@@ -14,6 +14,7 @@
  loge							shortcut for (log(ent_to_str(entity))
  logp							shortcut for (log(player_to_str(player))
  logt							shortcut for log_table(table|class|array)
+ logf							shortcut for log(format(str, ...))
  connect_strings(array, sep)	connects string array using separator: ["a", "b", "c"] -> "a, b, c"
  
  TASK SHEDULING

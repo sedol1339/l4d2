@@ -1,6 +1,7 @@
 /*
  This file contains some useful functions.
  It can be run several times, nothing breaks.
+ Performance is optimized where possible. This library does not create ant entities or running tasks by default.
  Short documentation:
  
  FUNCTIONS FOR LOGGING:

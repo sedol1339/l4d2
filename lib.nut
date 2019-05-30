@@ -32,6 +32,8 @@
  loop_get_refire_time(key)					returns refire time for loop
  loop_set_refire_time(key, refire_time)		sets new refire time for loop
  register_task_on_entity(ent, func, delay)	registers a loop for entity (using AddThinkToEnt); pass REAL delay value in seconds; this is not chained
+ on_player_connect(team, isbot, func)		register a callback for player_team event that will fire for specified team and params.isbot condition;
+											this is not chained; pass null to cancel
  
  TASK CANCELLING
  remove_delayed_call(key)		cancel delayed call using key
@@ -45,6 +47,7 @@
  remove_loop(key)				removes loop using key
  remove_task_on_entity(ent)		removes loop from entity
  remove_all_tasks_on_entities()	removes all loops from entities
+ remove_on_player_connect()		clears all callbacks registered with on_player_connect
  
  TASK LOGGING
  print_all_tasks()				prints ALL sheduled tasks (does not print tasks on entitites); specific functions are below
@@ -556,7 +559,7 @@ loge <- @(var) log(ent_to_str(var));
 
 logp <- @(var) log(player_to_str(var));
 
-logt <- @(var) log_table(var);
+logt <- log_table;
 
 logf <- function(str, ...) {
 	local args = [this, str];
@@ -569,6 +572,18 @@ connect_strings <- function(arr, separator) {
 	for (local i = 0; i < arr.len(); i++)
 		str += arr[i] + ((i != arr.len() - 1) ? separator : "");
 	return str;
+}
+
+__printstackinfos <- function() {
+	local i = 2;
+	local stackinfos = null;
+	while(true) {
+		stackinfos = getstackinfos(i);
+		if (!stackinfos) break;
+		local src_tokens = split(stackinfos.src, "/");
+		logf("\t<%s>: line %s", src_tokens[src_tokens.len() - 1], stackinfos.line.tostring());
+		i++;
+	}
 }
 
 ///////////////////////////////
@@ -945,6 +960,10 @@ delayed_call <- function(func, delay, scope_or_ent = null) {
 		func = func,
 		time = Time() + delay
 	}
+	if ("dc_debug" in getroottable() && ::dc_debug) {
+		log("delayed call registered with key " + key);
+		__printstackinfos();
+	}
 	DoEntFire("!self", "runscriptcode", "::__dc_check()", delay, null, worldspawn);
 	return key;
 }
@@ -958,8 +977,7 @@ worldspawn <- Entities.FindByClassname(null, "worldspawn");
 			try {
 				table.func();
 			} catch(exception) {
-				error(exception);
-				printl("");
+				error(format("Exception for delayed call (%s): %s\n", key, exception));
 			}
 			delete ::__dc_func[key];
 		}
@@ -1086,6 +1104,59 @@ log_event <- function(event, enabled = true) {
 log_events <- function(enabled = true) {
 	cvar("net_showevents", enabled ? 2 : 0);
 }
+
+//cant' use constants or enums, because vm don't see them from
+//other files if we IncludeScript() this library into them
+
+Team  <-{
+	ANY = -1
+	UNASSIGNED = 0
+	SPECTATORS = 1
+	SURVIVORS = 2
+	INFECTED = 3
+}
+
+ClientType <- {
+	ANY = -1
+	HUMAN = 0
+	BOT = 1
+}
+
+on_player_connect <- function(team, isbot, func) {
+	//it's ok to be registered multiple times
+	register_callback("player_team", "__on_player_connect", function(params) {
+		local func = __on_player_connect[params.team][params.isbot ? 1 : 0];
+		if (func) {
+			params.player <- GetPlayerFromUserID(params.userid);
+			func(params);
+		}
+	});
+	if (team == Team.ANY && isbot == ClientType.ANY) throw "specify team ot playertype for on_player_connect";
+	if (team == Team.ANY) {
+		__on_player_connect[0][isbot] = func;
+		__on_player_connect[1][isbot] = func;
+		__on_player_connect[2][isbot] = func;
+		__on_player_connect[3][isbot] = func;
+	} else if (isbot == ClientType.ANY) {
+		__on_player_connect[team][0] = func;
+		__on_player_connect[team][1] = func;
+	} else
+		__on_player_connect[team][isbot] = func;
+}
+
+remove_on_player_connect <- function() {
+	remove_callback("player_team", "__on_player_connect");
+	for (local team = 0; team <= 3; team++)
+		for (local isbot = 0; isbot <= 1; isbot++)
+			__on_player_connect[team][isbot] = null;
+}
+
+if (!("__on_player_connect" in this)) __on_player_connect <- [
+	[null, null], //Team.UNASSIGNED
+	[null, null], //Team.SPECTATORS
+	[null, null], //Team.SURVIVORS
+	[null, null], //Team.INFECTED
+];
 
 print_all_callbacks <- function() {
 	print("All callbacks registered with \"register_callback\":");

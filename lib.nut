@@ -1080,7 +1080,7 @@ remove_all_callbacks <- function() {
 }
 
 log_event <- function(event, enabled = true) {
-	if (enabled) register_callback(event, "__log_event_table", @(params)log_table(params));
+	if (enabled) register_callback(event, "__log_event_table", log_table);
 	else remove_callback(event, "__log_event_table");
 }
 

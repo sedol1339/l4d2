@@ -27,8 +27,10 @@
  add_task_on_shutdown(key, func)			register a function that will be called on server shutdown; pass true as additional param to run this after all others
  register_loop(key, func, refire_time)		register a function that will be called with an interval of refire_time seconds
  loop_reset(key)							reset loop using it's key; see function declaration for more info
+											by default this will prevent loop from running this tick; if you don't want this, pass false as additional param
  loop_subtract_from_timer(key, value)		subtract value from loop timer (function is called then timer value becomes 0)
  loop_add_to_timer(key, value)				add value to loop timer
+											by default this will prevent loop from running this tick; if you don't want this, pass false as additional param
  loop_get_refire_time(key)					returns refire time for loop
  loop_set_refire_time(key, refire_time)		sets new refire time for loop
  register_task_on_entity(ent, func, delay)	registers a loop for entity (using AddThinkToEnt); pass REAL delay value in seconds; this is not chained
@@ -113,6 +115,12 @@
  show_hud_hint_singleplayer()	shows hud hint to player; see function declaration for more info
  is_hitscan_weapon(name)		given weapon name returns true if weapon is hitscan
  playsound(path, ent)			precaches and plays sound on entity; soundscripts or paths can be used; if you add sounds, buid sound cache first
+ 
+ FILE FUNCTIONS (work with left4dead2/ems directory)
+ file_read(filename)			reads file, returns string or null
+ file_write(filename, str)		writes string to file, creates if not exist
+ file_to_func(filename)			reads file, compiles script from it's contents, returns function or null
+ file_append(filename, str)		appends string to the end of file
  
 */
 
@@ -1353,16 +1361,12 @@ loop_reset don't cause fire; after loop_reset timer will fire in RefireTime seco
 to fire immediately, reset timer and then subtract RefireTime from timer
 */
 
-//
-loop_reset <- function(key) {
+loop_reset <- function(key, prevent_running_this_tick = true) {
 	if (!(key in __loops)) return;
 	local timer = __loops[key];
-	timer.GetScriptScope().func_disabled <- timer.GetScriptScope().func;
-	timer.GetScriptScope().func <- __dummy;
 	DoEntFire("!self", "ResetTimer", "", 0, null, timer);
-	run_next_tick(function() {
-		timer.GetScriptScope().func <- timer.GetScriptScope().func_disabled;
-	});
+	if (prevent_running_this_tick)
+		__loop_prevent_running_this_tick(timer);
 }
 
 loop_subtract_from_timer <- function(key, value) {
@@ -1370,20 +1374,27 @@ loop_subtract_from_timer <- function(key, value) {
 	DoEntFire("!self", "SubtractFromTimer", value.tostring(), 0, null, __loops[key]);
 }
 
-loop_add_to_timer <- function(key, value) {
+loop_add_to_timer <- function(key, value, prevent_running_this_tick = true) {
 	if (!(key in __loops)) return;
 	local timer = __loops[key];
-	timer.GetScriptScope().func_disabled <- timer.GetScriptScope().func;
-	timer.GetScriptScope().func <- __dummy;
 	DoEntFire("!self", "AddToTimer", value.tostring(), 0, null, timer);
-	run_next_tick(function() {
-		timer.GetScriptScope().func <- timer.GetScriptScope().func_disabled;
-	});
+	if (prevent_running_this_tick)
+		__loop_prevent_running_this_tick(timer);
 }
 
 loop_set_refire_time <- function(key, value) {
 	if (!(key in __loops)) return;
 	DoEntFire("!self", "RefireTime", value.tostring(), 0, null, __loops[key]);
+}
+
+__loop_prevent_running_this_tick <- function(timer) {
+	local scope = timer.GetScriptScope();
+	if (scope.func == __dummy) return;
+	scope.func_disabled <- scope.func;
+	scope.func <- __dummy;
+	run_next_tick(function() {
+		scope.func <- scope.func_disabled;
+	});
 }
 
 loop_get_refire_time <- function(key) {
@@ -1644,5 +1655,20 @@ __netprops_bitmaps <- {
 }
 
 if (!("__watch_netprops" in getroottable())) ::__watch_netprops <- {}
+
+file_read <- FileToString; //gets filename, returns string
+
+file_write <- StringToFile; //gets filename and string
+
+file_to_func <- function(filename) {
+	local str = FileToString(filename);
+	if (!str) return null;
+	return compilestring(str);
+}
+
+file_append <- function(filename, str) {
+	local str_from_file = FileToString(filename);
+	StringToFile(filename, str_from_file ? str_from_file + str : str);
+}
 
 log("library included");

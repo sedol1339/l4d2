@@ -588,7 +588,8 @@ cvars_add <- function(_cvar, default_value, value) {
 }
 
 cvars_reapply <- function() {
-	foreach (_cvar, table in cvars_list) cvar(_cvar, table.value);
+	foreach (_cvar, table in cvars_list)
+		cvar(_cvar, table.value);
 }
 
 cvars_restore <- function(_cvar) {
@@ -645,7 +646,8 @@ for_each_player <- function (func) {
 //kill bots with death camera
 remove_dying_infected <- function() {
 	for_each_player(function(player){
-		if (!player.IsSurvivor() && player.IsDying() && IsPlayerABot(player)) player.Kill();
+		if (!player.IsSurvivor() && player.IsDying() && IsPlayerABot(player))
+			player.Kill();
 	});
 }
 
@@ -773,11 +775,11 @@ stop_director_forced <- function() {
 targetname_to_entity <- function(targetname) {
 	local ent = Entities.FindByName(null, targetname);
 	if (!ent) {
-		log_debug("WARNING! entity with targetname " + targetname + " does not exist");
+		log("WARNING! entity with targetname " + targetname + " does not exist");
 		return null;
 	}
 	if (Entities.FindByName(ent, targetname)) {
-		log_debug("WARNING! multiple entities with targetname " + targetname + " exist");
+		log("WARNING! multiple entities with targetname " + targetname + " exist");
 	}
 	return ent;
 }
@@ -1054,9 +1056,8 @@ register_callback <- function(event, key, func) {
 		local scope = {};
 		scope["event_name"] <- event;
 		scope["OnGameEvent_" + event] <- function (params) {
-			foreach(callback in __callbacks[scope.event_name]) {
+			foreach(callback in __callbacks[scope.event_name])
 				callback(params);
-			}
 		}.bindenv(this);
 		__CollectEventCallbacks(scope, "OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener);
 	}
@@ -1072,11 +1073,9 @@ remove_callback <- function(event, key) {
 }
 
 remove_all_callbacks <- function() {
-	foreach(event, callbacks in __callbacks) {
-		foreach(key, callback in callbacks) {
+	foreach(event, callbacks in __callbacks)
+		foreach(key, callback in callbacks)
 			delete callbacks[key];
-		}
-	}
 }
 
 log_event <- function(event, enabled = true) {
@@ -1093,9 +1092,8 @@ print_all_callbacks <- function() {
 	local strings = [];
 	foreach(event, callbacks in __callbacks) {
 		local tokens = [];
-		foreach(key, callback in callbacks) {
+		foreach(key, callback in callbacks)
 			tokens.push("\"" + key + "\"");
-		}
 		if (tokens.len() != 0)
 			strings.push(event + ": " + connect_strings(tokens, ","));
 	}
@@ -1137,9 +1135,8 @@ __ticker_init <- function() {
 	__ticker_ent.ValidateScriptScope();
 	__ticker_ent.GetScriptScope().func <- function() {
 		clock.__ticks++;
-		foreach(key, ticker in __tickers) {
+		foreach(ticker in __tickers)
 			ticker();
-		}
 	}.bindenv(this);
 	clock.__ticks = 0;
 }
@@ -1154,17 +1151,15 @@ remove_ticker <- function(key) {
 }
 
 remove_all_tickers <- function() {
-	foreach(key, ticker in __tickers) {
+	foreach(key, ticker in __tickers)
 		delete __tickers[key];
-	}
 }
 
 print_all_tickers <- function() {
 	print("All tickers registered with \"register_ticker\":");
 	local tokens = [];
-	foreach(key, ticker in __tickers) {
+	foreach(key, ticker in __tickers)
 		tokens.push("\"" + key + "\"");
-	}
 	if (tokens.len() == 0)
 		printl(" [none]");
 	else
@@ -1198,8 +1193,10 @@ add_task_on_shutdown <- function(key, func, after_all = false) {
 				}
 				printl("running tasks on shutdown...");
 				foreach(lib_id, lib_scope in __lib_scopes) {
-					foreach(func in lib_scope.__on_shutdown) func.call(lib_scope);
-					foreach(func in lib_scope.__on_shutdown_after_all) func.call(lib_scope);
+					foreach(func in lib_scope.__on_shutdown)
+						func.call(lib_scope);
+					foreach(func in lib_scope.__on_shutdown_after_all)
+						func.call(lib_scope);
 				}
 			}
 			::FindCircularReferences_replaced <- true;
@@ -1242,12 +1239,10 @@ print_all_tasks_on_shutdown <- function() {
 		return;
 	}
 	local tokens = [];
-	foreach(key, ticker in __on_shutdown) {
+	foreach(key, ticker in __on_shutdown)
 		tokens.push("\"" + key + "\"");
-	}
-	foreach(key, ticker in __on_shutdown_after_all) {
+	foreach(key, ticker in __on_shutdown_after_all)
 		tokens.push("\"" + key + "\"");
-	}
 	if (tokens.len() == 0)
 		printl(" [none]");
 	else
@@ -1328,9 +1323,8 @@ loop_get_refire_time <- function(key) {
 print_all_loops <- function() {
 	print("All loops registered with \"register_loop\":");
 	local tokens = [];
-	foreach(key, timer in __loops) {
+	foreach(key, timer in __loops)
 		tokens.push("\"" + key + "\"");
-	}
 	if (tokens.len() == 0)
 		printl(" [none]");
 	else
@@ -1363,10 +1357,9 @@ remove_task_on_entity <- function(ent) {
 }
 
 remove_all_tasks_on_entities <- function() {
-	foreach(ent in __tasks_ent) {
+	foreach(ent in __tasks_ent)
 		if (!deleted_ent(ent))
 			AddThinkToEnt(ent, null);
-	}
 	__tasks_ent <- {}
 }
 

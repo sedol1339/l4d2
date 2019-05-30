@@ -947,6 +947,8 @@ delayed_call <- function(func, delay, scope_or_ent = null) {
 	return key;
 }
 
+worldspawn <- Entities.FindByClassname(null, "worldspawn");
+
 ::__dc_check <- function() {
 	local time = Time();
 	foreach (key, table in ::__dc_func) {

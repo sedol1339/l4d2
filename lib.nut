@@ -99,7 +99,7 @@
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
  teleport_entity(ent, pos, ang)	teleports entity (using point_teleport); pos == null means don't change pos, ang == null means don't change ang
  get_entity_flag(ent, flag)		returns entity flag; example: get_entity_flag(player(), FL_FROZEN)
- set_entity_flag(ent,flag,val)	sets entity flag; example: get_entity_flag(player(), FL_FROZEN, false)
+ set_entity_flag(ent,flag,val)	sets entity flag; example: set_entity_flag(player(), FL_FROZEN, false)
  get_player_button(pl, btn)		returns true if specified button is pressed; example: get_player_button(player(), IN_JUMP)
  force_player_button(pl, btn)	forces button for player; pass false as additional param to release button
  kill_player(player)			kills player (increases revive count, then deals damage); for surv only if god=0; pass attacker as additional param

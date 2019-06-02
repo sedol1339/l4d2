@@ -124,325 +124,330 @@
  
 */
 
+local constants = getconsttable();
+
 //director constants
-const ALLOW_BASH_ALL = 0;
-const ALLOW_BASH_NONE = 2;
-const ALLOW_BASH_PUSHONLY = 1;
-const BOT_CANT_FEEL = 4;
-const BOT_CANT_HEAR = 2;
-const BOT_CANT_SEE = 1;
-const BOT_CMD_ATTACK = 0;
-const BOT_CMD_MOVE = 1;
-const BOT_CMD_RESET = 3;
-const BOT_CMD_RETREAT = 2;
-const BOT_QUERY_NOTARGET = 1;
-const DMG_BLAST = 64;
-const DMG_BLAST_SURFACE = 134217728;
-const DMG_BUCKSHOT = 536870912;
-const DMG_BULLET = 2;
-const DMG_BURN = 8;
-const DMG_HEADSHOT = 1073741824;
-const DMG_MELEE = 2097152;
-const DMG_STUMBLE = 33554432;
-const FINALE_CUSTOM_CLEAROUT = 11;
-const FINALE_CUSTOM_DELAY = 10;
-const FINALE_CUSTOM_PANIC = 7;
-const FINALE_CUSTOM_SCRIPTED = 9;
-const FINALE_CUSTOM_TANK = 8;
-const FINALE_FINAL_BOSS = 5;
-const FINALE_GAUNTLET_1 = 0;
-const FINALE_GAUNTLET_2 = 3;
-const FINALE_GAUNTLET_BOSS = 16;
-const FINALE_GAUNTLET_BOSS_INCOMING = 15;
-const FINALE_GAUNTLET_ESCAPE = 17;
-const FINALE_GAUNTLET_HORDE = 13;
-const FINALE_GAUNTLET_HORDE_BONUSTIME = 14;
-const FINALE_GAUNTLET_START = 12;
-const FINALE_HALFTIME_BOSS = 2;
-const FINALE_HORDE_ATTACK_1 = 1;
-const FINALE_HORDE_ATTACK_2 = 4;
-const FINALE_HORDE_ESCAPE = 6;
-const HUD_FAR_LEFT = 7;
-const HUD_FAR_RIGHT = 8;
-const HUD_FLAG_ALIGN_CENTER = 512;
-const HUD_FLAG_ALIGN_LEFT = 256;
-const HUD_FLAG_ALIGN_RIGHT = 768;
-const HUD_FLAG_ALLOWNEGTIMER = 128;
-const HUD_FLAG_AS_TIME = 16;
-const HUD_FLAG_BEEP = 4;
-const HUD_FLAG_BLINK = 8;
-const HUD_FLAG_COUNTDOWN_WARN = 32;
-const HUD_FLAG_NOBG = 64;
-const HUD_FLAG_NOTVISIBLE = 16384;
-const HUD_FLAG_POSTSTR = 2;
-const HUD_FLAG_PRESTR = 1;
-const HUD_FLAG_TEAM_INFECTED = 2048;
-const HUD_FLAG_TEAM_MASK = 3072;
-const HUD_FLAG_TEAM_SURVIVORS = 1024;
-const HUD_LEFT_BOT = 1;
-const HUD_LEFT_TOP = 0;
-const HUD_MID_BOT = 3;
-const HUD_MID_BOX = 9;
-const HUD_MID_TOP = 2;
-const HUD_RIGHT_BOT = 5;
-const HUD_RIGHT_TOP = 4;
-const HUD_SCORE_1 = 11;
-const HUD_SCORE_2 = 12;
-const HUD_SCORE_3 = 13;
-const HUD_SCORE_4 = 14;
-const HUD_SCORE_TITLE = 10;
-const HUD_SPECIAL_COOLDOWN = 4;
-const HUD_SPECIAL_MAPNAME = 6;
-const HUD_SPECIAL_MODENAME = 7;
-const HUD_SPECIAL_ROUNDTIME = 5;
-const HUD_SPECIAL_TIMER0 = 0;
-const HUD_SPECIAL_TIMER1 = 1;
-const HUD_SPECIAL_TIMER2 = 2;
-const HUD_SPECIAL_TIMER3 = 3;
-const HUD_TICKER = 6;
-const INFECTED_FLAG_CANT_FEEL_SURVIVORS = 32768;
-const INFECTED_FLAG_CANT_HEAR_SURVIVORS = 16384;
-const INFECTED_FLAG_CANT_SEE_SURVIVORS = 8192;
-const IN_ATTACK = 1;
-const IN_ATTACK2 = 2048;
-const IN_BACK = 16;
-const IN_CANCEL = 64;
-const IN_DUCK = 4;
-const IN_FORWARD = 8;
-const IN_JUMP = 2;
-const IN_LEFT = 512;
-const IN_RELOAD = 8192;
-const IN_RIGHT = 1024;
-const IN_USE = 32;
-const SCRIPTED_SPAWN_BATTLEFIELD = 2;
-const SCRIPTED_SPAWN_FINALE = 0;
-const SCRIPTED_SPAWN_POSITIONAL = 3;
-const SCRIPTED_SPAWN_SURVIVORS = 1;
-const SCRIPT_SHUTDOWN_EXIT_GAME = 4;
-const SCRIPT_SHUTDOWN_LEVEL_TRANSITION = 3;
-const SCRIPT_SHUTDOWN_MANUAL = 0;
-const SCRIPT_SHUTDOWN_ROUND_RESTART = 1;
-const SCRIPT_SHUTDOWN_TEAM_SWAP = 2;
-const SPAWNDIR_E = 4;
-const SPAWNDIR_N = 1;
-const SPAWNDIR_NE = 2;
-const SPAWNDIR_NW = 128;
-const SPAWNDIR_S = 16;
-const SPAWNDIR_SE = 8;
-const SPAWNDIR_SW = 32;
-const SPAWNDIR_W = 64;
-const SPAWN_ABOVE_SURVIVORS = 6;
-const SPAWN_ANYWHERE = 0;
-const SPAWN_BATTLEFIELD = 2;
-const SPAWN_BEHIND_SURVIVORS = 1;
-const SPAWN_FAR_AWAY_FROM_SURVIVORS = 5;
-const SPAWN_FINALE = 0;
-const SPAWN_IN_FRONT_OF_SURVIVORS = 7;
-const SPAWN_LARGE_VOLUME = 9;
-const SPAWN_NEAR_IT_VICTIM = 2;
-const SPAWN_NEAR_POSITION = 10;
-const SPAWN_NO_PREFERENCE = -1;
-const SPAWN_POSITIONAL = 3;
-const SPAWN_SPECIALS_ANYWHERE = 4;
-const SPAWN_SPECIALS_IN_FRONT_OF_SURVIVORS = 3;
-const SPAWN_SURVIVORS = 1;
-const SPAWN_VERSUS_FINALE_DISTANCE = 8;
-const STAGE_CLEAROUT = 4;
-const STAGE_DELAY = 2;
-const STAGE_ESCAPE = 7;
-const STAGE_NONE = 9;
-const STAGE_PANIC = 0;
-const STAGE_RESULTS = 8;
-const STAGE_SETUP = 5;
-const STAGE_TANK = 1;
-const TIMER_COUNTDOWN = 2;
-const TIMER_COUNTUP = 1;
-const TIMER_DISABLE = 0;
-const TIMER_SET = 4;
-const TIMER_STOP = 3;
-const TRACE_MASK_ALL = -1;
-const TRACE_MASK_NPC_SOLID = 33701899;
-const TRACE_MASK_PLAYER_SOLID = 33636363;
-const TRACE_MASK_SHOT = 1174421507;
-const TRACE_MASK_VISIBLE_AND_NPCS = 33579137;
-const TRACE_MASK_VISION = 33579073;
-const UPGRADE_EXPLOSIVE_AMMO = 1;
-const UPGRADE_INCENDIARY_AMMO = 0;
-const UPGRADE_LASER_SIGHT = 2;
-const ZOMBIE_BOOMER = 2;
-const ZOMBIE_CHARGER = 6;
-const ZOMBIE_HUNTER = 3;
-const ZOMBIE_JOCKEY = 5;
-const ZOMBIE_NORMAL = 0;
-const ZOMBIE_SMOKER = 1;
-const ZOMBIE_SPITTER = 4;
-const ZOMBIE_TANK = 8;
-const ZOMBIE_WITCH = 7;
-const ZSPAWN_MOB = 10;
-const ZSPAWN_MUDMEN = 12;
-const ZSPAWN_WITCHBRIDE = 11;
+constants.ALLOW_BASH_ALL <- 0;
+constants.ALLOW_BASH_NONE <- 2;
+constants.ALLOW_BASH_PUSHONLY <- 1;
+constants.BOT_CANT_FEEL <- 4;
+constants.BOT_CANT_HEAR <- 2;
+constants.BOT_CANT_SEE <- 1;
+constants.BOT_CMD_ATTACK <- 0;
+constants.BOT_CMD_MOVE <- 1;
+constants.BOT_CMD_RESET <- 3;
+constants.BOT_CMD_RETREAT <- 2;
+constants.BOT_QUERY_NOTARGET <- 1;
+constants.DMG_BLAST <- 64;
+constants.DMG_BLAST_SURFACE <- 134217728;
+constants.DMG_BUCKSHOT <- 536870912;
+constants.DMG_BULLET <- 2;
+constants.DMG_BURN <- 8;
+constants.DMG_HEADSHOT <- 1073741824;
+constants.DMG_MELEE <- 2097152;
+constants.DMG_STUMBLE <- 33554432;
+constants.FINALE_CUSTOM_CLEAROUT <- 11;
+constants.FINALE_CUSTOM_DELAY <- 10;
+constants.FINALE_CUSTOM_PANIC <- 7;
+constants.FINALE_CUSTOM_SCRIPTED <- 9;
+constants.FINALE_CUSTOM_TANK <- 8;
+constants.FINALE_FINAL_BOSS <- 5;
+constants.FINALE_GAUNTLET_1 <- 0;
+constants.FINALE_GAUNTLET_2 <- 3;
+constants.FINALE_GAUNTLET_BOSS <- 16;
+constants.FINALE_GAUNTLET_BOSS_INCOMING <- 15;
+constants.FINALE_GAUNTLET_ESCAPE <- 17;
+constants.FINALE_GAUNTLET_HORDE <- 13;
+constants.FINALE_GAUNTLET_HORDE_BONUSTIME <- 14;
+constants.FINALE_GAUNTLET_START <- 12;
+constants.FINALE_HALFTIME_BOSS <- 2;
+constants.FINALE_HORDE_ATTACK_1 <- 1;
+constants.FINALE_HORDE_ATTACK_2 <- 4;
+constants.FINALE_HORDE_ESCAPE <- 6;
+constants.HUD_FAR_LEFT <- 7;
+constants.HUD_FAR_RIGHT <- 8;
+constants.HUD_FLAG_ALIGN_CENTER <- 512;
+constants.HUD_FLAG_ALIGN_LEFT <- 256;
+constants.HUD_FLAG_ALIGN_RIGHT <- 768;
+constants.HUD_FLAG_ALLOWNEGTIMER <- 128;
+constants.HUD_FLAG_AS_TIME <- 16;
+constants.HUD_FLAG_BEEP <- 4;
+constants.HUD_FLAG_BLINK <- 8;
+constants.HUD_FLAG_COUNTDOWN_WARN <- 32;
+constants.HUD_FLAG_NOBG <- 64;
+constants.HUD_FLAG_NOTVISIBLE <- 16384;
+constants.HUD_FLAG_POSTSTR <- 2;
+constants.HUD_FLAG_PRESTR <- 1;
+constants.HUD_FLAG_TEAM_INFECTED <- 2048;
+constants.HUD_FLAG_TEAM_MASK <- 3072;
+constants.HUD_FLAG_TEAM_SURVIVORS <- 1024;
+constants.HUD_LEFT_BOT <- 1;
+constants.HUD_LEFT_TOP <- 0;
+constants.HUD_MID_BOT <- 3;
+constants.HUD_MID_BOX <- 9;
+constants.HUD_MID_TOP <- 2;
+constants.HUD_RIGHT_BOT <- 5;
+constants.HUD_RIGHT_TOP <- 4;
+constants.HUD_SCORE_1 <- 11;
+constants.HUD_SCORE_2 <- 12;
+constants.HUD_SCORE_3 <- 13;
+constants.HUD_SCORE_4 <- 14;
+constants.HUD_SCORE_TITLE <- 10;
+constants.HUD_SPECIAL_COOLDOWN <- 4;
+constants.HUD_SPECIAL_MAPNAME <- 6;
+constants.HUD_SPECIAL_MODENAME <- 7;
+constants.HUD_SPECIAL_ROUNDTIME <- 5;
+constants.HUD_SPECIAL_TIMER0 <- 0;
+constants.HUD_SPECIAL_TIMER1 <- 1;
+constants.HUD_SPECIAL_TIMER2 <- 2;
+constants.HUD_SPECIAL_TIMER3 <- 3;
+constants.HUD_TICKER <- 6;
+constants.INFECTED_FLAG_CANT_FEEL_SURVIVORS <- 32768;
+constants.INFECTED_FLAG_CANT_HEAR_SURVIVORS <- 16384;
+constants.INFECTED_FLAG_CANT_SEE_SURVIVORS <- 8192;
+constants.IN_ATTACK <- 1;
+constants.IN_ATTACK2 <- 2048;
+constants.IN_BACK <- 16;
+constants.IN_CANCEL <- 64;
+constants.IN_DUCK <- 4;
+constants.IN_FORWARD <- 8;
+constants.IN_JUMP <- 2;
+constants.IN_LEFT <- 512;
+constants.IN_RELOAD <- 8192;
+constants.IN_RIGHT <- 1024;
+constants.IN_USE <- 32;
+constants.SCRIPTED_SPAWN_BATTLEFIELD <- 2;
+constants.SCRIPTED_SPAWN_FINALE <- 0;
+constants.SCRIPTED_SPAWN_POSITIONAL <- 3;
+constants.SCRIPTED_SPAWN_SURVIVORS <- 1;
+constants.SCRIPT_SHUTDOWN_EXIT_GAME <- 4;
+constants.SCRIPT_SHUTDOWN_LEVEL_TRANSITION <- 3;
+constants.SCRIPT_SHUTDOWN_MANUAL <- 0;
+constants.SCRIPT_SHUTDOWN_ROUND_RESTART <- 1;
+constants.SCRIPT_SHUTDOWN_TEAM_SWAP <- 2;
+constants.SPAWNDIR_E <- 4;
+constants.SPAWNDIR_N <- 1;
+constants.SPAWNDIR_NE <- 2;
+constants.SPAWNDIR_NW <- 128;
+constants.SPAWNDIR_S <- 16;
+constants.SPAWNDIR_SE <- 8;
+constants.SPAWNDIR_SW <- 32;
+constants.SPAWNDIR_W <- 64;
+constants.SPAWN_ABOVE_SURVIVORS <- 6;
+constants.SPAWN_ANYWHERE <- 0;
+constants.SPAWN_BATTLEFIELD <- 2;
+constants.SPAWN_BEHIND_SURVIVORS <- 1;
+constants.SPAWN_FAR_AWAY_FROM_SURVIVORS <- 5;
+constants.SPAWN_FINALE <- 0;
+constants.SPAWN_IN_FRONT_OF_SURVIVORS <- 7;
+constants.SPAWN_LARGE_VOLUME <- 9;
+constants.SPAWN_NEAR_IT_VICTIM <- 2;
+constants.SPAWN_NEAR_POSITION <- 10;
+constants.SPAWN_NO_PREFERENCE <- -1;
+constants.SPAWN_POSITIONAL <- 3;
+constants.SPAWN_SPECIALS_ANYWHERE <- 4;
+constants.SPAWN_SPECIALS_IN_FRONT_OF_SURVIVORS <- 3;
+constants.SPAWN_SURVIVORS <- 1;
+constants.SPAWN_VERSUS_FINALE_DISTANCE <- 8;
+constants.STAGE_CLEAROUT <- 4;
+constants.STAGE_DELAY <- 2;
+constants.STAGE_ESCAPE <- 7;
+constants.STAGE_NONE <- 9;
+constants.STAGE_PANIC <- 0;
+constants.STAGE_RESULTS <- 8;
+constants.STAGE_SETUP <- 5;
+constants.STAGE_TANK <- 1;
+constants.TIMER_COUNTDOWN <- 2;
+constants.TIMER_COUNTUP <- 1;
+constants.TIMER_DISABLE <- 0;
+constants.TIMER_SET <- 4;
+constants.TIMER_STOP <- 3;
+constants.TRACE_MASK_ALL <- -1;
+constants.TRACE_MASK_NPC_SOLID <- 33701899;
+constants.TRACE_MASK_PLAYER_SOLID <- 33636363;
+constants.TRACE_MASK_SHOT <- 1174421507;
+constants.TRACE_MASK_VISIBLE_AND_NPCS <- 33579137;
+constants.TRACE_MASK_VISION <- 33579073;
+constants.UPGRADE_EXPLOSIVE_AMMO <- 1;
+constants.UPGRADE_INCENDIARY_AMMO <- 0;
+constants.UPGRADE_LASER_SIGHT <- 2;
+constants.ZOMBIE_BOOMER <- 2;
+constants.ZOMBIE_CHARGER <- 6;
+constants.ZOMBIE_HUNTER <- 3;
+constants.ZOMBIE_JOCKEY <- 5;
+constants.ZOMBIE_NORMAL <- 0;
+constants.ZOMBIE_SMOKER <- 1;
+constants.ZOMBIE_SPITTER <- 4;
+constants.ZOMBIE_TANK <- 8;
+constants.ZOMBIE_WITCH <- 7;
+constants.ZSPAWN_MOB <- 10;
+constants.ZSPAWN_MUDMEN <- 12;
+constants.ZSPAWN_WITCHBRIDE <- 11;
 
-//sourcemod entity_prop_stocks.inc constants
-const RENDER_NORMAL = 0;
-const RENDER_TRANSCOLOR = 1;
-const RENDER_TRANSTEXTURE = 2;
-const RENDER_GLOW = 3; //no Z buffer checks -- fixed size in screen space
-const RENDER_TRANSALPHA = 4;
-const RENDER_TRANSADD = 5;
-const RENDER_ENVIRONMENTAL = 6; //not drawn, used for environmental effects
-const RENDER_TRANSADDFRAMEBLEND = 7; //use a fractional frame value to blend between animation frames
-const RENDER_TRANSALPHAADD = 8;
-const RENDER_WORLDGLOW = 9; //same as kRenderGlow but not fixed size in screen space
-const RENDER_NONE = 10; //don't render
+//sourcemod entity_prop_stocks.inc constants (for "m_nRenderMode")
+constants.RENDER_NORMAL <- 0;
+constants.RENDER_TRANSCOLOR <- 1;
+constants.RENDER_TRANSTEXTURE <- 2;
+constants.RENDER_GLOW <- 3; //no Z buffer checks -- fixed size in screen space
+constants.RENDER_TRANSALPHA <- 4;
+constants.RENDER_TRANSADD <- 5;
+constants.RENDER_ENVIRONMENTAL <- 6; //not drawn, used for environmental effects
+constants.RENDER_TRANSADDFRAMEBLEND <- 7; //use a fractional frame value to blend between animation frames
+constants.RENDER_TRANSALPHAADD <- 8;
+constants.RENDER_WORLDGLOW <- 9; //same as kRenderGlow but not fixed size in screen space
+constants.RENDER_NONE <- 10; //don't render
 
-//renderfx constants
-const RENDERFX_NONE = 0;
-const RENDERFX_PULSE_SLOW = 1;
-const RENDERFX_PULSE_FAST = 2;
-const RENDERFX_PULSE_SLOW_WIDE = 3;
-const RENDERFX_PULSE_FAST_WIDE = 4;
-const RENDERFX_FADE_SLOW = 5;
-const RENDERFX_FADE_FAST = 6;
-const RENDERFX_SOLID_SLOW = 7;
-const RENDERFX_SOLID_FAST = 8;
-const RENDERFX_STROBE_SLOW = 9;
-const RENDERFX_STROBE_FAST = 10;
-const RENDERFX_STROBE_FASTER = 11;
-const RENDERFX_FLICKER_SLOW = 12;
-const RENDERFX_FLICKER_FAST = 13;
-const RENDERFX_NO_DISSIPATION = 14;
-const RENDERFX_DISTORT = 15;            /**< Distort/scale/translate flicker */
-const RENDERFX_HOLOGRAM = 16;           /**< kRenderFxDistort + distance fade */
-const RENDERFX_EXPLODE = 17;            /**< Scale up really big! */
-const RENDERFX_GLOWSHELL = 18;            /**< Glowing Shell */
-const RENDERFX_CLAMP_MIN_SCALE = 19;    /**< Keep this sprite from getting very small (SPRITES only!) */
-const RENDERFX_ENV_RAIN = 20;            /**< for environmental rendermode, make rain */
-const RENDERFX_ENV_SNOW = 21;            /**<  "        "            "    , make snow */
-const RENDERFX_SPOTLIGHT = 22;            /**< TEST CODE for experimental spotlight */
-const RENDERFX_RAGDOLL = 23;            /**< HACKHACK: TEST CODE for signalling death of a ragdoll character */
-const RENDERFX_PULSE_FAST_WIDER = 24;
-const RENDERFX_MAX = 25;
-const RENDERFX_FADE_NEAR = 26;
+//renderfx constants (for "renderfx" keyvalue)
+constants.RENDERFX_NONE <- 0;
+constants.RENDERFX_PULSE_SLOW <- 1;
+constants.RENDERFX_PULSE_FAST <- 2;
+constants.RENDERFX_PULSE_SLOW_WIDE <- 3;
+constants.RENDERFX_PULSE_FAST_WIDE <- 4;
+constants.RENDERFX_FADE_SLOW <- 5;
+constants.RENDERFX_FADE_FAST <- 6;
+constants.RENDERFX_SOLID_SLOW <- 7;
+constants.RENDERFX_SOLID_FAST <- 8;
+constants.RENDERFX_STROBE_SLOW <- 9;
+constants.RENDERFX_STROBE_FAST <- 10;
+constants.RENDERFX_STROBE_FASTER <- 11;
+constants.RENDERFX_FLICKER_SLOW <- 12;
+constants.RENDERFX_FLICKER_FAST <- 13;
+constants.RENDERFX_NO_DISSIPATION <- 14;
+constants.RENDERFX_DISTORT <- 15;            /**< Distort/scale/translate flicker */
+constants.RENDERFX_HOLOGRAM <- 16;           /**< kRenderFxDistort + distance fade */
+constants.RENDERFX_EXPLODE <- 17;            /**< Scale up really big! */
+constants.RENDERFX_GLOWSHELL <- 18;            /**< Glowing Shell */
+constants.RENDERFX_CLAMP_MIN_SCALE <- 19;    /**< Keep this sprite from getting very small (SPRITES only!) */
+constants.RENDERFX_ENV_RAIN <- 20;            /**< for environmental rendermode, make rain */
+constants.RENDERFX_ENV_SNOW <- 21;            /**<  "        "            "    , make snow */
+constants.RENDERFX_SPOTLIGHT <- 22;            /**< TEST CODE for experimental spotlight */
+constants.RENDERFX_RAGDOLL <- 23;            /**< HACKHACK: TEST CODE for signalling death of a ragdoll character */
+constants.RENDERFX_PULSE_FAST_WIDER <- 24;
+constants.RENDERFX_MAX <- 25;
+constants.RENDERFX_FADE_NEAR <- 26;
 
-//player specific flag numbers from sourcemod entity_prop_stocks.inc
-getconsttable()["FL_ONGROUND"] <- (1 << 0); //at rest/on the ground
-getconsttable()["FL_DUCKING"] <- (1 << 1); //player is fully crouched
-getconsttable()["FL_WATERJUMP"] <- (1 << 2); //player jumping out of water
-getconsttable()["FL_ONTRAIN"] <- (1 << 3); //player is controlling a train, so movement commands should be ignored on client during prediction
-getconsttable()["FL_INRAIN"] <- (1 << 4); //indicates the entity is standing in rain
-getconsttable()["FL_FROZEN"] <- (1 << 5); //player is frozen for 3rd person camera
-getconsttable()["FL_ATCONTROLS"] <- (1 << 6); //player can't move, but keeps key inputs for controlling another entity
-getconsttable()["FL_CLIENT"] <- (1 << 7); //is a player
-getconsttable()["FL_FAKECLIENT"] <- (1 << 8); //fake client, simulated server side; don't send network messages to them
+//player specific flag numbers from sourcemod entity_prop_stocks.inc (for "m_fFlags")
+constants.FL_ONGROUND <- (1 << 0); //at rest/on the ground
+constants.FL_DUCKING <- (1 << 1); //player is fully crouched
+constants.FL_WATERJUMP <- (1 << 2); //player jumping out of water
+constants.FL_ONTRAIN <- (1 << 3); //player is controlling a train, so movement commands should be ignored on client during prediction
+constants.FL_INRAIN <- (1 << 4); //indicates the entity is standing in rain
+constants.FL_FROZEN <- (1 << 5); //player is frozen for 3rd person camera
+constants.FL_ATCONTROLS <- (1 << 6); //player can't move, but keeps key inputs for controlling another entity
+constants.FL_CLIENT <- (1 << 7); //is a player
+constants.FL_FAKECLIENT <- (1 << 8); //fake client, simulated server side; don't send network messages to them
 
-//non-player specific flag numbers from sourcemod entity_prop_stocks.inc
-getconsttable()["FL_INWATER"] <- (1 << 9); //in water
-getconsttable()["FL_FLY"] <- (1 << 10); //changes the SV_Movestep() behavior to not need to be on ground
-getconsttable()["FL_SWIM"] <- (1 << 11); //changes the SV_Movestep() behavior to not need to be on ground (but stay in water)
-getconsttable()["FL_CONVEYOR"] <- (1 << 12);
-getconsttable()["FL_NPC"] <- (1 << 13);
-getconsttable()["FL_GODMODE"] <- (1 << 14);
-getconsttable()["FL_NOTARGET"] <- (1 << 15);
-getconsttable()["FL_AIMTARGET"] <- (1 << 16); //set if the crosshair needs to aim onto the entity
-getconsttable()["FL_PARTIALGROUND"] <- (1 << 17); //not all corners are valid
-getconsttable()["FL_STATICPROP"] <- (1 << 18); //eetsa static prop!
-getconsttable()["FL_GRAPHED"] <- (1 << 19); //worldgraph has this ent listed as something that blocks a connection
-getconsttable()["FL_GRENADE"] <- (1 << 20);
-getconsttable()["FL_STEPMOVEMENT"] <- (1 << 21); //changes the SV_Movestep() behavior to not do any processing
-getconsttable()["FL_DONTTOUCH"] <- (1 << 22); //doesn't generate touch functions, generates Untouch() for anything it was touching when this flag was set
-getconsttable()["FL_BASEVELOCITY"] <- (1 << 23); //base velocity has been applied this frame (used to convert base velocity into momentum)
-getconsttable()["FL_WORLDBRUSH"] <- (1 << 24); //not moveable/removeable brush entity (really part of the world, but represented as an entity for transparency or something)
-getconsttable()["FL_OBJECT"] <- (1 << 25); //terrible name. This is an object that NPCs should see. Missiles, for example
-getconsttable()["FL_KILLME"] <- (1 << 26); //this entity is marked for death -- will be freed by game DLL
-getconsttable()["FL_ONFIRE"] <- (1 << 27); //you know...
-getconsttable()["FL_DISSOLVING"] <- (1 << 28); //we're dissolving!
-getconsttable()["FL_TRANSRAGDOLL"] <- (1 << 29); //in the process of turning into a client side ragdoll
-getconsttable()["FL_UNBLOCKABLE_BY_PLAYER"] <- (1 << 30); //pusher that can't be blocked by the player
-getconsttable()["FL_FREEZING"] <- (1 << 31); //we're becoming frozen!
-getconsttable()["FL_EP2V_UNKNOWN1"] <- (1 << 31); //unknown
+//non-player specific flag numbers from sourcemod entity_prop_stocks.inc (for "m_fFlags")
+constants.FL_INWATER <- (1 << 9); //in water
+constants.FL_FLY <- (1 << 10); //changes the SV_Movestep() behavior to not need to be on ground
+constants.FL_SWIM <- (1 << 11); //changes the SV_Movestep() behavior to not need to be on ground (but stay in water)
+constants.FL_CONVEYOR <- (1 << 12);
+constants.FL_NPC <- (1 << 13);
+constants.FL_GODMODE <- (1 << 14);
+constants.FL_NOTARGET <- (1 << 15);
+constants.FL_AIMTARGET <- (1 << 16); //set if the crosshair needs to aim onto the entity
+constants.FL_PARTIALGROUND <- (1 << 17); //not all corners are valid
+constants.FL_STATICPROP <- (1 << 18); //eetsa static prop!
+constants.FL_GRAPHED <- (1 << 19); //worldgraph has this ent listed as something that blocks a connection
+constants.FL_GRENADE <- (1 << 20);
+constants.FL_STEPMOVEMENT <- (1 << 21); //changes the SV_Movestep() behavior to not do any processing
+constants.FL_DONTTOUCH <- (1 << 22); //doesn't generate touch functions, generates Untouch() for anything it was touching when this flag was set
+constants.FL_BASEVELOCITY <- (1 << 23); //base velocity has been applied this frame (used to convert base velocity into momentum)
+constants.FL_WORLDBRUSH <- (1 << 24); //not moveable/removeable brush entity (really part of the world, but represented as an entity for transparency or something)
+constants.FL_OBJECT <- (1 << 25); //terrible name. This is an object that NPCs should see. Missiles, for example
+constants.FL_KILLME <- (1 << 26); //this entity is marked for death -- will be freed by game DLL
+constants.FL_ONFIRE <- (1 << 27); //you know...
+constants.FL_DISSOLVING <- (1 << 28); //we're dissolving!
+constants.FL_TRANSRAGDOLL <- (1 << 29); //in the process of turning into a client side ragdoll
+constants.FL_UNBLOCKABLE_BY_PLAYER <- (1 << 30); //pusher that can't be blocked by the player
+constants.FL_FREEZING <- (1 << 31); //we're becoming frozen!
+constants.FL_EP2V_UNKNOWN1 <- (1 << 31); //unknown
 
 //damage types from SDKHooks, partially collides with director constants
-const DMG_GENERIC = 0;
-const DMG_CRUSH = 1;
-const DMG_BULLET = 2;
-const DMG_SLASH = 4;
-const DMG_BURN = 8;
-const DMG_VEHICLE = 16;
-const DMG_FALL = 32;
-const DMG_BLAST = 64;
-const DMG_CLUB = 128;
-const DMG_SHOCK = 256;
-const DMG_SONIC = 512;
-const DMG_ENERGYBEAM = 1024;
-const DMG_PREVENT_PHYSICS_FORCE = 2048;
-const DMG_NEVERGIB = 4096;
-const DMG_ALWAYSGIB = 8192;
-const DMG_DROWN = 16384;
-const DMG_PARALYZE = 32768;
-const DMG_NERVEGAS = 65536;
-const DMG_POISON = 131072;
-const DMG_RADIATION = 262144;
-const DMG_DROWNRECOVER = 524288;
-const DMG_ACID = 1048576;
-const DMG_SLOWBURN = 2097152;
-const DMG_REMOVENORAGDOLL = 4194304;
-const DMG_PHYSGUN = 8388608;
-const DMG_PLASMA = 16777216;
-const DMG_AIRBOAT = 33554432;
-const DMG_DISSOLVE = 67108864;
-const DMG_BLAST_SURFACE = 134217728;
-const DMG_DIRECT = 268435456;
-const DMG_BUCKSHOT = 536870912;
+constants.DMG_GENERIC <- 0;
+constants.DMG_CRUSH <- 1;
+constants.DMG_BULLET <- 2;
+constants.DMG_SLASH <- 4;
+constants.DMG_BURN <- 8;
+constants.DMG_VEHICLE <- 16;
+constants.DMG_FALL <- 32;
+constants.DMG_BLAST <- 64;
+constants.DMG_CLUB <- 128;
+constants.DMG_SHOCK <- 256;
+constants.DMG_SONIC <- 512;
+constants.DMG_ENERGYBEAM <- 1024;
+constants.DMG_PREVENT_PHYSICS_FORCE <- 2048;
+constants.DMG_NEVERGIB <- 4096;
+constants.DMG_ALWAYSGIB <- 8192;
+constants.DMG_DROWN <- 16384;
+constants.DMG_PARALYZE <- 32768;
+constants.DMG_NERVEGAS <- 65536;
+constants.DMG_POISON <- 131072;
+constants.DMG_RADIATION <- 262144;
+constants.DMG_DROWNRECOVER <- 524288;
+constants.DMG_ACID <- 1048576;
+constants.DMG_SLOWBURN <- 2097152;
+constants.DMG_REMOVENORAGDOLL <- 4194304;
+constants.DMG_PHYSGUN <- 8388608;
+constants.DMG_PLASMA <- 16777216;
+constants.DMG_AIRBOAT <- 33554432;
+constants.DMG_DISSOLVE <- 67108864;
+constants.DMG_BLAST_SURFACE <- 134217728;
+constants.DMG_DIRECT <- 268435456;
+constants.DMG_BUCKSHOT <- 536870912;
 
 //solid types
-const SOLID_NONE = 0; // no solid model
-const SOLID_BSP = 1; // a BSP tree
-const SOLID_BBOX = 2; // an AABB
-const SOLID_OBB = 3; // an OBB (not implemented yet)
-const SOLID_OBB_YAW = 4; // an OBB, constrained so that it can only yaw
-const SOLID_CUSTOM = 5; // Always call into the entity for tests
-const SOLID_VPHYSICS = 6; // solid vphysics object, get vcollide from the model and collide with that
+constants.SOLID_NONE <- 0; // no solid model
+constants.SOLID_BSP <- 1; // a BSP tree
+constants.SOLID_BBOX <- 2; // an AABB
+constants.SOLID_OBB <- 3; // an OBB (not implemented yet)
+constants.SOLID_OBB_YAW <- 4; // an OBB, constrained so that it can only yaw
+constants.SOLID_CUSTOM <- 5; // Always call into the entity for tests
+constants.SOLID_VPHYSICS <- 6; // solid vphysics object, get vcollide from the model and collide with that
 
-//extended buttons constants
-getconsttable()["IN_ATTACK"] <- (1 << 0);
-getconsttable()["IN_JUMP"] <- (1 << 1);
-getconsttable()["IN_DUCK"] <- (1 << 2);
-getconsttable()["IN_FORWARD"] <- (1 << 3);
-getconsttable()["IN_BACK"] <- (1 << 4);
-getconsttable()["IN_USE"] <- (1 << 5);
-getconsttable()["IN_CANCEL"] <- (1 << 6);
-getconsttable()["IN_LEFT"] <- (1 << 7);
-getconsttable()["IN_RIGHT"] <- (1 << 8);
-getconsttable()["IN_MOVELEFT"] <- (1 << 9);
-getconsttable()["IN_MOVERIGHT"] <- (1 << 10);
-getconsttable()["IN_ATTACK2"] <- (1 << 11);
-getconsttable()["IN_RUN"] <- (1 << 12);
-getconsttable()["IN_RELOAD"] <- (1 << 13);
-getconsttable()["IN_ALT1"] <- (1 << 14);
-getconsttable()["IN_ALT2"] <- (1 << 15);
-getconsttable()["IN_SCORE"] <- (1 << 16);   // Used by client.dll for when scoreboard is held down
-getconsttable()["IN_SPEED"] <- (1 << 17);	// Player is holding the speed key (+speed, or shift in L4D2)
-getconsttable()["IN_WALK"] <- (1 << 18);	// Player holding walk key
-getconsttable()["IN_ZOOM"] <- (1 << 19);	// Zoom key for HUD zoom
-getconsttable()["IN_WEAPON1"] <- (1 << 20);	// weapon defines these bits
-getconsttable()["IN_WEAPON2"] <- (1 << 21);	// weapon defines these bits
-getconsttable()["IN_BULLRUSH"] <- (1 << 22);
-getconsttable()["IN_GRENADE1"] <- (1 << 23);	// grenade 1
-getconsttable()["IN_GRENADE2"] <- (1 << 24);	// grenade 2
-getconsttable()["IN_ATTACK3"] <- (1 << 25);
+//extended buttons constants (for GetButtonMask(), "m_nButtons", "m_afButtonForced")
+constants.IN_ATTACK <- (1 << 0);
+constants.IN_JUMP <- (1 << 1);
+constants.IN_DUCK <- (1 << 2);
+constants.IN_FORWARD <- (1 << 3);
+constants.IN_BACK <- (1 << 4);
+constants.IN_USE <- (1 << 5);
+constants.IN_CANCEL <- (1 << 6);
+constants.IN_LEFT <- (1 << 7);
+constants.IN_RIGHT <- (1 << 8);
+constants.IN_MOVELEFT <- (1 << 9);
+constants.IN_MOVERIGHT <- (1 << 10);
+constants.IN_ATTACK2 <- (1 << 11);
+constants.IN_RUN <- (1 << 12);
+constants.IN_RELOAD <- (1 << 13);
+constants.IN_ALT1 <- (1 << 14);
+constants.IN_ALT2 <- (1 << 15);
+constants.IN_SCORE <- (1 << 16);   // Used by client.dll for when scoreboard is held down
+constants.IN_SPEED <- (1 << 17);	// Player is holding the speed key (+speed, or shift in L4D2)
+constants.IN_WALK <- (1 << 18);	// Player holding walk key
+constants.IN_ZOOM <- (1 << 19);	// Zoom key for HUD zoom
+constants.IN_WEAPON1 <- (1 << 20);	// weapon defines these bits
+constants.IN_WEAPON2 <- (1 << 21);	// weapon defines these bits
+constants.IN_BULLRUSH <- (1 << 22);
+constants.IN_GRENADE1 <- (1 << 23);	// grenade 1
+constants.IN_GRENADE2 <- (1 << 24);	// grenade 2
+constants.IN_ATTACK3 <- (1 << 25);
 
-const MOVETYPE_NONE = 0; //Don't move
-const MOVETYPE_ISOMETRIC = 1; //For players, in TF2 commander view, etc
-const MOVETYPE_WALK = 2; //Player only, moving on the ground
-const MOVETYPE_STEP = 3; //Monster/NPC movement
-const MOVETYPE_FLY = 4; //Fly, no gravity
-const MOVETYPE_FLYGRAVITY = 5; //Fly, with gravity
-const MOVETYPE_VPHYSICS = 6; //Physics movetype
-const MOVETYPE_PUSH = 7; //No clip to world, but pushes and crushes things
-const MOVETYPE_NOCLIP = 8; //Noclip
-const MOVETYPE_LADDER = 9; //For players, when moving on a ladder
-const MOVETYPE_OBSERVER = 10; //Spectator movetype. DO NOT use this to make player spectate
-const MOVETYPE_CUSTOM = 11; //Custom movetype, can be applied to the player to prevent the default movement code from running, while still calling the related hooks
+// (for "movetype")
+constants.MOVETYPE_NONE <- 0; //Don't move
+constants.MOVETYPE_ISOMETRIC <- 1; //For players, in TF2 commander view, etc
+constants.MOVETYPE_WALK <- 2; //Player only, moving on the ground
+constants.MOVETYPE_STEP <- 3; //Monster/NPC movement
+constants.MOVETYPE_FLY <- 4; //Fly, no gravity
+constants.MOVETYPE_FLYGRAVITY <- 5; //Fly, with gravity
+constants.MOVETYPE_VPHYSICS <- 6; //Physics movetype
+constants.MOVETYPE_PUSH <- 7; //No clip to world, but pushes and crushes things
+constants.MOVETYPE_NOCLIP <- 8; //Noclip
+constants.MOVETYPE_LADDER <- 9; //For players, when moving on a ladder
+constants.MOVETYPE_OBSERVER <- 10; //Spectator movetype. DO NOT use this to make player spectate
+constants.MOVETYPE_CUSTOM <- 11; //Custom movetype, can be applied to the player to prevent the default movement code from running, while still calling the related hooks
+
+g_ModeScript.InjectTable(constants, this);
 
 if (!("__lib" in this)) {
 	if (this == getroottable())
@@ -839,6 +844,16 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 }
 
 if (!("__current_hints" in this)) __current_hints <- {}
+
+create_particles <- function(effect_name, origin, duration = -1) {
+	local effect = SpawnEntityFromTable("info_particle_system", {
+		effect_name = effect_name,
+		origin = origin,
+	});
+	DoEntFire("!self", "Start", "", 0, null, effect);
+	if (duration != -1) DoEntFire("!self", "Kill", "", duration, null, effect);
+	return effect;
+}
 
 vector_to_angle <- function(vec) {
 	if (vec.x == 0 && vec.y == 0 && vec.z == 0) throw "cannot convect zero vector to angle";
@@ -1436,6 +1451,7 @@ remove_task_on_entity <- function(ent) {
 	if (!(ent in __tasks_ent)) return;
 	delete __tasks_ent[ent];
 	AddThinkToEnt(ent, null);
+	ent.GetScriptScope().task <- function() {};
 }
 
 remove_all_tasks_on_entities <- function() {

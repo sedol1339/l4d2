@@ -703,6 +703,7 @@ spawn_infected <- function(param_type, param_pos) {
 	if (!player) return null;
 	if(player.GetZombieType() == 9) return null; //if an extra infected bot appears, it becomes a survivor and is then removed
 	log("spawning infected type " + param_type + ": " + player_to_str(player));
+	player.ValidateScriptScope();
 	return player;
 }
 
@@ -812,6 +813,24 @@ targetname_to_entity <- function(targetname) {
 	return ent;
 }
 
+/* netprop <- function(entity, prop, value = null) {
+	type = NetProps.GetPropType(ent, prop);
+	if (value != null) { //but can be 0
+		switch (type) {
+			case "integer":
+				NetProps.SetPropEntity(ent, prop, value); break;
+				NetProps.SetPropInt(ent, prop, value); break; //???
+			case "string": NetProps.SetPropString(ent, prop, value); break;
+			case "float": NetProps.SetPropFloat(ent, prop, value); break;
+			case "Vector": NetProps.SetPropVector(ent, prop, value); break;
+			case null: throw "no such prop: " + prop;
+			default: throw "unsupported prop type: " + table.type + " of prop " + prop;
+		}
+	} else {
+		
+	}
+} */
+
 /* examples:
  show_hud_hint_singleplayer("Use reload or leave field to cancel.", Vector(255,255,255), null, "+reload", 2);
  show_hud_hint_singleplayer("Use reload or leave field to cancel.", Vector(255,255,255), "icon_info", null, 2);
@@ -880,6 +899,7 @@ trace_line <- function(start, end, mask = TRACE_MASK_VISIBLE_AND_NPCS, ignore = 
 		table.fraction = 0;
 	if (table.hit)
 		table.hitpos <- table.start + (table.end - table.start).Scale(table.fraction);
+	//DebugDrawLine_vCol(start, end, table.hit ? Vector(255,0,0) : Vector(0,255,0), false, 1);
 	return table;
 }
 

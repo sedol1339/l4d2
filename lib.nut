@@ -78,6 +78,9 @@
  trace_line(start, end)			does TraceLine, calculates table.hitpos and returns table; optional params: mask, ignore (see TraceLine documentation)
  normalize(vec)					normalizes non-zero vector
  ln(x)							natural logarifm (instead of log)
+ min(a, b)						min of two numbers
+ max(a, b)						max of two numbers
+ roundf(a)						round float to int
  
  CLOCK FUNCTIONS
  clock.sec()					returns engine time (stops if game is paused)
@@ -106,6 +109,7 @@
  client_command(player, cmd)	send command from player (using point_clientcommand)
  switch_to_infected(pl, class)	switches to infected and spaws as zombie class
  targetname_to_entity(name)		returns entity with given targetname or null; print warning if there are multiple entities with this targetname
+ find_entities(classname)		find entities by classname (returns array)
  
  GAME LOGIC FUNCTIONS
  no_SI_with_death_cams()		will automatically remove infected bots with death cam; pass false as param to cancel
@@ -813,6 +817,14 @@ targetname_to_entity <- function(targetname) {
 	return ent;
 }
 
+find_entities <- function(classname) {
+	local ent = null
+	local arr = []
+	while (ent = Entities.FindByClassname(ent, classname))
+		arr.push(ent)
+	return arr
+}
+
 /* netprop <- function(entity, prop, value = null) {
 	type = NetProps.GetPropType(ent, prop);
 	if (value != null) { //but can be 0
@@ -906,6 +918,24 @@ trace_line <- function(start, end, mask = TRACE_MASK_VISIBLE_AND_NPCS, ignore = 
 normalize <- function(vec) {
 	if (vec.x == 0 && vec.y == 0 && vec.z == 0) throw "cannot normalize zero vector";
 	return vec.Scale(1/vec.Length());
+}
+
+min <- function(a, b) {
+	return (a < b) ? a : b
+}
+
+max <- function(a, b) {
+	return (a > b) ? a : b
+}
+
+roundf <- function(a) {
+	local a_abs = fabs(a)
+	local a_abs_flr = floor(a_abs)
+	local a_abs_part = a_abs - a_abs_flr
+	local a_abs_round = a_abs_flr
+	if (a_abs_part >= 0.5)
+		a_abs_round++
+	return (a > 0) ? a_abs_round : 0 - a_abs_round
 }
 
 ///////////////////////////////

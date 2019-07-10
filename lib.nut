@@ -1351,7 +1351,6 @@ register_ticker <- function(key, func) {
 }
 
 __ticker_init <- function() {
-	log("q")
 	if (__ticker_ent && !deleted_ent(__ticker_ent))
 		return;
 	__ticker_ent = SpawnEntityFromTable("logic_timer", {

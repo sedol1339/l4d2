@@ -144,21 +144,22 @@
  hud.flags_add(possessor, name, flags)		add flags for slot
  hud.flags_remove(possessor, name, flags)	remove flags for slot
  
- hud.posess_timer(possessor, timer_name)				posess free timer, timer name should be string; return true (success) or false (no free slots); 
- hud.release_timer(possessor, timer_name)			release posessed timer (like releasing hud slots)
- hud.disable_timer(possessor, timer_name)			disables timer (--:-- will be shown), new timers are disabled by default
- hud.set_timer(possessor, timer_name, value)			sets timer value, does not start or stop timer (if timer is disabled, it will become paused)
- hud.start_timer_countup(possessor, timer_name)		starts timer, count up; does not change it's value (if it was disabled, 0:00 is default)
+ hud.posess_timer(possessor, timer_name)	posess free timer, timer name should be string; return true (success) or false (no free slots); 
+ hud.release_timer(possessor, timer_name)	release posessed timer (like releasing hud slots)
+ hud.disable_timer(possessor, timer_name)	disables timer (--:-- will be shown), new timers are disabled by default
+ hud.set_timer(possessor, timer_name, value)	sets timer value, does not start or stop timer (if timer is disabled, it will become paused)
+ hud.start_timer_countup(possessor, timer_name)	starts timer, count up; does not change it's value (if it was disabled, 0:00 is default)
  hud.start_timer_countdown(possessor, timer_name)	starts timer, count down; does not change it's value (if it was disabled, 0:00 is default)
- hud.pause_timer(possessor, timer_name)				pauses timer; does not change it's value (if it was disabled, 0:00 is default)
- hud.get_timer(possessor, timer_name)				returns timer value as float
-													!! timer will work wrongly if slot does not allow negative, but timer once dropped below zero !!
-													!! too lazy to fix this (need to add allow_negative field to timer table) !!
+ hud.pause_timer(possessor, timer_name)		pauses timer; does not change it's value (if it was disabled, 0:00 is default)
+ hud.get_timer(possessor, timer_name)		returns timer value as float
+											
+											use HUD_FLAG_ALLOWNEGTIMER slot flag to display negative timer values
+											!! timer will work wrongly if slot does not allow negative, but timer once dropped below zero !!
+											!! too lazy to fix this (need to add allow_negative field to timer table) !!
 
  hud.set_timer_callback(possessor, timer_name, value, func, stop_timer)	call func on specified timer value; if "stop" argument is true,
-																		stops timer on callback (optional, default is false); func may be null
- hud.remove_timer_callbacks(possessor, timer_name)						remove all registered timer callbacks
-																		hint: use HUD_FLAG_ALLOWNEGTIMER slot flag to display negative timer values
+											stops timer on callback (optional, default is false); func may be null
+ hud.remove_timer_callbacks(possessor, timer_name)	remove all registered timer callbacks
  
  hud.global_off()							don't render all HUD elements
  hud.global_on()							resume rendering of all HUD elements

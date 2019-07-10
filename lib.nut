@@ -110,6 +110,7 @@
  switch_to_infected(pl, class)	switches to infected and spaws as zombie class
  targetname_to_entity(name)		returns entity with given targetname or null; print warning if there are multiple entities with this targetname
  find_entities(classname)		find entities by classname (returns array)
+ replace_primary_weapon(player, weapon)	replaces weapon in primary slot; pass true as additional argument to give laser sight
  
  GAME LOGIC FUNCTIONS
  no_SI_with_death_cams()		will automatically remove infected bots with death cam; pass false as param to cancel
@@ -877,6 +878,18 @@ find_entities <- function(classname) {
 	while (ent = Entities.FindByClassname(ent, classname))
 		arr.push(ent)
 	return arr
+}
+
+replace_primary_weapon <- function(player, weapon, laser_sight = false) {
+	local inv_table = {};
+	GetInvTable(player, inv_table);
+	if ("slot0" in inv_table)
+		inv_table.slot0.Kill();
+	run_this_tick(function() {
+		player.GiveItem(weapon_name);
+		if (laser_sight)
+			player.GiveUpgrade(UPGRADE_LASER_SIGHT);
+	});
 }
 
 /* set_speed_multiplier <- function(player, multiplier) {

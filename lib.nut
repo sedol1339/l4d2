@@ -117,6 +117,14 @@
  find_entities(classname)		find entities by classname (returns array)
  replace_primary_weapon(player, weapon)	replaces weapon in primary slot; pass true as additional argument to give laser sight
  
+ NETPROPS FUNCTIONS
+ propint(ent, prop[, value])	get/set integer offset
+ propfloat(ent, prop[, value])	get/set float offset
+ propstr(ent, prop[, value])	get/set string offset
+ propvec(ent, prop[, value])	get/set Vector offset
+ propent(ent, prop[, value])	get/set ehandle offset
+								see also: watch_netprops()
+ 
  GAME LOGIC FUNCTIONS
  no_SI_with_death_cams()		will automatically remove infected bots with death cam; pass false as param to cancel
  restart_game()					retsarts round in 1 second; pass true as additional param to reset cvars (cvars_restore_all() & "sv_cheats 0")
@@ -823,7 +831,7 @@ teleport_entity <- function(ent, param_origin, param_angles) {
 
 get_entity_flag <- function(ent, flag) {
 	assert(ent);
-	return (NetProps.GetPropInt(ent,"m_fFlags") & flag) ? true : false;
+	return (propint(ent,"m_fFlags") & flag) ? true : false;
 }
 
 /* example:
@@ -832,9 +840,9 @@ get_entity_flag <- function(ent, flag) {
 */
 set_entity_flag <- function(ent, flag, value) {
 	assert(ent);
-	local flags = NetProps.GetPropInt(ent,"m_fFlags");
+	local flags = propint(ent,"m_fFlags");
 	flags = value ? (flags | flag) : (flags & ~flag);
-	NetProps.SetPropInt(ent, "m_fFlags", flags);
+	propint(ent, "m_fFlags", flags);
 }
 
 get_player_button <- function(player, button) {
@@ -844,11 +852,11 @@ get_player_button <- function(player, button) {
 
 force_player_button <- function(player, button, press = true) {
 	assert(player);
-	local buttons = NetProps.GetPropInt(player, "m_afButtonForced");
+	local buttons = propint(player, "m_afButtonForced");
 	if (press)
-		NetProps.SetPropInt(player, "m_afButtonForced", buttons | button)
+		propint(player, "m_afButtonForced", buttons | button)
 	else
-		NetProps.SetPropInt(player, "m_afButtonForced", buttons &~ button)
+		propint(player, "m_afButtonForced", buttons &~ button)
 }
 
 kill_player <- function(player, attacker = null, set_revive_count = true) {
@@ -875,10 +883,10 @@ client_command <- function(player, command) {
 }
 
 switch_to_infected <- function(player, zombie_class) {
-	NetProps.SetPropInt(player, "m_iTeamNum", 3);
-	NetProps.SetPropInt(player, "m_lifeState", 2);
-	NetProps.SetPropInt(player, "CTerrorPlayer.m_iVersusTeam", 2);
-	NetProps.SetPropInt(player, "m_iPlayerState", 6);
+	propint(player, "m_iTeamNum", 3);
+	propint(player, "m_lifeState", 2);
+	propint(player, "CTerrorPlayer.m_iVersusTeam", 2);
+	propint(player, "m_iPlayerState", 6);
 	spawn_infected(zombie_class, player.GetOrigin());
 }
 
@@ -930,8 +938,8 @@ replace_primary_weapon <- function(player, weapon, laser_sight = false) {
 }
 
 /* set_speed_multiplier <- function(player, multiplier) {
-	NetProps.SetPropFloat(player, "m_flLaggedMovementValue", multiplier)
-	NetProps.SetPropFloat(player, "m_flGravity", 1.0 / multiplier / multiplier)
+	propfloat(player, "m_flLaggedMovementValue", multiplier)
+	propfloat(player, "m_flGravity", 1.0 / multiplier / multiplier)
 	register_callback("player_jump", player, function(_params) {
 		local _player = GetPlayerFromUserID(_params.userid);
 		run_this_tick(function() {
@@ -940,20 +948,20 @@ replace_primary_weapon <- function(player, weapon, laser_sight = false) {
 			speed.z = 189.194 / multiplier
 			_player.SetVelocity(speed)
 			//moving platforms?
-			log("m_flGravity " + NetProps.GetPropFloat(player, "m_flGravity") + " vertical speed " + speed.z)
+			log("m_flGravity " + propfloat(player, "m_flGravity") + " vertical speed " + speed.z)
 		})
 	})
 } */
 
 set_speed_multiplier <- function(player, multiplier) {
 	register_ticker(player, function() {
-		NetProps.SetPropFloat(player, "m_flGroundSpeed", 220 * multiplier)
-		NetProps.SetPropFloat(player, "m_flMaxspeed", 220 * multiplier)
-		NetProps.SetPropFloat(player, "m_flSpeed", 220 * multiplier)
-		//NetProps.SetPropFloat(player, "m_flConstraintSpeedFactor", 0.2)
-		//NetProps.SetPropVector(player, "m_vecConstraintCenter", player.GetOrigin())
-		//NetProps.SetPropFloat(player, "m_flConstraintRadius", 100)
-		//NetProps.SetPropFloat(player, "m_flConstraintWidth", 1000)
+		propfloat(player, "m_flGroundSpeed", 220 * multiplier)
+		propfloat(player, "m_flMaxspeed", 220 * multiplier)
+		propfloat(player, "m_flSpeed", 220 * multiplier)
+		//propfloat(player, "m_flConstraintSpeedFactor", 0.2)
+		//propvec(player, "m_vecConstraintCenter", player.GetOrigin())
+		//propfloat(player, "m_flConstraintRadius", 100)
+		//propfloat(player, "m_flConstraintWidth", 1000)
 	})
 }
 
@@ -974,6 +982,44 @@ set_speed_multiplier <- function(player, multiplier) {
 		
 	}
 } */
+
+propint <- function(ent, prop, value = null) {
+	if (value != null)
+		NetProps.SetPropInt(ent, prop, value)
+	else
+		return NetProps.GetPropInt(ent, prop)
+}
+
+propfloat <- function(ent, prop, value = null) {
+	if (value != null)
+		NetProps.SetPropFloat(ent, prop, value)
+	else
+		return NetProps.GetPropFloat(ent, prop)
+}
+
+propstr <- function(ent, prop, value = null) {
+	if (value != null)
+		NetProps.SetPropString(ent, prop, value)
+	else
+		return NetProps.GetPropString(ent, prop)
+}
+
+propvec <- function(ent, prop, value = null) {
+	if (value != null)
+		NetProps.SetPropVector(ent, prop, value)
+	else
+		return NetProps.GetPropVector(ent, prop)
+}
+
+propent <- function(ent, prop, ...) {
+	if (vargv.len() > 1)
+		throw "wrong number of arguments"
+	if (vargv.len() == 1)
+		NetProps.SetPropEntity(ent, prop, vargv[0])
+	else
+		return NetProps.GetPropEntity(ent, prop)
+}
+
 
 /* examples:
  show_hud_hint_singleplayer("Use reload or leave field to cancel.", Vector(255,255,255), null, "+reload", 2);
@@ -1596,7 +1642,7 @@ __loop_prevent_running_this_tick <- function(timer) {
 
 loop_get_refire_time <- function(key) {
 	if (!(key in __loops)) return;
-	return NetProps.GetPropInt(__loops[key], "m_flRefireTime");
+	return propint(__loops[key], "m_flRefireTime");
 }
 
 print_all_loops <- function() {
@@ -1939,7 +1985,7 @@ hud <- {
 			throw format("Possessor %s not found", possessor.tostring())
 		local possessor_table = ::__hud_data.possessors[possessor]
 		if (!(name in possessor_table))
-			throw format("Name %s not found for possessor %s", name.tostring(), possessor.tostring())
+			throw format("Name %s not found for possessor %s", name.tostring(), possessor)
 		return possessor_table[name]
 	},
 	
@@ -1966,7 +2012,7 @@ hud <- {
 			if (timer.possessor == possessor && timer.name == name)
 				return id
 		if (dont_throw) return -1
-		throw format("cannot find timer named %s for possessor %s", name.tostring(), possessor.tostring())
+		throw format("cannot find timer named %s for possessor %s", name.tostring(), possessor)
 	},
 	
 	init = function() {
@@ -1993,7 +2039,7 @@ hud <- {
 			::__hud_data.possessors[possessor] <- {}
 		local possessor_table = ::__hud_data.possessors[possessor]
 		if (name in possessor_table)
-			throw format("name %s is already registered for possessor %s", name.tostring(), possessor.tostring())
+			throw format("name %s is already registered for possessor %s", name.tostring(), possessor)
 		
 		//first action: add slot to possessors table
 		possessor_table[name] <- slot_to_posess
@@ -2168,7 +2214,7 @@ hud <- {
 			return false
 		}
 		if (__get_timer_id(possessor, timer_name, true) != -1)
-			throw format("timer name %s is already registered for possessor %s", timer_name.tostring(), possessor.tostring())
+			throw format("timer name %s is already registered for possessor %s", timer_name.tostring(), possessor)
 		
 		::__hud_data.timers[timer_to_posess].possessor = possessor
 		::__hud_data.timers[timer_to_posess].name = timer_name

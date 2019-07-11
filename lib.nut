@@ -18,6 +18,11 @@
  logf							shortcut for log(format(str, ...)) bug: printf prints "%%" instead of "%"
  connect_strings(array, sep)	connects string array using separator: ["a", "b", "c"] -> "a, b, c"
  
+ checktype(var, type)			throws exception if var is not of specified type;
+								type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
+								type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
+								type can be array of string types
+ 
  TASK SHEDULING
  delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key; see function declaration for more info
  run_this_tick(func)						runs function later (in this tick)
@@ -128,7 +133,6 @@
  file_append(filename, str)		appends string to the end of file
  
  HUD FUNCTIONS (see: L4D2_EMS/Appendix:_HUD) [timers can be used independently of HUD]
- hud.init()									should be called once before all other functions; after one call other calls will not have effect
  hud.posess_slot(possessor, name)			take control over freeslot; name - any number or string to name the slot (does not match real slot id,
 											that is internal); return true (success) or false (no free slots)
  hud.release_slot(possessor, name)			release posessed slot (shot is getting hidden, becoming free to posess and you can't refer to it anymore)
@@ -164,9 +168,9 @@
  
  hud.global_off()							don't render all HUD elements
  hud.global_on()							resume rendering of all HUD elements
+ hud.global_clear()							release all posessed elements
  
- example HUD usage:							> hud.init()
-											> hud.posess_timer("MyHUDInterface", "MyTimer")
+ example HUD usage:							> hud.posess_timer("MyHUDInterface", "MyTimer")
 											> hud.set_timer("MyHUDInterface", "MyTimer", 10)
 											> hud.start_timer_countdown("MyHUDInterface", "MyTimer")
 											> hud.set_timer_callback("MyHUDInterface", "MyTimer", 1, @()cvar("mp_restartgame", 1))
@@ -174,6 +178,9 @@
 											> hud.set_position("MyHUDInterface", "MyTimerSlot", 0.35, 0.75, 0.3, 0.05)
 											> hud.set_special("MyHUDInterface", "MyTimerSlot", "MyTimer", hud.PREFIX, "Game is restarting in ")
 
+ //hud.slot_exclude(slot)					excludes internal slot from hud system (will not be used or posessed) - for solving conflicts
+ hud.show_message(text, duration, background, float_up, x, y, w, h)	shows message without posessing a slot
+ 
 */
 
 ///////////////////////////////
@@ -506,6 +513,11 @@ constants.MOVETYPE_LADDER <- 9; //For players, when moving on a ladder
 constants.MOVETYPE_OBSERVER <- 10; //Spectator movetype. DO NOT use this to make player spectate
 constants.MOVETYPE_CUSTOM <- 11; //Custom movetype, can be applied to the player to prevent the default movement code from running, while still calling the related hooks
 
+constants.NUMBER <- -1
+constants.FUNC <- -2
+constants.STRING <- -3
+constants.BOOL <- -4
+
 g_ModeScript.InjectTable(constants, this);
 
 if (!("__lib" in this)) {
@@ -655,6 +667,31 @@ __printstackinfos <- function() {
 		local src_tokens = split(stackinfos.src, "/");
 		logf("\t<%s>: line %s", src_tokens[src_tokens.len() - 1], stackinfos.line.tostring());
 		i++;
+	}
+}
+
+checktype <- function(var, _type) {
+	local typeof_var = typeof(var)
+	local function throw_invalid_type() {
+		throw "invalid variable type: " + typeof_var
+	}
+	if (typeof(_type) == "string") {
+		if (typeof_var != _type) throw_invalid_type()
+	} else if (typeof(_type) == "array") {
+		foreach(_type_entry in _type)
+			if (typeof_var == _type_entry)
+				return
+		throw_invalid_type()
+	} else if (_type == NUMBER) {
+		if (typeof_var != "float" && typeof_var != "integer") throw_invalid_type()
+	} else if (_type == FUNC) {
+		if (typeof_var != "function" && typeof_var != "native function") throw_invalid_type()
+	} else if (_type == STRING) {
+		if (typeof_var != "string") throw_invalid_type()
+	} else if (_type == BOOL) {
+		if (typeof_var != "bool") throw_invalid_type()
+	} else {
+		throw "checktype: _type should be string, array, NUMBER, FUNC, STRING or BOOL"
 	}
 }
 
@@ -1836,7 +1873,7 @@ file_append <- function(filename, str) {
 
 ///////////////////////////////
 
-if (!("__hud_data" in getroottable())) { //if we include library first time
+__hud_data_init <- function() { //if we include library first time
 	::__hud_data <- {
 		possessors = {},
 		internal_slots = {},
@@ -1868,10 +1905,14 @@ if (!("__hud_data" in getroottable())) { //if we include library first time
 	}
 }
 
+if (!("__hud_data" in getroottable()))
+	__hud_data_init()
+
 hud <- {
 	__check_init = function() {
 		if (!::__hud_data.initialized)
-			throw "HUD is not initialized"
+			//throw "HUD is not initialized"
+			hud.init()
 	},
 	
 	__refresh = function() {
@@ -1932,6 +1973,7 @@ hud <- {
 		if (::__hud_data.initialized)
 			return
 		::__hud_data.initialized = true
+		log("HUD was initialized")
 		
 		hud.__refresh()
 	},
@@ -1977,6 +2019,7 @@ hud <- {
 		__check_init()
 		
 		//first action: remove slot from possessors table
+		local possessor_table = ::__hud_data.possessors[possessor]
 		local slot_to_delete = __get_internal_index(possessor, name)
 		delete possessor_table[name]
 		
@@ -2300,6 +2343,52 @@ hud <- {
 		::__hud_data.disabled = false
 		hud.__refresh()
 	},
+	
+	global_clear = function() {
+		__check_init()
+		__hud_data_init()
+		hud.__refresh()
+	},
+	
+	show_message = function(text, duration = 5, background = true, float_up = false, x = 0.35, y = 0.75, w = 0.3, h = 0.05) {
+		__check_init()
+		
+		checktype(text, STRING)
+		checktype(duration, NUMBER)
+		checktype(background, BOOL)
+		checktype(float_up, BOOL)
+		checktype(x, NUMBER)
+		checktype(y, NUMBER)
+		checktype(w, NUMBER)
+		checktype(h, NUMBER)
+		
+		local slot_name = UniqueString()
+		if (!hud.posess_slot("__show_message", slot_name)) {
+			log("warning! no free slots for message: " + text)
+			return
+		}
+		
+		hud.set_position("__show_message", slot_name, x, y, w, h)
+		hud.flags_set("__show_message", slot_name, HUD_FLAG_ALIGN_CENTER | (background ? 0 : HUD_FLAG_NOBG))
+		hud.set_text("__show_message", slot_name, text)
+		local start_time = clock.sec()
+		
+		if (float_up)
+			register_ticker("__show_message" + slot_name, function() {
+				local function dY(dT) {
+					return 0.15*(1 - 1/(dT + 1))
+				}
+				hud.set_position("__show_message", slot_name, x, y - dY(clock.sec() - start_time), w, h)
+				hud.__refresh()
+			})
+		delayed_call(function() {
+			hud.release_slot("__show_message", slot_name)
+			if (float_up)
+				remove_ticker("__show_message" + slot_name)
+		}, duration)
+		
+		hud.__refresh()
+	}
 }
 
 ///////////////////////////////

@@ -1931,10 +1931,10 @@ hud <- {
 	},
 	
 	__get_internal_index = function(possessor, name) { //throws exception if not found
-		if (type(possessor) != "string")
-			throw "possessor should be string"
-		if (type(name) != "string" && type(name) != "integer")
-			throw "name should be string or integer"
+		
+		checktype(possessor, STRING)
+		checktype(name, ["string", "integer"])
+		
 		if (!(possessor in ::__hud_data.possessors))
 			throw format("Possessor %s not found", possessor.tostring())
 		local possessor_table = ::__hud_data.possessors[possessor]
@@ -1958,10 +1958,10 @@ hud <- {
 	},
 	
 	__get_timer_id = function(possessor, name, dont_throw = false) { //throws exception if not found
-		if (type(possessor) != "string")
-			throw "possessor should be string"
-		if (type(name) != "string")
-			throw "timer name should be string"
+		
+		checktype(possessor, STRING)
+		checktype(name, STRING)
+		
 		foreach (id, timer in ::__hud_data.timers)
 			if (timer.possessor == possessor && timer.name == name)
 				return id
@@ -1981,10 +1981,9 @@ hud <- {
 	posess_slot = function(possessor, name) {
 		__check_init()
 		
-		if (type(possessor) != "string")
-			throw "possessor should be string"
-		if (type(name) != "string" && type(name) != "integer")
-			throw "name should be string or integer"
+		checktype(possessor, STRING)
+		checktype(name, ["string", "integer"])
+		
 		local slot_to_posess = hud.__find_free_slot()
 		if (slot_to_posess == -1) {
 			log("cannot find free HUD slots")
@@ -2035,14 +2034,10 @@ hud <- {
 	set_position = function(possessor, name, x, y, w, h) {
 		__check_init()
 		
-		if (type(x) != "integer" && type(x) != "float")
-			throw "x is not integer or float"
-		if (type(y) != "integer" && type(y) != "float")
-			throw "y is not integer or float"
-		if (type(w) != "integer" && type(w) != "float")
-			throw "w is not integer or float"
-		if (type(h) != "integer" && type(h) != "float")
-			throw "h is not integer or float"
+		checktype(x, NUMBER)
+		checktype(y, NUMBER)
+		checktype(w, NUMBER)
+		checktype(h, NUMBER)
 			
 		local slot = __get_internal_index(possessor, name)
 		HUDPlace(slot, x, y, w, h)
@@ -2053,8 +2048,7 @@ hud <- {
 	set_visible = function(possessor, name, is_visible) {
 		__check_init()
 		
-		if (type(visible) != "bool")
-			throw "is_visible (3rd argument) should be boolean"
+		checktype(visible, BOOL)
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2066,8 +2060,7 @@ hud <- {
 	set_text = function(possessor, name, text) {
 		__check_init()
 		
-		if (type(text) != "string" && type(text) != "integer" && type(text) != "float")
-			throw "text (3rd argument) should be string, integer or float"
+		checktype(text, ["string", "integer", "float"])
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2082,8 +2075,7 @@ hud <- {
 	set_datafunc = function(possessor, name, func) {
 		__check_init()
 		
-		if (type(func) != "function" && type(func) != "native function")
-			throw "func (3rd argument) should be function"
+		checktype(func, FUNC)
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2101,12 +2093,10 @@ hud <- {
 	set_special = function(possessor, name, value, is_prefix = null, text = null) {
 		__check_init()
 		
-		if (type(value) != "integer" && type(value) != "string")
-			throw "value (3rd argument) should be integer or string"
-		if (is_prefix != null && type(is_prefix) != "bool")
-			throw "is_prefix (4th argument) should be boolean"
-		if (text != null && type(text) != "string")
-			throw "text (5th argument) should be string"
+		checktype(value, ["integer", "string"])
+		if (is_prefix != null) checktype(is_prefix, BOOL)
+		if (text != null) checktype(text, STRING)
+		
 		if (is_prefix != null && text == null || is_prefix != null && text == null)
 			throw "is_prefix (4th argument) and text (5th argument) are used together, one of them is null"
 		if (value == HUD_SPECIAL_TIMER0 || value == HUD_SPECIAL_TIMER1 || value == HUD_SPECIAL_TIMER2 || value == HUD_SPECIAL_TIMER3)
@@ -2133,8 +2123,7 @@ hud <- {
 	flags_set = function(possessor, name, flags) {
 		__check_init()
 		
-		if (type(flags) != "integer")
-			throw "flags (3rd argument) should be integer"
+		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2146,8 +2135,7 @@ hud <- {
 	flags_add = function(possessor, name, flags) {
 		__check_init()
 		
-		if (type(flags) != "integer")
-			throw "flags (3rd argument) should be integer"
+		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2159,8 +2147,7 @@ hud <- {
 	flags_remove = function(possessor, name, flags) {
 		__check_init()
 		
-		if (type(flags) != "integer")
-			throw "flags (3rd argument) should be integer"
+		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
 		local slot_table = ::__hud_data.layout.Fields[slot]
@@ -2172,10 +2159,8 @@ hud <- {
 	posess_timer = function(possessor, timer_name) {
 		__check_init()
 		
-		if (type(possessor) != "string")
-			throw "possessor should be string"
-		if (type(timer_name) != "string")
-			throw "timer_name should be string"
+		checktype(possessor, STRING)
+		checktype(timer_name, STRING)
 		
 		local timer_to_posess = hud.__find_free_timer()
 		if (timer_to_posess == -1) {
@@ -2204,10 +2189,8 @@ hud <- {
 	disable_timer = function(possessor, timer_name) {
 		__check_init()
 		
-		if (type(possessor) != "string")
-			throw "possessor should be string"
-		if (type(timer_name) != "string")
-			throw "timer_name should be string"
+		checktype(possessor, STRING)
+		checktype(timer_name, STRING)
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
 		HUDManageTimers(timer_to_posess, TIMER_DISABLE, 0)
@@ -2217,8 +2200,7 @@ hud <- {
 	set_timer = function(possessor, timer_name, value) {
 		__check_init()
 		
-		if (type(value) != "integer" && type(value) != "float")
-			throw "value (3rd argument) should be integer or float"
+		checktype(value, NUMBER)
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
 		HUDManageTimers(timer_index, TIMER_STOP, 0)
@@ -2273,12 +2255,9 @@ hud <- {
 	set_timer_callback = function(possessor, timer_name, value, func, stop_timer = false) {
 		__check_init()
 		
-		if (type(value) != "integer" && type(value) != "float")
-			throw "value (3rd argument) should be integer or float"
-		if (func != null && type(func) != "function" && type(func) != "native function")
-			throw "func (4th argument) should be function"
-		if (type(stop_timer) != "bool")
-			throw "stop_timer (5th argument) should be boolean"
+		checktype(value, NUMBER)
+		if (func != null) checktype(func, FUNC)
+		checktype(stop_timer, BOOL)
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
 		if(::__hud_data.timer_callbacks.len() == 0) {

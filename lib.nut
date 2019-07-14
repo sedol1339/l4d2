@@ -6,7 +6,7 @@
  
  FUNCTIONS FOR LOGGING:
  log(str)						prints to console
- say_chat(str)					prints to chat for all players
+ say_chat(str, ...)				prints to chat for all players; if more than one argument, using formatting like say_chat(format(str, ...))	
  log_table(table|class|array)	dumps deep structure of table (better version of DeepPrintTable); additinal param: max_depth
  var_to_str(var)				converts any variable to string (better version of tostring())
  ent_to_str(ent)				converts entity to string (prints entity index and targetname)
@@ -16,8 +16,9 @@
  logp							shortcut for (log(player_to_str(player))
  logt							shortcut for log_table(table|class|array)
  logf							shortcut for log(format(str, ...)) bug: printf prints "%%" instead of "%"
- connect_strings(array, sep)	connects string array using separator: ["a", "b", "c"] -> "a, b, c"
+ concat(array, sep)				connects string array using separator: ["a", "b", "c"] -> "a, b, c"
  
+ MISC FUNCTIONS
  checktype(var, type)			throws exception if var is not of specified type;
 								type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
 								type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
@@ -116,6 +117,7 @@
  targetname_to_entity(name)		returns entity with given targetname or null; print warning if there are multiple entities with this targetname
  find_entities(classname)		find entities by classname (returns array)
  replace_primary_weapon(player, weapon)	replaces weapon in primary slot; pass true as additional argument to give laser sight
+ drop_weapon(player, slot)
  
  NETPROPS FUNCTIONS
  propint(ent, prop[, value])	get/set integer offset
@@ -541,7 +543,14 @@ if (!("__lib" in this)) {
 
 log <- printl
 
-say_chat <- @(message) Say(null, message, false);
+say_chat <- function(message, ...) {
+	if (vargv.len() > 0) {
+		local args = [this, message]
+		args.extend(vargv)
+		message = format.acall(args)
+	}
+	Say(null, message, false)
+}
 
 /* for example output: log_table(getroottable()) */
 log_table <- function(table, max_depth = 3, current_depth = 0, manual_call = true, original_table = null) {
@@ -659,12 +668,14 @@ logf <- function(str, ...) {
 	log(format.acall(args));
 }
 
-connect_strings <- function(arr, separator) {
+concat <- function(arr, separator) {
 	local str = "";
 	for (local i = 0; i < arr.len(); i++)
 		str += arr[i] + ((i != arr.len() - 1) ? separator : "");
 	return str;
 }
+
+connect_strings <- concat //backward compatibility
 
 __printstackinfos <- function() {
 	local i = 2;
@@ -935,6 +946,22 @@ replace_primary_weapon <- function(player, weapon, laser_sight = false) {
 		if (laser_sight)
 			player.GiveUpgrade(UPGRADE_LASER_SIGHT);
 	});
+}
+
+drop_weapon <- function(player, slot) {
+	/*local function kill_slot(slot) {
+		local inv_table = {};
+		GetInvTable(player, inv_table);
+		if ("slot" + slot in inv_table)
+			inv_table["slot" + slot].Kill();
+	}
+	switch (slot) {
+		case 0:
+			player.GiveItem("rifle")
+			//run_next_tick( @()kill_slot(0) )
+			break
+	}*/
+	//todo https://forums.alliedmods.net/showthread.php?t=110734
 }
 
 /* set_speed_multiplier <- function(player, multiplier) {

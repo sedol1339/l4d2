@@ -77,7 +77,7 @@
  cvar(cvar, value)				shortcut for Convars.SetValue(cvar, value); also makes logging
  cvarstr(cvar)					shortcut for Convars.GetStr
  cvarf(cvar)					shortcut for Convars.GetFloat
- cvar_create(cvar, value)		performs "setinfo cvar value", this value can be retrieved or changed later using cvar(), cvarf(), cvarstr(); function returns value
+ cvar_create(cvar, value)		performs "setinfo cvar value", this value can be retrieved or changed later using cvar(), cvarf(), cvarstr();returns value
  cvars_add(cvar, default, new)	sets cvar to new value, stores default and new value in table
  cvars_reapply()				sets all cvars in table to their "new" values stored in table (useful if cvars have been reset after "sv_cheats 0")
  cvars_restore(cvar)			restores default cvar value from table (and remove cvar from table)
@@ -1630,7 +1630,7 @@ print_all_tasks_on_shutdown <- function() {
 register_loop <- function(key, func, refire_time) {
 	if (key in __loops) {
 		local timer = __loops[key];
-		timer.GetScriptScope().func <- func.bindenv(this);
+		timer.GetScriptScope().func <- func;
 		DoEntFire("!self", "RefireTime", refire_time.tostring(), 0, null, timer);
 		DoEntFire("!self", "ResetTimer", "", 0, null, timer);
 		return;
@@ -1641,7 +1641,7 @@ register_loop <- function(key, func, refire_time) {
 	});
 	timer.ConnectOutput("OnTimer", "func");
 	timer.ValidateScriptScope();
-	timer.GetScriptScope().func <- func.bindenv(this);
+	timer.GetScriptScope().func <- func;
 	__loops[key] <- timer;
 }
 

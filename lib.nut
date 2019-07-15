@@ -17,6 +17,8 @@
  logt							shortcut for log_table(table|class|array)
  logf							shortcut for log(format(str, ...)) bug: printf prints "%%" instead of "%"
  concat(array, sep)				connects string array using separator: ["a", "b", "c"] -> "a, b, c"
+ vecstr2(vec)					vec to string (compact 2-digits representation)
+ vecstr3(vec)					vec to string (compact 3-digits representation)
  
  MISC FUNCTIONS
  checktype(var, type)			throws exception if var is not of specified type;
@@ -73,6 +75,8 @@
  
  CONVARS FUNCTIONS
  cvar(cvar, value)				shortcut for Convars.SetValue(cvar, value); also makes logging
+ cvarstr(cvar)					shortcut for Convars.GetStr
+ cvarf(cvar)					shortcut for Convars.GetFloat
  cvars_add(cvar, default, new)	sets cvar to new value, stores default and new value in table
  cvars_reapply()				sets all cvars in table to their "new" values stored in table (useful if cvars have been reset after "sv_cheats 0")
  cvars_restore(cvar)			restores default cvar value from table (and remove cvar from table)
@@ -677,6 +681,14 @@ concat <- function(arr, separator) {
 
 connect_strings <- concat //backward compatibility
 
+vecstr2 <- function(vec) {
+	return format("%.2f %.2f %.2f", vec.x, vec.y, vec.z)
+}
+
+vecstr3 <- function(vec) {
+	return format("%.3f %.3f %.3f", vec.x, vec.y, vec.z)
+}
+
 __printstackinfos <- function() {
 	local i = 2;
 	local stackinfos = null;
@@ -720,6 +732,10 @@ cvar <- function(_cvar, value) {
 	logf("cvar %s set to %s", _cvar, value.tostring());
 	Convars.SetValue(_cvar, value);
 }
+
+cvarstr <- Convars.GetStr.bindenv(Convars)
+
+cvarf <- Convars.GetFloat.bindenv(Convars)
 
 /* we need next 3 functions to restore all previously set cvars if user toggles sv_cheats */
 

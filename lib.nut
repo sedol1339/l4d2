@@ -624,23 +624,23 @@ ent_to_str <- function(ent) {
 }
 
 var_to_str <- function(var) {
-	local function typemask(n) {
-		switch (n) {
-			case -1: return "var"
-			case 6: return "int/float"
-			case 8: return "bool"
-			case 17: return "string"
-			case 768: return "function"
-			case 32768: return "Vector"
-		}
-		return "<type " + n + ">";
-	}
 	if (var == null) return "null";
 	// CBaseEntity and CTerrorPlayer do not exist until we instantiate them
 	if ("CBaseEntity" in getroottable() && var instanceof ::CBaseEntity)
 		return ent_to_str(var);
 	if (typeof(var) == "string") return "\"" + var + "\"";
 	if (typeof(var) == "function" || typeof(var) == "native function") {
+		local function typemask(n) {
+			switch (n) {
+				case -1: return "var"
+				case 6: return "int/float"
+				case 8: return "bool"
+				case 17: return "string"
+				case 768: return "function"
+				case 32768: return "Vector"
+			}
+			return "<type " + n + ">";
+		}
 		local infos = var.getinfos();
 		local params_arr = [];
 		if ("parameters" in infos && infos.parameters != null)
@@ -682,11 +682,15 @@ concat <- function(arr, separator) {
 connect_strings <- concat //backward compatibility
 
 vecstr2 <- function(vec) {
-	return format("%.2f %.2f %.2f", vec.x, vec.y, vec.z)
+	local digits = [vec.x, vec.y, vec.z]
+	foreach (i, digit in digits) if (digit <= 0 && digit > -0.005) digits[i] = 0 //to prevent printing -0.00
+	return format("%.2f %.2f %.2f", digits[0], digits[1], digits[2])
 }
 
 vecstr3 <- function(vec) {
-	return format("%.3f %.3f %.3f", vec.x, vec.y, vec.z)
+	local digits = [vec.x, vec.y, vec.z]
+	foreach (i, digit in digits) if (digit <= 0 && digit > -0.0005) digits[i] = 0 //to prevent printing -0.000
+	return format("%.3f %.3f %.3f", digits[0], digits[1], digits[2])
 }
 
 __printstackinfos <- function() {

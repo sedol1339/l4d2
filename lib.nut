@@ -17,8 +17,8 @@
  logt							shortcut for log_table(table|class|array)
  logf							shortcut for log(format(str, ...)) bug: printf prints "%%" instead of "%"
  concat(array, sep)				connects string array using separator: ["a", "b", "c"] -> "a, b, c"
- vecstr2(vec)					vec to string (compact 2-digits representation)
- vecstr3(vec)					vec to string (compact 3-digits representation)
+ vecstr2(vec)					vec to string (compact 2-digits representation): "0.00 1.00 -1.00"
+ vecstr3(vec)					vec to string (compact 3-digits representation): "0.000 1.000 -1.000"
  
  MISC FUNCTIONS
  checktype(var, type)			throws exception if var is not of specified type;
@@ -77,6 +77,7 @@
  cvar(cvar, value)				shortcut for Convars.SetValue(cvar, value); also makes logging
  cvarstr(cvar)					shortcut for Convars.GetStr
  cvarf(cvar)					shortcut for Convars.GetFloat
+ cvar_create(cvar, value)		performs "setinfo cvar value", this value can be retrieved or changed later using cvar(), cvarf(), cvarstr(); function returns value
  cvars_add(cvar, default, new)	sets cvar to new value, stores default and new value in table
  cvars_reapply()				sets all cvars in table to their "new" values stored in table (useful if cvars have been reset after "sv_cheats 0")
  cvars_restore(cvar)			restores default cvar value from table (and remove cvar from table)
@@ -683,13 +684,13 @@ connect_strings <- concat //backward compatibility
 
 vecstr2 <- function(vec) {
 	local digits = [vec.x, vec.y, vec.z]
-	foreach (i, digit in digits) if (digit <= 0 && digit > -0.005) digits[i] = 0 //to prevent printing -0.00
+	foreach (i, digit in digits) if (digit == -0) digits[i] = 0
 	return format("%.2f %.2f %.2f", digits[0], digits[1], digits[2])
 }
 
 vecstr3 <- function(vec) {
 	local digits = [vec.x, vec.y, vec.z]
-	foreach (i, digit in digits) if (digit <= 0 && digit > -0.0005) digits[i] = 0 //to prevent printing -0.000
+	foreach (i, digit in digits) if (digit == -0) digits[i] = 0
 	return format("%.3f %.3f %.3f", digits[0], digits[1], digits[2])
 }
 
@@ -740,6 +741,12 @@ cvar <- function(_cvar, value) {
 cvarstr <- Convars.GetStr.bindenv(Convars)
 
 cvarf <- Convars.GetFloat.bindenv(Convars)
+
+cvar_create <- function(_cvar, value) {
+	logf("cvar %s created and set to %s", _cvar, value.tostring());
+	SendToServerConsole("setinfo " + _cvar + " " + value) //if anyone doesn't alias setinfo!
+	return value
+}
 
 /* we need next 3 functions to restore all previously set cvars if user toggles sv_cheats */
 

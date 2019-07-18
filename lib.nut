@@ -2,6 +2,16 @@
  This file contains some useful functions.
  It can be run several times, nothing breaks.
  Performance is optimized where possible. This library does not create any entities or running tasks by default.
+ 
+ Author: kapkan https://steamcommunity.com/id/xwergxz/
+ TODO:
+	- check if ticker params & return value are working or not
+	- optional entity param for delayed_call, run_this_tick, run_next_tick - checks if the entity exists when running delayed call
+	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
+	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
+	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
+	- stop conding and live a real life
+ 
  Short documentation:
  
  FUNCTIONS FOR LOGGING:

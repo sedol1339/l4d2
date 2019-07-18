@@ -21,10 +21,12 @@
  vecstr3(vec)					vec to string (compact 3-digits representation): "0.000 1.000 -1.000"
  
  MISC FUNCTIONS
- checktype(var, type)			throws exception if var is not of specified type;
-								type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
-								type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
-								type can be array of string types
+ checktype(var, type)				throws exception if var is not of specified type;
+									type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
+									type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
+									type can be array of string types
+ chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
+ chain_continue(key)				continue chain using it's key
  
  TASK SHEDULING
  delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key; see function declaration for more info
@@ -77,7 +79,8 @@
  cvar(cvar, value)				shortcut for Convars.SetValue(cvar, value); also makes logging
  cvarstr(cvar)					shortcut for Convars.GetStr
  cvarf(cvar)					shortcut for Convars.GetFloat
- cvar_create(cvar, value)		performs "setinfo cvar value", this value can be retrieved or changed later using cvar(), cvarf(), cvarstr();returns value
+ cvarf_lim(cvar, min, max)		returns cvar, not letting it exceed min and max limits; for use with cvar_create(); min/max may be null 
+ cvar_create(cvar, value)		performs "setinfo cvar value", this value can be retrieved or changed later using cvar(), cvarf(), cvarstr(); returns value
  cvars_add(cvar, default, new)	sets cvar to new value, stores default and new value in table
  cvars_reapply()				sets all cvars in table to their "new" values stored in table (useful if cvars have been reset after "sv_cheats 0")
  cvars_restore(cvar)			restores default cvar value from table (and remove cvar from table)
@@ -731,6 +734,32 @@ checktype <- function(var, _type) {
 	}
 }
 
+if (!("__chains" in this)) __chains <- {};
+
+chain <- function(key, ...) {
+	__chains[key] <- {
+		index = 0,
+		functions = clone vargv
+	}
+	chain_continue(key)
+}
+
+chain_continue <- function(key) {
+	if (!(key in __chains)) return
+	local chain_table = __chains[key]
+	local chain_len = chain_table.functions.len()
+	local chain_index = chain_table.index
+	if (chain_index >= chain_len) {
+		delete __chains[key]
+	} else {
+		local func = chain_table.functions[chain_index]
+		run_next_tick(func)
+		chain_table.index = chain_index + 1
+		if (chain_index == chain_len - 1)
+			delete __chains[key]
+	}
+}
+
 ///////////////////////////////
 
 cvar <- function(_cvar, value) {
@@ -741,6 +770,18 @@ cvar <- function(_cvar, value) {
 cvarstr <- Convars.GetStr.bindenv(Convars)
 
 cvarf <- Convars.GetFloat.bindenv(Convars)
+
+cvarf_lim <- function(_cvar, min, max) {
+	local val = cvarf(_cvar)
+	if (min != null && val < min) {
+		error(format("cvar %s cannot be less than %.1f\n", _cvar, min))
+		val = min
+	} else if (max != null && val > max) {
+		error(format("cvar %s cannot be more than %.1f\n", _cvar, max))
+		val = max
+	}
+	return val
+}
 
 cvar_create <- function(_cvar, value) {
 	logf("cvar %s created and set to %s", _cvar, value.tostring());
@@ -1492,13 +1533,28 @@ tested:
 - multiple including this library
 - multiple calls of __ticker_init
 probably multiple instances of this library with different scopes will also work
+
+if function returns false, ticker will be removed
 */
 
 register_ticker <- function(key, func) {
 	if (!key) key = UniqueString();
 	if (!__ticker_ent || deleted_ent(__ticker_ent))
 		__ticker_init();
-	__tickers[key] <- func;
+	__tickers[key] <- {
+		func = func,
+		start_time = clock.sec(),
+		last_time = null,
+		start_ticks = clock.ticks(),
+	}
+}
+
+//this variable will be accessible from ticker function
+ticker_info <- {
+	start_time = null, //time when current ticker loop started
+	delta_time = null,	//time elapsed since last ticker call
+	ticks = null,	//ticks elapsed from first loop call (first call = 0 ticks)
+	first_call = null,	//equivalent to "ticker_info.ticks == 0"
 }
 
 __ticker_init <- function() {
@@ -1511,9 +1567,20 @@ __ticker_init <- function() {
 	__ticker_ent.ValidateScriptScope();
 	__ticker_ent.GetScriptScope().func <- function() {
 		clock.__ticks++;
-		foreach(ticker in __tickers)
-			ticker();
-	}.bindenv(this);
+		foreach(key, ticker in __tickers) {
+			ticker_info.start_time = ticker.start_time
+			local current_time = clock.sec()
+			ticker_info.delta_time = ticker.last_time ? (current_time - ticker.last_time) : null
+			ticker_info.ticks = clock.ticks() - ticker_info.start_ticks
+			ticker_info.first_call = !ticker.last_time
+			ticker.last_time = current_time
+			local return_value = ticker.func()
+			if (return_value == false) {
+				delete __tickers[key]
+				logf("Removing ticker %s, function returned false", key)
+			}
+		}
+	} //.bindenv(this);
 	clock.__ticks = 0;
 }
 

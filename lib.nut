@@ -10,7 +10,7 @@
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
-	- stop conding and live a real life
+	- stop coding and live a real life
  
  Short documentation:
  

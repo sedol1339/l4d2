@@ -81,7 +81,6 @@
 								delay is a delay in seconds between checks (0 = every tick_
 								key is used for on_key_action_remove()
 								second param may be player entity or the whole team (see Team table for second argument)
- on_key_action_remove(key)
  
  chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
  chain_continue(key)				continue chain using it's key
@@ -100,6 +99,7 @@
  remove_all_tasks_on_entities()	removes all loops from entities
  remove_on_player_connect()		clears all callbacks registered with on_player_connect
  remove_chat_command(name)		removes chat command, given name or array of names
+ on_key_action_remove(key)		remove key action registered with on_key_action
  
  TASK & CALLBACKS LOGGING
  print_all_tasks()				prints ALL sheduled tasks (does not print tasks on entitites); specific functions are below
@@ -921,6 +921,7 @@ cvarf_lim <- function(_cvar, min, max) {
 }
 
 cvar_create <- function(_cvar, value) {
+	if (value == "") value = "\"\""
 	logf("cvar %s created and set to %s", _cvar, value.tostring());
 	SendToServerConsole("setinfo " + _cvar + " " + value) //if anyone doesn't alias setinfo!
 	return value

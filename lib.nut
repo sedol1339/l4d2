@@ -5,11 +5,12 @@
  
  Author: kapkan https://steamcommunity.com/id/xwergxz/
  TODO:
-	- check if ticker params & return value are working or not
 	- optional entity param for delayed_call, run_this_tick, run_next_tick - checks if the entity exists when running delayed call
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
+	- add function on_key_press(key, player or team, keyboard_key, delay, on_pressed, on_released) - registers a loop with delay that checks pressed keys
+	- add function on_key_press_remove(key)
 	- stop coding and live a real life
  
  Short documentation:
@@ -29,35 +30,57 @@
  concat(array, sep)				connects string array using separator: ["a", "b", "c"] -> "a, b, c"
  vecstr2(vec)					vec to string (compact 2-digits representation): "0.00 1.00 -1.00"
  vecstr3(vec)					vec to string (compact 3-digits representation): "0.000 1.000 -1.000"
+ tolower(str)					converts a string to lower case, supports english and russian symbols
  
  MISC FUNCTIONS
  checktype(var, type)				throws exception if var is not of specified type;
 									type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
 									type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
 									type can be array of string types
- chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
- chain_continue(key)				continue chain using it's key
  
- TASK SHEDULING
+ TASK & CALLBACKS SHEDULING
  delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key; see function declaration for more info
  run_this_tick(func)						runs function later (in this tick)
  run_next_tick(func)						runs function later (in next tick)
- register_callback(event, key, func)		registers callback for event using key; pass params table to func
  register_ticker(key, func)					register a function that will be called every tick; example: register_ticker("my_key", @()log("tick"))
+											if ticker function has a "return" statement and returns false, ticker will be removed
+											inside ticker function you have read-only access to the following parameters:
+											ticker_info.start_time		//time when current ticker loop started
+											ticker_info.delta_time		//time elapsed since last ticker call
+											ticker_info.ticks			//ticks elapsed since register_ticker (first call = 1 ticks)
+											ticker_info.first_call 		//is it a first call of this ticker?
+											!! if we register the same ticker again, ticker info will be reset !!
+ register_callback(event, key, func)		registers callback for event using key; pass params table to func
+											if event table has "userid" and/or "victim" params,
+											they will be also accessible as entity handle: "player" and/or "player_victim"
  add_task_on_shutdown(key, func)			register a function that will be called on server shutdown; pass true as additional param to run this after all others
  register_loop(key, func, refire_time)		register a function that will be called with an interval of refire_time seconds
  loop_reset(key)							reset loop using it's key; see function declaration for more info
 											by default this will prevent loop from running this tick; if you don't want this, pass false as additional param
- loop_subtract_from_timer(key, value)		subtract value from loop timer (function is called then timer value becomes 0)
- loop_add_to_timer(key, value)				add value to loop timer
+ loop_subtract_from_timer(key, time)		subtract time from loop timer (timer will trigger when it's time becomes 0)
+ loop_add_to_timer(key, time)				add time to loop timer
 											by default this will prevent loop from running this tick; if you don't want this, pass false as additional param
  loop_get_refire_time(key)					returns refire time for loop
  loop_set_refire_time(key, refire_time)		sets new refire time for loop
  register_task_on_entity(ent, func, delay)	registers a loop for entity (using AddThinkToEnt); pass REAL delay value in seconds; this is not chained
  on_player_connect(team, isbot, func)		register a callback for player_team event that will fire for specified team and params.isbot condition;
 											this is not chained; pass null to cancel
+ register_chat_command(name, func)			registers a chat command (internally makes a callback for event player_say)
+											name can be string or array of strings
+											name "testcmd" means that player types !testcmd or /testcmd in chat (both will work)
+											func should have 3 parameters:
+												command - what command was called (without ! or /)
+												args_text - all arguments as string
+												args - all arguments as array (arguments are either enclosed in quotes or divided by spaces)
+											example used input: !testcmd a b " c d"
+											corresponding function call: func("testcmd", "a b \" c d\"", ["a", "b", " c d"])
+											user input cannot have nested quotes (\")
+											commands are case-insensitive (only for english and russian letters)
  
- TASK CANCELLING
+ chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
+ chain_continue(key)				continue chain using it's key
+ 
+ TASK & CALLBACKS CANCELLING
  remove_delayed_call(key)		cancel delayed call using key
  remove_all_delayed_calls()		cancel all delayed calls
  remove_callback(event, key)	removes callback for event using key
@@ -70,14 +93,16 @@
  remove_task_on_entity(ent)		removes loop from entity
  remove_all_tasks_on_entities()	removes all loops from entities
  remove_on_player_connect()		clears all callbacks registered with on_player_connect
+ remove_chat_command(name)		removes chat command, given name or array of names
  
- TASK LOGGING
+ TASK & CALLBACKS LOGGING
  print_all_tasks()				prints ALL sheduled tasks (does not print tasks on entitites); specific functions are below
  print_all_delayed_calls()		prints all pending delayed calls
  print_all_callbacks()			prints all callbacks
  print_all_tickers()			prints all tickers
  print_all_tasks_on_shutdown()	prints all tasks on shutdown
  print_all_loops()				prints all loops
+ print_all_chat_commands()		prings all chat commands
  
  DEVELOPMENT FUNCTIONS
  log_event(event)				start logging event; pass false as additional param to cancel
@@ -707,6 +732,64 @@ vecstr3 <- function(vec) {
 	return format("%.3f %.3f %.3f", digits[0], digits[1], digits[2])
 }
 
+tolower <- function(str) {
+	//currently supports only english and russian letters
+	//extendable by this script: https://pastebin.com/26j2zJAg
+	local unicode_tolower = {
+		"\xFFD0\xFF90": "\xFFD0\xFFB0",
+		"\xFFD0\xFF91": "\xFFD0\xFFB1",
+		"\xFFD0\xFF92": "\xFFD0\xFFB2",
+		"\xFFD0\xFF93": "\xFFD0\xFFB3",
+		"\xFFD0\xFF94": "\xFFD0\xFFB4",
+		"\xFFD0\xFF95": "\xFFD0\xFFB5",
+		"\xFFD0\xFF81": "\xFFD1\xFF91",
+		"\xFFD0\xFF96": "\xFFD0\xFFB6",
+		"\xFFD0\xFF97": "\xFFD0\xFFB7",
+		"\xFFD0\xFF98": "\xFFD0\xFFB8",
+		"\xFFD0\xFF99": "\xFFD0\xFFB9",
+		"\xFFD0\xFF9A": "\xFFD0\xFFBA",
+		"\xFFD0\xFF9B": "\xFFD0\xFFBB",
+		"\xFFD0\xFF9C": "\xFFD0\xFFBC",
+		"\xFFD0\xFF9D": "\xFFD0\xFFBD",
+		"\xFFD0\xFF9E": "\xFFD0\xFFBE",
+		"\xFFD0\xFF9F": "\xFFD0\xFFBF",
+		"\xFFD0\xFFA0": "\xFFD1\xFF80",
+		"\xFFD0\xFFA1": "\xFFD1\xFF81",
+		"\xFFD0\xFFA2": "\xFFD1\xFF82",
+		"\xFFD0\xFFA3": "\xFFD1\xFF83",
+		"\xFFD0\xFFA4": "\xFFD1\xFF84",
+		"\xFFD0\xFFA5": "\xFFD1\xFF85",
+		"\xFFD0\xFFA6": "\xFFD1\xFF86",
+		"\xFFD0\xFFA7": "\xFFD1\xFF87",
+		"\xFFD0\xFFA8": "\xFFD1\xFF88",
+		"\xFFD0\xFFA9": "\xFFD1\xFF89",
+		"\xFFD0\xFFAA": "\xFFD1\xFF8A",
+		"\xFFD0\xFFAB": "\xFFD1\xFF8B",
+		"\xFFD0\xFFAC": "\xFFD1\xFF8C",
+		"\xFFD0\xFFAD": "\xFFD1\xFF8D",
+		"\xFFD0\xFFAE": "\xFFD1\xFF8E",
+		"\xFFD0\xFFAF": "\xFFD1\xFF8F",
+	}
+	//unfurtunately blobs are not supported
+	str = str.tolower()
+	local newstr = ""
+	for(local i = 0; i < str.len(); i++) {
+		local symbol = str[i]
+		if (symbol >= 0) {
+			newstr += symbol.tochar()
+		} else {
+			if (i == str.len() - 1)
+				throw "unfinished unicode string: last char have negative code"
+			local symbol_next = str[++i]
+			local unicode_char = symbol.tochar() + symbol_next.tochar()
+			if (unicode_char in unicode_tolower)
+				unicode_char = unicode_tolower[unicode_char]
+			newstr += unicode_char
+		}
+	}
+	return newstr
+}
+
 __printstackinfos <- function() {
 	local i = 2;
 	local stackinfos = null;
@@ -743,6 +826,44 @@ checktype <- function(var, _type) {
 		throw "checktype: _type should be string, array, NUMBER, FUNC, STRING or BOOL"
 	}
 }
+
+//////////////////////////
+
+/*
+
+ Set(element, element, ...)			creates a Set of elements
+ Set.add(element, element, ...)		adds element(s) to set
+ Set.remove(element, element, ...)	removes element(s) from set
+									check if element is in set: if (element in set) ...
+									iterate over set: foreach (element in set) ...
+									don't do this: foreach (key, element in set) - key will always be null
+
+ PROBLEM: can't find a way to make "in" operator work, class is unfinished
+
+Set <- class {
+	__data = null
+	constructor(...) {
+		__data = {}
+		foreach (element in vargv)
+			__data[element] <- true
+	}
+	function _nexti(prev_index) { //prev_index is null on iteration start
+		if (prev_index == null) return "a"
+		if (prev_index == "a") return "b"
+		if (prev_index == "b") return "c"
+		if (prev_index == "c") return null
+	}
+	function _get(index) {
+		if (index == "a") return "A"
+		if (index == "b") return "B"
+		if (index == "c") return "C"
+		throw null //according to documentation
+	}
+}
+
+*/
+
+//////////////////////////
 
 if (!("__chains" in this)) __chains <- {};
 
@@ -1430,8 +1551,12 @@ register_callback <- function(event, key, func) {
 		local scope = {};
 		scope["event_name"] <- event;
 		scope["OnGameEvent_" + event] <- function (params) {
+			if ("userid" in params)
+				params.player <- GetPlayerFromUserID(params.userid);
+			if ("victim" in params)
+				params.player_victim <- GetPlayerFromUserID(params.victim);
 			foreach(callback in __callbacks[scope.event_name])
-				callback(params);
+				callback(clone params);
 		}.bindenv(this);
 		__CollectEventCallbacks(scope, "OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener);
 	}
@@ -1580,8 +1705,8 @@ __ticker_init <- function() {
 		foreach(key, ticker in __tickers) {
 			ticker_info.start_time = ticker.start_time
 			local current_time = clock.sec()
-			ticker_info.delta_time = ticker.last_time ? (current_time - ticker.last_time) : null
-			ticker_info.ticks = clock.ticks() - ticker_info.start_ticks
+			ticker_info.delta_time = ticker.last_time ? (current_time - ticker.last_time) : (current_time - ticker.start_time)
+			ticker_info.ticks = clock.ticks() - ticker.start_ticks
 			ticker_info.first_call = !ticker.last_time
 			ticker.last_time = current_time
 			local return_value = ticker.func()
@@ -1836,6 +1961,102 @@ delay	real avg delay
 */
 
 if (!("__tasks_ent" in this)) __tasks_ent <- {}
+
+///////////////////////////////
+
+if (!("__chat_cmds" in this)) __chat_cmds <- {}
+
+//debug: script register_chat_command(["cmd", "command"], @(a, b, c)log(a + "\n" + b + "\n" + concat(c, ",")))
+
+register_chat_command <- function(names, func) {
+	if (type(names) == "string") {
+		names = [names]
+	} else if (type(names) != "array") {
+		throw "name should be string or array of strings"
+	}
+	foreach (name in names) {
+		name = tolower(name)
+		if (name in __chat_cmds)
+			logf("WARNING! chat command %s was already registered, overriding...", name)
+		__chat_cmds[name] <- func
+	}
+	register_callback("player_say", "__chat_cmds", function(params) {
+		local cmd_markers = ["!", "/"]
+		local text = lstrip(params.text)
+		local is_command = false
+		foreach(marker in cmd_markers)
+			if (text.slice(0, marker.len()) == marker) {
+				text = text.slice(marker.len())
+				is_command = true
+				break
+			}
+		if (!is_command) return
+		local space_pos = text.find(" ")
+		local command = tolower(space_pos ? text.slice(0, space_pos) : text)
+		if (!(command in __chat_cmds)) return
+		log("parsing chat command " + command)
+		local initial_args_text = ""
+		local args = []
+		if (space_pos) {
+			initial_args_text = text.slice(space_pos + 1)
+			local args_text = initial_args_text
+			//now we start parsing arguments
+			while(true) {
+				args_text = lstrip(args_text)
+				if (args_text.len() == 0) break
+				if (args_text[0].tochar() == "\"") {
+					//quotes are started
+					local end_quote_pos = -1
+					local next_quote_pos = 0
+					while(true) {
+						next_quote_pos = args_text.find("\"", next_quote_pos + 1)
+						if (next_quote_pos == null) break
+						if (next_quote_pos == args_text.len() - 1 || args_text[next_quote_pos + 1].tochar() == " ") {
+							end_quote_pos = next_quote_pos
+							break
+						}
+					}
+					if (end_quote_pos == -1) {
+						//quotes are not closed
+						local next_space = args_text.find(" ", 1)
+						if (next_space == null) next_space = args_text.len()
+						local arg = args_text.slice(0, next_space)
+						args.push(arg)
+						args_text = args_text.slice(next_space)
+					} else {
+						//quotes are closed
+						local arg = args_text.slice(0, end_quote_pos + 1)
+						//removing quotes
+						arg = arg.slice(1, arg.len() - 1)
+						args.push(arg)
+						args_text = args_text.slice(end_quote_pos + 1)
+					}
+				} else {
+					//no quotes
+					local next_space = args_text.find(" ", 1)
+						if (next_space == null) next_space = args_text.len()
+					local arg = args_text.slice(0, next_space)
+					args.push(arg)
+					args_text = args_text.slice(next_space)
+				}
+			}
+		}
+		__chat_cmds[command](command, initial_args_text, args)
+	})
+}
+
+remove_chat_command <- function(name) {
+	name = tolower(name)
+	if (!(name in __chat_cmds))
+		logf("WARNING! chat command %s was not registered", name)
+	else
+		delete __chat_cmds[name]
+}
+
+print_all_chat_commands <- function() {
+	log("all chat commands registered with register_chat_command")
+	logt(__chat_cmds)
+}
 
 ///////////////////////////////
 

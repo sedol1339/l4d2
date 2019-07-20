@@ -1,7 +1,7 @@
 /*
  This file contains some useful functions.
  It can be run several times, nothing breaks.
- Performance is optimized where possible. This library does not create any entities or running tasks by default.
+ Performance is optimized where possible. This library does not create any entities, running tasks or affecting HUD by default (unless you run a specific library functions for this).
  
  Author: kapkan https://steamcommunity.com/id/xwergxz/
  TODO:
@@ -155,6 +155,7 @@
  player()						for singleplayer: fast function that returns human player
  bot()							for testing: returns first found bot player
  server_host()					returns listenserver host player or null
+								warning! may return null while server host is still connecting
  for_each_player(func)			calls function for every player, passes player as param
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
@@ -999,8 +1000,11 @@ server_host <- function() {
 	if (__server_host) return __server_host;
 	local terror_player_manager = Entities.FindByClassname(null, "terror_player_manager")
 	for (local i = 0; i <= 32; i++)
-		if (NetProps.GetPropIntArray(terror_player_manager, "m_listenServerHost", i))
-			return EntIndexToHScript(i)
+		if (NetProps.GetPropIntArray(terror_player_manager, "m_listenServerHost", i)) {
+			local player = EntIndexToHScript(i)
+			__server_host = player
+			return player
+		}
 }
 
 __server_host <- null;
@@ -1107,8 +1111,14 @@ restart_game <- function(restore_cvars = true) {
 	cvar("mp_restartgame", 1);
 	if (restore_cvars) {
 		cvars_restore_all();
-		Convars.SetValue("sv_cheats", 1);
-		Convars.SetValue("sv_cheats", 0);
+		local cheats = (cvarf("sv_cheats") != 0)
+		if (!cheats) {
+			Convars.SetValue("sv_cheats", 1);
+			Convars.SetValue("sv_cheats", 0);
+		} else {
+			Convars.SetValue("sv_cheats", 0);
+			Convars.SetValue("sv_cheats", 1);
+		}
 	}
 }
 

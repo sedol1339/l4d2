@@ -9,8 +9,6 @@
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
-	- add function on_key_press(key, player or team, keyboard_key, delay, on_pressed, on_released) - registers a loop with delay that checks pressed keys
-	- add function on_key_press_remove(key)
 	- stop coding and live a real life
  
  Short documentation:
@@ -64,7 +62,7 @@
  loop_set_refire_time(key, refire_time)		sets new refire time for loop
  register_task_on_entity(ent, func, delay)	registers a loop for entity (using AddThinkToEnt); pass REAL delay value in seconds; this is not chained
  on_player_connect(team, isbot, func)		register a callback for player_team event that will fire for specified team and params.isbot condition;
-											this is not chained; pass null to cancel
+											this is not chained; pass null to cancel; see Team and ClientType tables for first 2 arguments
  register_chat_command(name, func)			registers a chat command (internally makes a callback for event player_say)
 											name can be string or array of strings
 											name "testcmd" means that player types !testcmd or /testcmd in chat (both will work)
@@ -76,6 +74,14 @@
 											corresponding function call: func("testcmd", "a b \" c d\"", ["a", "b", " c d"])
 											user input cannot have nested quotes (\")
 											commands are case-insensitive (only for english and russian letters)
+ 
+ on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released)
+								on_pressed will be called when players presses specified keyboard_key
+								on_released will be called when players releases specified keyboard_key
+								delay is a delay in seconds between checks (0 = every tick_
+								key is used for on_key_action_remove()
+								second param may be player entity or the whole team (see Team table for second argument)
+ on_key_action_remove(key)
  
  chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
  chain_continue(key)				continue chain using it's key
@@ -2056,6 +2062,66 @@ remove_chat_command <- function(name) {
 print_all_chat_commands <- function() {
 	log("all chat commands registered with register_chat_command")
 	logt(__chat_cmds)
+}
+
+///////////////////////////////
+
+/* Team.ANY = -1
+Team.UNASSIGNED = 0
+Team.SPECTATORS = 1
+Team.SURVIVORS = 2
+Team.INFECTED = 3 */
+
+//test: script on_key_action("my", Team.SURVIVORS, IN_ATTACK, 0.1, @(player)player.ApplyAbsVelocityImpulse(Vector(0,0,300)), null)
+//test: script on_key_action("my", player(), IN_ALT1, 0, @(p)propint(p,"movetype",8), @(p)propint(p,"movetype",2))
+//test: register_ticker("test",@()log(player().GetButtonMask()))
+
+on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, on_released) {
+	if (!on_pressed) on_pressed = __dummy
+	if (!on_released) on_released = __dummy
+	local player = null
+	local team = null
+	if (type(player_or_team) == "integer") {
+		team = player_or_team
+	} else {
+		player = player_or_team
+	}
+	register_loop("__key_action_" + key, function() {
+		local function do_key_check(player) {
+			player.ValidateScriptScope()
+			local player_scope = player.GetScriptScope()
+			local name_in_scope = "__last_buttons_" + key
+			local key_pressed = (propint(player, "m_nButtons") & keyboard_key) ? true : false
+			if (name_in_scope in player_scope) {
+				local last_key_state = player_scope[name_in_scope]
+				if (last_key_state && !key_pressed)
+					on_released(player)
+				else if (!last_key_state && key_pressed)
+					on_pressed(player)
+			}
+			player_scope[name_in_scope] <- key_pressed
+		}
+		if (player) {
+			do_key_check(player)
+		} else {
+			for_each_player( function(player) {
+				local current_player_team = propint(player, "m_iTeamNum")
+				if (team == Team.ANY || current_player_team == team)
+					do_key_check(player)
+			})
+		}
+	}, delay)
+}
+
+on_key_action_remove <- function(key) {
+	remove_loop("__key_action_" + key)
+	for_each_player( function(player) {
+		player.ValidateScriptScope()
+		local player_scope = player.GetScriptScope()
+		local name_in_scope = "__last_buttons_" + key
+		if (name_in_scope in player_scope)
+			delete player_scope[name_in_scope]
+	})
 }
 
 ///////////////////////////////

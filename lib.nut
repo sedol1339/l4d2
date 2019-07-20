@@ -29,6 +29,7 @@
  vecstr2(vec)					vec to string (compact 2-digits representation): "0.00 1.00 -1.00"
  vecstr3(vec)					vec to string (compact 3-digits representation): "0.000 1.000 -1.000"
  tolower(str)					converts a string to lower case, supports english and russian symbols
+ remove_quotes(str)				if str is enclosed in quotes, removes them
  
  MISC FUNCTIONS
  checktype(var, type)				throws exception if var is not of specified type;
@@ -66,7 +67,8 @@
  register_chat_command(name, func)			registers a chat command (internally makes a callback for event player_say)
 											name can be string or array of strings
 											name "testcmd" means that player types !testcmd or /testcmd in chat (both will work)
-											func should have 3 parameters:
+											func should have 4 parameters:
+												player - player who issued command
 												command - what command was called (without ! or /)
 												args_text - all arguments as string
 												args - all arguments as array (arguments are either enclosed in quotes or divided by spaces)
@@ -152,6 +154,7 @@
  deleted_ent(ent)				returns true if entity doesn't exist anymore
  player()						for singleplayer: fast function that returns human player
  bot()							for testing: returns first found bot player
+ server_host()					returns listenserver host player or null
  for_each_player(func)			calls function for every player, passes player as param
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
@@ -796,6 +799,12 @@ tolower <- function(str) {
 	return newstr
 }
 
+remove_quotes <- function(str) {
+	if (str.slice(0, 1) == "\"" && str.slice(str.len() - 1) == "\"")
+		return str.slice(1, str.len() - 1)
+	return str
+}
+
 __printstackinfos <- function() {
 	local i = 2;
 	local stackinfos = null;
@@ -985,6 +994,16 @@ bot <- function() {
 		}
 	}
 }
+
+server_host <- function() {
+	if (__server_host) return __server_host;
+	local terror_player_manager = Entities.FindByClassname(null, "terror_player_manager")
+	for (local i = 0; i <= 32; i++)
+		if (NetProps.GetPropIntArray(terror_player_manager, "m_listenServerHost", i))
+			return EntIndexToHScript(i)
+}
+
+__server_host <- null;
 
 for_each_player <- function (func) {
 	local tmp_player = null;
@@ -1973,8 +1992,6 @@ if (!("__tasks_ent" in this)) __tasks_ent <- {}
 
 if (!("__chat_cmds" in this)) __chat_cmds <- {}
 
-//debug: script register_chat_command(["cmd", "command"], @(a, b, c)log(a + "\n" + b + "\n" + concat(c, ",")))
-
 register_chat_command <- function(names, func) {
 	if (type(names) == "string") {
 		names = [names]
@@ -2001,7 +2018,7 @@ register_chat_command <- function(names, func) {
 		local space_pos = text.find(" ")
 		local command = tolower(space_pos ? text.slice(0, space_pos) : text)
 		if (!(command in __chat_cmds)) return
-		log("parsing chat command " + command)
+		logf("parsing args for chat command %s from player %s", command, player_to_str(params.player))
 		local initial_args_text = ""
 		local args = []
 		if (space_pos) {
@@ -2048,7 +2065,7 @@ register_chat_command <- function(names, func) {
 				}
 			}
 		}
-		__chat_cmds[command](command, initial_args_text, args)
+		__chat_cmds[command](params.player, command, initial_args_text, args)
 	})
 }
 

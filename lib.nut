@@ -6,7 +6,6 @@
  Author: kapkan https://steamcommunity.com/id/xwergxz/
  Repository: https://github.com/sedol1339/l4d2
  TODO:
-	- optional entity param for delayed_call, run_this_tick, run_next_tick - checks if the entity exists when running delayed call
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
@@ -17,6 +16,7 @@
  FUNCTIONS FOR LOGGING:
  log(str)						prints to console
  say_chat(str, ...)				prints to chat for all players; if more than one argument, using formatting like say_chat(format(str, ...))	
+								this function uses multiple Say() statements to print long strings
  log_table(table|class|array)	dumps deep structure of table (better version of DeepPrintTable); additinal param: max_depth
  var_to_str(var)				converts any variable to string (better version of tostring())
  ent_to_str(ent)				converts entity to string (prints entity index and targetname)
@@ -27,10 +27,10 @@
  logt							shortcut for log_table(table|class|array)
  logf							shortcut for log(format(str, ...)) bug: printf prints "%%" instead of "%"
  concat(array, sep)				connects string array using separator: ["a", "b", "c"] -> "a, b, c"
- vecstr2(vec)					vec to string (compact 2-digits representation): "0.00 1.00 -1.00"
- vecstr3(vec)					vec to string (compact 3-digits representation): "0.000 1.000 -1.000"
+ vecstr2(vec)					vec to string (compact 2-digits representation): 0.00 1.00 -1.00
+ vecstr3(vec)					vec to string (compact 3-digits representation): 0.000 1.000 -1.000
  tolower(str)					converts a string to lower case, supports english and russian symbols
- remove_quotes(str)				if str is enclosed in quotes, removes them
+ remove_quotes(str)				if string is enclosed in quotes, removes them
  
  MISC FUNCTIONS
  checktype(var, type)				throws exception if var is not of specified type;
@@ -39,12 +39,13 @@
 									type can be array of string types
  
  TASK & CALLBACKS SHEDULING
- delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key; see function declaration for more info
- run_this_tick(func)						runs function later (in this tick)
- run_next_tick(func)						runs function later (in next tick)
+ delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key;
+											see function declaration for more info
+ run_this_tick(func)						runs function later (in this tick); second parameter can optionally be scope or ent
+ run_next_tick(func)						runs function later (in next tick); second parameter can optionally be scope or ent
  register_ticker(key, func)					register a function that will be called every tick; example: register_ticker("my_key", @()log("tick"))
 											if ticker function has a "return" statement and returns false, ticker will be removed
-											inside ticker function you have read-only access to the following parameters:
+											inside ticker function you have access to the following parameters (changing them will not have effect):
 											ticker_info.start_time		//time when current ticker loop started
 											ticker_info.delta_time		//time elapsed since last ticker call
 											ticker_info.ticks			//ticks elapsed since register_ticker (first call = 1 ticks)
@@ -81,9 +82,9 @@
  on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released)
 								on_pressed will be called when players presses specified keyboard_key
 								on_released will be called when players releases specified keyboard_key
-								delay is a delay in seconds between checks (0 = every tick_
+								delay is a delay in seconds between checks (0 = every tick)
 								key is used for on_key_action_remove()
-								second param may be player entity or the whole team (see Team table for second argument)
+								second param may be player entity or the whole team (see Team table)
  
  chain(key, func_1, func_2, ...)	chain functions call: call func_1, wait until chain_continue(key) will be called, then call next function etc.
  chain_continue(key)				continue chain using it's key
@@ -603,7 +604,10 @@ say_chat <- function(message, ...) {
 		args.extend(vargv)
 		message = format.acall(args)
 	}
-	Say(null, message, false)
+	local MAX_LENGTH = 200
+	for (local i = 0; i < message.len(); i += MAX_LENGTH)
+		Say(null, message.slice(i, min(message.len(), i + MAX_LENGTH)), false)
+	//TODO break by words
 }
 
 /* for example output: log_table(getroottable()) */
@@ -784,6 +788,16 @@ tolower <- function(str) {
 	//unfurtunately blobs are not supported
 	str = str.tolower()
 	local newstr = ""
+	local has_unicode = false
+	for(local i = 0; i < str.len(); i++) {
+		local symbol = str[i]
+		if (symbol < 0) {
+			has_unicode = true
+			break
+		}
+	}
+	if (!has_unicode)
+		return str
 	for(local i = 0; i < str.len(); i++) {
 		local symbol = str[i]
 		if (symbol >= 0) {
@@ -1427,9 +1441,9 @@ if (!("clock" in this)) clock <- {
 ///////////////////////////////
 
 /*
-delayed_call(func, delay) - calls function after delay (seconds);
-delayed_call(func, delay, scope) - calls function after delay (seconds) using scope as environment;
-delayed_call(func, delay, entity) - calls function after delay (seconds) using entity script scope as environment;
+delayed_call(func, delay) - calls function after delay (seconds)
+delayed_call(func, delay, scope) - calls function after delay (seconds) using scope as environment
+delayed_call(func, delay, entity) - calls function after delay (seconds) using entity's runscriptscope input
 
 ///// example 1 /////
 delayed_call( function(){ log("hello!") }, 0.5 )
@@ -1447,96 +1461,137 @@ delayed_call( function(){ log(a) }, 0.5 )
 ///// example 3 /////
 delayed_call(@()self.Kill(), 0.5, entity)
 //entity will be removed after 0.5 sec
-//it's the same as this:
-entity.ValidateScriptScope();
-delayed_call(function(){ self.Kill() }.bindenv(entity.GetScriptScope()), 0.5)
 
 ///// delays /////
 delay == 0:			function always runs THIS tick, runs immediately even if game is paused
-delay <= 0.0333:	function always runs THIS tick, immediately after if game is unpaused;
+delay <= 0.0333:	function always runs THIS tick, immediately after game is unpaused
 					nested delayed calls even with non-zero delay will be executed not earlier than next tick
 delay >= 0.0334:	function always runs NEXT tick
 these numbers are bound to tickrate; this behaviour probably do not depend on server performance
 (even when you run heavy script every tick, tickrate remains 30)
 
-you can also use run_this_tick(func), run_next_tick(func)
+you can also use run_this_tick(func[, scope|ent]), run_next_tick(func[, scope|ent])
 */
 
 delayed_call <- function(func, delay, scope_or_ent = null) {
-	local key = UniqueString();
-	if (scope_or_ent) {
-		if ("GetScriptScope" in scope_or_ent) {
-			scope_or_ent.ValidateScriptScope();
-			func = func.bindenv(scope_or_ent.GetScriptScope());
-		} else func = func.bindenv(scope_or_ent);
+	local key = UniqueString()
+	local ent = null
+	local scope = null
+	if ("CBaseEntity" in getroottable() && scope_or_ent instanceof ::CBaseEntity) {
+		ent = scope_or_ent
+		if (deleted_ent(ent)
+			throw "trying to register a delayed call for deleted entity"
+		ent.ValidateScriptScope()
+		local scope_key = "__dc" + key
+		ent.GetScriptScope().scope_key <- function() {
+			try {
+				func()
+			} catch(exception) {
+				error(format("Exception for delayed call (%s) [ent %s]: %s\n", key, ent_to_str(ent), exception));
+			}
+			delete ::__dc_ents[key]
+		}
+		::__dc_ents[key] <- {
+			ent = ent,
+			time = clock.sec() + delay
+		}
+		DoEntFire("!self", "runscriptcode", scope_key + "()", delay, null, ent)
+	} else {
+		scope = scope_or_ent
+		if (scope) {
+			try {
+				func = func.bindenv(scope)
+			} catch (exception) {
+				throw "Cannot bindenv function to " + var_to_str(scope)
+			}
+		}
+		::__dc_func[key] <- {
+			func = func,
+			time = clock.sec() + delay
+		}
+		if ("dc_debug" in getroottable() && ::dc_debug) {
+			log("delayed call registered with key " + key)
+			__printstackinfos()
+		}
+		DoEntFire("!self", "runscriptcode", "::__dc_check()", delay, null, worldspawn)
 	}
-	::__dc_func[key] <- {
-		func = func,
-		time = Time() + delay
-	}
-	if ("dc_debug" in getroottable() && ::dc_debug) {
-		log("delayed call registered with key " + key);
-		__printstackinfos();
-	}
-	DoEntFire("!self", "runscriptcode", "::__dc_check()", delay, null, worldspawn);
-	return key;
+	return key
 }
 
-worldspawn <- Entities.FindByClassname(null, "worldspawn");
+worldspawn <- Entities.FindByClassname(null, "worldspawn")
 
 ::__dc_check <- function() {
-	local time = Time();
+	local time = Time()
 	foreach (key, table in ::__dc_func) {
 		if (table.time <= time) {
 			try {
-				table.func();
+				table.func()
 			} catch(exception) {
-				error(format("Exception for delayed call (%s): %s\n", key, exception));
+				error(format("Exception for delayed call (%s): %s\n", key, exception))
 			}
-			delete ::__dc_func[key];
+			delete ::__dc_func[key]
 		}
 	}
 }
 
 if (!("__dc_func" in getroottable())) ::__dc_func <- {}
 
+if (!("__dc_ents" in getroottable())) ::__dc_ents <- {}
+
 remove_delayed_call <- function (key) {
-	if (key in ::__dc_func)
-		delete ::__dc_func[key];
+	if (key in ::__dc_func) {
+		delete ::__dc_func[key]
+	} else if (key in ::__dc_ents) {
+		local ent_scope = __dc_ents[key].ent.GetScriptScope()
+		local scope_key = "__dc" + key
+		if (scope_key in ent_scope)
+			delete ent_scope[scope_key]
+		delete __dc_ents[key]
+	}
 }
 
 remove_all_delayed_calls <- function () {
 	::__dc_func <- {};
+	foreach(key, dc_table in ::__dc_ents) {
+		remove_delayed_call(key)
+	}
 }
 
-run_this_tick <- function(func)  {
-	local args = [this, func, 0];
-	args.extend(vargv);
-	delayed_call.acall(args);
+run_this_tick <- function(func, ...)  {
+	local args = [this, func, 0]
+	args.extend(vargv)
+	delayed_call.acall(args)
 }
 
-run_next_tick <- function(func)  {
-	local args = [this, func, 0.001];
-	args.extend(vargv);
+run_next_tick <- function(func, ...)  {
+	local args = [this, func, 0.001]
+	args.extend(vargv)
 	delayed_call( function() {
-		delayed_call.acall(args);
-	}, 0.001);
+		delayed_call.acall(args)
+	}, 0.001)
 }
 
 print_all_delayed_calls <- function() {
-	print("All delayed calls registered:");
-	local strings = [];
+	print("All delayed calls registered:")
+	local strings = []
+	local time = clock.sec()
 	foreach(key, table in __dc_func) {
 		strings.push(format(
 			"\"%s\": will be called after %f seconds",
-			key, table.time - Time()
+			key, table.time - time
 		));
 	}
+	foreach(key, table in __dc_ents) {
+		strings.push(format(
+			"\"%s\" [ent %s]: will be called after %f seconds",
+			key, ent_to_str(table.ent), table.time - time
+		))
+	}
 	if (strings.len() == 0)
-		printl(" [none]");
+		printl(" [none]")
 	else {
-		printl("");
-		foreach(str in strings) printl(str);
+		printl("")
+		foreach(str in strings) printl(str)
 	}
 }
 

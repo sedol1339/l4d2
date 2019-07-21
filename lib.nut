@@ -4,6 +4,7 @@
  Performance is optimized where possible. This library does not create any entities, running tasks or affecting HUD by default (unless you run a specific library functions for this).
  
  Author: kapkan https://steamcommunity.com/id/xwergxz/
+ Repository: https://github.com/sedol1339/l4d2
  TODO:
 	- optional entity param for delayed_call, run_this_tick, run_next_tick - checks if the entity exists when running delayed call
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)

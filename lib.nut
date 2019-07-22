@@ -6,6 +6,8 @@
  Author: kapkan https://steamcommunity.com/id/xwergxz/
  Repository: https://github.com/sedol1339/l4d2
  TODO:
+	- fix on_player_connect for another team enum
+	- fix scopes issue
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
@@ -1479,7 +1481,7 @@ delayed_call <- function(func, delay, scope_or_ent = null) {
 	local scope = null
 	if ("CBaseEntity" in getroottable() && scope_or_ent instanceof ::CBaseEntity) {
 		ent = scope_or_ent
-		if (deleted_ent(ent)
+		if (deleted_ent(ent))
 			throw "trying to register a delayed call for deleted entity"
 		ent.ValidateScriptScope()
 		local scope_key = "__dc" + key
@@ -1683,10 +1685,10 @@ log_events <- function(enabled = true) {
 
 Team  <-{
 	ANY = -1
-	UNASSIGNED = 0
-	SPECTATORS = 1
-	SURVIVORS = 2
-	INFECTED = 3
+	UNASSIGNED = 1
+	SPECTATORS = 2
+	SURVIVORS = 4
+	INFECTED = 8
 }
 
 ClientType <- {
@@ -2065,17 +2067,18 @@ register_chat_command <- function(names, func) {
 		throw "name should be string or array of strings"
 	}
 	foreach (name in names) {
+		local cmd = "cmd_" + name
 		name = tolower(name)
-		if (name in __chat_cmds)
+		if (cmd in __chat_cmds)
 			logf("WARNING! chat command %s was already registered, overriding...", name)
-		__chat_cmds[name] <- func
+		__chat_cmds[cmd] <- func
 	}
 	register_callback("player_say", "__chat_cmds", function(params) {
 		local cmd_markers = ["!", "/"]
 		local text = lstrip(params.text)
 		local is_command = false
 		foreach(marker in cmd_markers)
-			if (text.slice(0, marker.len()) == marker) {
+			if (text.len() >= marker.len() && text.slice(0, marker.len()) == marker) {
 				text = text.slice(marker.len())
 				is_command = true
 				break
@@ -2083,7 +2086,8 @@ register_chat_command <- function(names, func) {
 		if (!is_command) return
 		local space_pos = text.find(" ")
 		local command = tolower(space_pos ? text.slice(0, space_pos) : text)
-		if (!(command in __chat_cmds)) return
+		log(command)
+		if (!("cmd_" + command in __chat_cmds)) return
 		logf("parsing args for chat command %s from player %s", command, player_to_str(params.player))
 		local initial_args_text = ""
 		local args = []
@@ -2131,16 +2135,23 @@ register_chat_command <- function(names, func) {
 				}
 			}
 		}
-		__chat_cmds[command](params.player, command, initial_args_text, args)
+		__chat_cmds["cmd_" + command](params.player, command, initial_args_text, args)
 	})
 }
 
-remove_chat_command <- function(name) {
-	name = tolower(name)
-	if (!(name in __chat_cmds))
-		logf("WARNING! chat command %s was not registered", name)
-	else
-		delete __chat_cmds[name]
+remove_chat_command <- function(names) {
+	if (type(names) == "string") {
+		names = [names]
+	} else if (type(names) != "array") {
+		throw "name should be string or array of strings"
+	}
+	foreach (name in names) {
+		name = tolower(name)
+		if (!(name in __chat_cmds))
+			logf("WARNING! chat command %s was not registered", name)
+		else
+			delete __chat_cmds[name]
+	}
 }
 
 print_all_chat_commands <- function() {
@@ -2151,10 +2162,10 @@ print_all_chat_commands <- function() {
 ///////////////////////////////
 
 /* Team.ANY = -1
-Team.UNASSIGNED = 0
-Team.SPECTATORS = 1
-Team.SURVIVORS = 2
-Team.INFECTED = 3 */
+Team.UNASSIGNED = 1
+Team.SPECTATORS = 2
+Team.SURVIVORS = 4
+Team.INFECTED = 8 */
 
 //test: script on_key_action("my", Team.SURVIVORS, IN_ATTACK, 0.1, @(player)player.ApplyAbsVelocityImpulse(Vector(0,0,300)), null)
 //test: script on_key_action("my", player(), IN_ALT1, 0, @(p)propint(p,"movetype",8), @(p)propint(p,"movetype",2))
@@ -2189,8 +2200,8 @@ on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, 
 			do_key_check(player)
 		} else {
 			for_each_player( function(player) {
-				local current_player_team = propint(player, "m_iTeamNum")
-				if (team == Team.ANY || current_player_team == team)
+				local current_player_team = 1 << propint(player, "m_iTeamNum")
+				if (current_player_team & team)
 					do_key_check(player)
 			})
 		}

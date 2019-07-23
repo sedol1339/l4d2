@@ -85,9 +85,10 @@
 												max - maximum number of arguments allowed (or null),
 												msg - message to print when arglen < min or arglen > max
  
- on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released)
+ on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released, on_hold)
 								on_pressed will be called when players presses specified keyboard_key
 								on_released will be called when players releases specified keyboard_key
+								on_hold (optional) will be called together with on_pressed and later until players releases key
 								delay is a delay in seconds between checks (0 = every tick)
 								key is used for on_key_action_remove()
 								second param may be player entity or the whole team (see Team table)
@@ -2071,8 +2072,8 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 		throw "name should be string or array of strings"
 	}
 	foreach (name in names) {
-		local cmd = "cmd_" + name
 		name = tolower(name)
+		local cmd = "cmd_" + name
 		if (cmd in __chat_cmds)
 			logf("WARNING! chat command %s was already registered, overriding...", name)
 		__chat_cmds[cmd] <- func
@@ -2187,10 +2188,11 @@ Team.INFECTED = 8 */
 //test: script on_key_action("my", player(), IN_ALT1, 0, @(p)propint(p,"movetype",8), @(p)propint(p,"movetype",2))
 //test: register_ticker("test",@()log(player().GetButtonMask()))
 
-on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, on_released) {
+on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, on_released = null, on_hold = null) {
 	if (!key) key = UniqueString()
 	if (!on_pressed) on_pressed = __dummy
 	if (!on_released) on_released = __dummy
+	if (!on_hold) on_hold = __dummy
 	local player = null
 	local team = null
 	if (type(player_or_team) == "integer") {
@@ -2210,6 +2212,8 @@ on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, 
 					on_released(player)
 				else if (!last_key_state && key_pressed)
 					on_pressed(player)
+				if (key_pressed)
+					on_hold(player)
 			}
 			player_scope[name_in_scope] <- key_pressed
 		}

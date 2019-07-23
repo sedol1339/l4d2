@@ -69,7 +69,7 @@
  on_player_connect(team, isbot, func)		register a callback for player_team event that will fire for specified team and params.isbot condition;
 											this is not chained; pass null to cancel; see Team and ClientType tables for first 2 arguments
  register_chat_command(name, func)			registers a chat command (internally makes a callback for event player_say)
-											name can be string or array of strings
+											name can be string or array of strings (this means same handler for different commands)
 											name "testcmd" means that player types !testcmd or /testcmd in chat (both will work)
 											func should have 4 parameters:
 												player - player who issued command
@@ -77,9 +77,13 @@
 												args_text - all arguments as string
 												args - all arguments as array (arguments are either enclosed in quotes or divided by spaces)
 											example used input: !testcmd a b " c d"
-											corresponding function call: func("testcmd", "a b \" c d\"", ["a", "b", " c d"])
+											corresponding function call: func(player, "testcmd", "a b \" c d\"", ["a", "b", " c d"])
 											user input cannot have nested quotes (\")
-											commands are case-insensitive (only for english and russian letters)
+											commands may include unicode and are case-insensitive (only for english and russian letters)
+											you can pass up to three optional params to register_chat_command:
+												min - minimum number of arguments allowed (or null),
+												max - maximum number of arguments allowed (or null),
+												msg - message to print when arglen < min or arglen > max
  
  on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released)
 								on_pressed will be called when players presses specified keyboard_key
@@ -2060,7 +2064,7 @@ if (!("__tasks_ent" in this)) __tasks_ent <- {}
 
 if (!("__chat_cmds" in this)) __chat_cmds <- {}
 
-register_chat_command <- function(names, func) {
+register_chat_command <- function(names, func, argmin = null, argmax = null, errmsg = null) {
 	if (type(names) == "string") {
 		names = [names]
 	} else if (type(names) != "array") {
@@ -2135,7 +2139,19 @@ register_chat_command <- function(names, func) {
 				}
 			}
 		}
-		__chat_cmds["cmd_" + command](params.player, command, initial_args_text, args)
+		if (argmin != null && argmin != 0 && argmin == argmax && args.len() != argmin) {
+			say_chat(errmsg ? errmsg : format("This command requires %s arguments", argmin))
+		} else if (argmin != null && args.len() < argmin) {
+			say_chat(errmsg ? errmsg : format("This command requires at least %s %s", argmin, argmin > 1 ? "arguments" : "argument"))
+		} else if (argmax != null && args.len() > argmax) {
+			if (argmax != 0) {
+				say_chat(errmsg ? errmsg : format("This command accepts no more than %s %s", argmax, argmax > 1 ? "arguments" : "argument"))
+			} else {
+				say_chat(errmsg ? errmsg : "This command does not accept arguments")
+			}
+		} else {
+			__chat_cmds["cmd_" + command](params.player, command, initial_args_text, args)
+		}
 	})
 }
 
@@ -2172,6 +2188,7 @@ Team.INFECTED = 8 */
 //test: register_ticker("test",@()log(player().GetButtonMask()))
 
 on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, on_released) {
+	if (!key) key = UniqueString()
 	if (!on_pressed) on_pressed = __dummy
 	if (!on_released) on_released = __dummy
 	local player = null

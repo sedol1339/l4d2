@@ -165,6 +165,7 @@
  bot()							for testing: returns first found bot player
  server_host()					returns listenserver host player or null
 								warning! may return null while server host is still connecting
+ scope(player)					validates and returns player's scope
  for_each_player(func)			calls function for every player, passes player as param
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
@@ -589,6 +590,10 @@ constants.NUMBER <- -1
 constants.FUNC <- -2
 constants.STRING <- -3
 constants.BOOL <- -4
+
+constants.DEFAULT_TICKRATE <- 30.0
+
+constants.INF <- 10e100000000
 
 g_ModeScript.InjectTable(constants, this);
 
@@ -1030,6 +1035,11 @@ server_host <- function() {
 }
 
 __server_host <- null;
+
+scope <- function(player) {
+	player.ValidateScriptScope()
+	return player.GetScriptScope()
+}
 
 for_each_player <- function (func) {
 	local tmp_player = null;
@@ -2076,7 +2086,12 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 		local cmd = "cmd_" + name
 		if (cmd in __chat_cmds)
 			logf("WARNING! chat command %s was already registered, overriding...", name)
-		__chat_cmds[cmd] <- func
+		__chat_cmds[cmd] <- {
+			func = func,
+			argmin = argmin,
+			argmax = argmax,
+			errmsg = errmsg
+		}
 	}
 	register_callback("player_say", "__chat_cmds", function(params) {
 		local cmd_markers = ["!", "/"]
@@ -2091,7 +2106,6 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 		if (!is_command) return
 		local space_pos = text.find(" ")
 		local command = tolower(space_pos ? text.slice(0, space_pos) : text)
-		log(command)
 		if (!("cmd_" + command in __chat_cmds)) return
 		logf("parsing args for chat command %s from player %s", command, player_to_str(params.player))
 		local initial_args_text = ""
@@ -2140,6 +2154,10 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 				}
 			}
 		}
+		local cmd_table = __chat_cmds["cmd_" + command]
+		local argmin = cmd_table.argmin
+		local argmax = cmd_table.argmax
+		local errmsg = cmd_table.errmsg
 		if (argmin != null && argmin != 0 && argmin == argmax && args.len() != argmin) {
 			say_chat(errmsg ? errmsg : format("This command requires %s arguments", argmin))
 		} else if (argmin != null && args.len() < argmin) {
@@ -2151,7 +2169,7 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 				say_chat(errmsg ? errmsg : "This command does not accept arguments")
 			}
 		} else {
-			__chat_cmds["cmd_" + command](params.player, command, initial_args_text, args)
+			cmd_table.func(params.player, command, initial_args_text, args)
 		}
 	})
 }
@@ -2163,7 +2181,7 @@ remove_chat_command <- function(names) {
 		throw "name should be string or array of strings"
 	}
 	foreach (name in names) {
-		name = tolower(name)
+		name = "cmd_" + tolower(name)
 		if (!(name in __chat_cmds))
 			logf("WARNING! chat command %s was not registered", name)
 		else
@@ -2427,9 +2445,17 @@ watch_netprops_restore <- function (slot) {
 watch_netprops_save_binds <- @() SendToConsole(::__watch_netprops.binds_save);
 watch_netprops_restore_binds <- @() SendToConsole(::__watch_netprops.binds_restore);
 
+local buttons_bits = ["IN_ATTACK", "IN_JUMP", "IN_DUCK", "IN_FORWARD", "IN_BACK", "IN_USE", "IN_CANCEL", "IN_LEFT", "IN_RIGHT", "IN_MOVELEFT", "IN_MOVERIGHT", "IN_ATTACK2", "IN_RUN", "IN_RELOAD", "IN_ALT1", "IN_ALT2", "IN_SCORE", "IN_SPEED", "IN_WALK", "IN_ZOOM", "IN_WEAPON1", "IN_WEAPON2", "IN_BULLRUSH", "IN_GRENADE1", "IN_GRENADE2"]
+
 __netprops_bitmaps <- {
 	m_fFlags = ["FL_ONGROUND", "FL_DUCKING", "FL_WATERJUMP", "FL_ONTRAIN", "FL_INRAIN", "FL_FROZEN", "FL_ATCONTROLS", "FL_CLIENT", "FL_FAKECLIENT", "FL_INWATER", "FL_FLY", "FL_SWIM", "FL_CONVEYOR", "FL_NPC", "FL_GODMODE", "FL_NOTARGET", "FL_AIMTARGET", "FL_PARTIALGROUND", "FL_STATICPROP", "FL_GRAPHED", "FL_GRENADE", "FL_STEPMOVEMENT", "FL_DONTTOUCH", "FL_BASEVELOCITY", "FL_WORLDBRUSH", "FL_OBJECT", "FL_KILLME", "FL_ONFIRE", "FL_DISSOLVING", "FL_TRANSRAGDOLL", "FL_UNBLOCKABLE_BY_PLAYER", "FL_FREEZING"],
-	m_nButtons = ["IN_ATTACK", "IN_JUMP", "IN_DUCK", "IN_FORWARD", "IN_BACK", "IN_USE", "IN_CANCEL", "IN_LEFT", "IN_RIGHT", "IN_MOVELEFT", "IN_MOVERIGHT", "IN_ATTACK2", "IN_RUN", "IN_RELOAD", "IN_ALT1", "IN_ALT2", "IN_SCORE", "IN_SPEED", "IN_WALK", "IN_ZOOM", "IN_WEAPON1", "IN_WEAPON2", "IN_BULLRUSH", "IN_GRENADE1", "IN_GRENADE2"],
+	m_nButtons = buttons_bits,
+	m_nOldButtons = buttons_bits,
+	m_afButtonLast = buttons_bits,
+	m_afButtonPressed = buttons_bits,
+	m_afButtonReleased = buttons_bits,
+	m_afButtonDisabled = buttons_bits,
+	m_afButtonForced = buttons_bits,
 }
 
 if (!("__watch_netprops" in getroottable())) ::__watch_netprops <- {}

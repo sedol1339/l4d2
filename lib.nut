@@ -12,6 +12,8 @@
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
 	- stop coding and live a real life
+	- add "forced" support from line 1550
+	- replade "for_each_player" by foreach(player in players())
  
  Short documentation:
  
@@ -55,7 +57,7 @@
 											!! if we register the same ticker again, ticker info will be reset !!
  register_callback(event, key, func)		registers callback for event using key; pass params table to func
 											if event table has "userid" and/or "victim" params,
-											they will be also accessible as entity handle: "player" and/or "player_victim"
+											they will be also accessible as entity handle: "player" and/or "player_victim", "player_attacker"
  add_task_on_shutdown(key, func)			register a function that will be called on server shutdown; pass true as additional param to run this after all others
  register_loop(key, func, refire_time)		register a function that will be called with an interval of refire_time seconds
  loop_reset(key)							reset loop using it's key; see function declaration for more info
@@ -166,7 +168,8 @@
  server_host()					returns listenserver host player or null
 								warning! may return null while server host is still connecting
  scope(player)					validates and returns player's scope
- for_each_player(func)			calls function for every player, passes player as param
+ for_each_player(func)			calls function for every player, passes player as param; better use "foreach(player in players())"
+ players()						returns array of player entities, optionally pass team: players(Team.SURVIVORS | Team.SPECTATORS)
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
  teleport_entity(ent, pos, ang)	teleports entity (using point_teleport); pos == null means don't change pos, ang == null means don't change ang
@@ -908,7 +911,7 @@ Set <- class {
 
 //////////////////////////
 
-if (!("__chains" in this)) __chains <- {};
+if (!("__chains" in this) || forced) __chains <- {};
 
 chain <- function(key, ...) {
 	__chains[key] <- {
@@ -966,7 +969,7 @@ cvar_create <- function(_cvar, value) {
 
 /* we need next 3 functions to restore all previously set cvars if user toggles sv_cheats */
 
-if (!("cvars_list" in this)) cvars_list <- {};
+if (!("cvars_list" in this) || forced) cvars_list <- {};
 
 cvars_add <- function(_cvar, default_value, value) {
 	cvar(_cvar, value);
@@ -1045,6 +1048,17 @@ for_each_player <- function (func) {
 	local tmp_player = null;
 	while (tmp_player = Entities.FindByClassname(tmp_player, "player"))
 		if (tmp_player) func(tmp_player);
+}
+
+players <- function (team = Team.ANY) {
+	local player = null
+	local arr = []
+	while (player = Entities.FindByClassname(player, "player")) {
+		local current_player_team = 1 << propint(player, "m_iTeamNum")
+		if (current_player_team & team)
+			arr.push(player)
+	}
+	return arr
 }
 
 //kill bots with death camera
@@ -1346,7 +1360,7 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 	}, time);
 }
 
-if (!("__current_hints" in this)) __current_hints <- {}
+if (!("__current_hints" in this) || forced) __current_hints <- {}
 
 create_particles <- function(effect_name, origin, duration = -1) {
 	local effect = SpawnEntityFromTable("info_particle_system", {
@@ -1412,7 +1426,7 @@ roundf <- function(a) {
 
 ///////////////////////////////
 
-if (!("clock" in this)) clock <- {
+if (!("clock" in this) || forced) clock <- {
 
 	sec = Time,
 	
@@ -1664,6 +1678,8 @@ register_callback <- function(event, key, func) {
 				params.player <- GetPlayerFromUserID(params.userid);
 			if ("victim" in params)
 				params.player_victim <- GetPlayerFromUserID(params.victim);
+			if ("attacker" in params)
+				params.player_attacker <- GetPlayerFromUserID(params.attacker);
 			foreach(callback in __callbacks[scope.event_name])
 				callback(clone params);
 		}.bindenv(this);
@@ -2983,5 +2999,10 @@ hud <- {
 include_lib()
 
 ///////////////////////////////
+
+lib <- function() {
+	forced <- true
+	IncludeScript("kapkan/lib")
+}
 
 log("library included");

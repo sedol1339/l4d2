@@ -6,14 +6,12 @@
  Author: kapkan https://steamcommunity.com/id/xwergxz/
  Repository: https://github.com/sedol1339/l4d2
  TODO:
-	- fix on_player_connect for another team enum
 	- fix scopes issue
 	- delayed_call_group(group_key, func, delay, ...) - for removing a group of delayed calls (for example in tr/core when finishing training)
 	- tasks instead of chains: Task(on_start, on_tick, on_finish); chain(task_1, task_2, ...); on_tick = function(){ if (...) task_fihish() }
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
 	- stop coding and live a real life
 	- add "forced" support from line 1550
-	- replade "for_each_player" by foreach(player in players())
  
  Short documentation:
  
@@ -170,6 +168,7 @@
  scope(player)					validates and returns player's scope
  for_each_player(func)			calls function for every player, passes player as param; better use "foreach(player in players())"
  players()						returns array of player entities, optionally pass team: players(Team.SURVIVORS | Team.SPECTATORS)
+ get_team(player)					returns team of player (of Team enum)
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
  teleport_entity(ent, pos, ang)	teleports entity (using point_teleport); pos == null means don't change pos, ang == null means don't change ang
@@ -1050,15 +1049,18 @@ for_each_player <- function (func) {
 		if (tmp_player) func(tmp_player);
 }
 
-players <- function (team = Team.ANY) {
+players <- function (teams = Team.ANY) {
 	local player = null
 	local arr = []
 	while (player = Entities.FindByClassname(player, "player")) {
-		local current_player_team = 1 << propint(player, "m_iTeamNum")
-		if (current_player_team & team)
+		if (get_team(player) & teams)
 			arr.push(player)
 	}
 	return arr
+}
+
+get_team <- function(player) {
+	return 1 << propint(player, "m_iTeamNum")
 }
 
 //kill bots with death camera
@@ -1716,38 +1718,32 @@ log_events <- function(enabled = true) {
 
 Team  <-{
 	ANY = -1
-	UNASSIGNED = 1
-	SPECTATORS = 2
-	SURVIVORS = 4
-	INFECTED = 8
+	UNASSIGNED = 1 << 0
+	SPECTATORS = 1 << 1
+	SURVIVORS = 1 << 2
+	INFECTED = 1 << 3
 }
 
 ClientType <- {
 	ANY = -1
-	HUMAN = 0
-	BOT = 1
+	HUMAN = 1 << 0
+	BOT = 1 << 1
 }
 
-on_player_connect <- function(team, isbot, func) {
+on_player_connect <- function(teams, isbot, func) {
 	//it's ok to be registered multiple times
 	register_callback("player_team", "__on_player_connect", function(params) {
 		local func = __on_player_connect[params.team][params.isbot ? 1 : 0];
-		if (func) {
-			params.player <- GetPlayerFromUserID(params.userid);
-			func(params);
-		}
+		if (func) func(params)
 	});
-	if (team == Team.ANY && isbot == ClientType.ANY) throw "specify team ot playertype for on_player_connect";
-	if (team == Team.ANY) {
-		__on_player_connect[0][isbot] = func;
-		__on_player_connect[1][isbot] = func;
-		__on_player_connect[2][isbot] = func;
-		__on_player_connect[3][isbot] = func;
-	} else if (isbot == ClientType.ANY) {
-		__on_player_connect[team][0] = func;
-		__on_player_connect[team][1] = func;
-	} else
-		__on_player_connect[team][isbot] = func;
+	if (teams == Team.ANY && isbot == ClientType.ANY) throw "specify team ot playertype for on_player_connect";
+	for(local i = 0; i <= 3; i++)
+		if (teams & (1 << i)) {
+			if (isbot == ClientType.ANY || !isbot)
+				__on_player_connect[i][0] = func
+			if (isbot == ClientType.ANY || isbot)
+				__on_player_connect[i][1] = func
+		}
 }
 
 remove_on_player_connect <- function() {
@@ -2255,8 +2251,7 @@ on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, 
 			do_key_check(player)
 		} else {
 			for_each_player( function(player) {
-				local current_player_team = 1 << propint(player, "m_iTeamNum")
-				if (current_player_team & team)
+				if (get_team(player) & team)
 					do_key_check(player)
 			})
 		}

@@ -39,6 +39,7 @@
 									type can be string: "string", "float", "integer", "bool", "Vector", "array", "function", "native function" etc.
 									type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
 									type can be array of string types
+ unique_str_id(ent)					converts entity to string, suitable for using as string key
  
  TASK & CALLBACKS SHEDULING
  delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key;
@@ -126,6 +127,8 @@
  log_events()					start logging all events; pass false as additional param to cancel
  watch_netprops(ent,[netprops])	for singleplayer: print entity netprops in real time in HUD and binds actions to save/restore them;
 								see function declaration for more info
+ draw_collision_box(ent, dur, color)	draws collision box for entity for duration //is drawing not all lines probably due to engine bug
+ mark(ent, dur, color)					marks point, drawing a box for duration
  
  CONVARS FUNCTIONS
  cvar(cvar, value)				shortcut for Convars.SetValue(cvar, value); also makes logging
@@ -183,6 +186,7 @@
  find_entities(classname)		find entities by classname (returns array)
  replace_primary_weapon(player, weapon)	replaces weapon in primary slot; pass true as additional argument to give laser sight
  drop_weapon(player, slot)
+ create_particles(effect_name, origin_or_parent, duration = -1)
  
  NETPROPS FUNCTIONS
  propint(ent, prop[, value])	get/set integer offset
@@ -264,6 +268,8 @@
 include_lib <- function() {
 
 ///////////////////////////////
+
+if (!("forced" in this)) forced <- false
 
 local constants = getconsttable();
 
@@ -588,6 +594,8 @@ constants.MOVETYPE_LADDER <- 9; //For players, when moving on a ladder
 constants.MOVETYPE_OBSERVER <- 10; //Spectator movetype. DO NOT use this to make player spectate
 constants.MOVETYPE_CUSTOM <- 11; //Custom movetype, can be applied to the player to prevent the default movement code from running, while still calling the related hooks
 
+//look https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/const.h for other constants
+
 constants.NUMBER <- -1
 constants.FUNC <- -2
 constants.STRING <- -3
@@ -872,6 +880,10 @@ checktype <- function(var, _type) {
 	}
 }
 
+unique_str_id <- function(ent) {
+	return ent.GetEntityHandle().tointeger()
+}
+
 //////////////////////////
 
 /*
@@ -1047,6 +1059,17 @@ for_each_player <- function (func) {
 	local tmp_player = null;
 	while (tmp_player = Entities.FindByClassname(tmp_player, "player"))
 		if (tmp_player) func(tmp_player);
+}
+
+//cant' use constants or enums, because vm don't see them from
+//other files if we IncludeScript() this library into them
+
+Team  <-{
+	ANY = -1
+	UNASSIGNED = 1 << 0
+	SPECTATORS = 1 << 1
+	SURVIVORS = 1 << 2
+	INFECTED = 1 << 3
 }
 
 players <- function (teams = Team.ANY) {
@@ -1247,6 +1270,29 @@ drop_weapon <- function(player, slot) {
 	//todo https://forums.alliedmods.net/showthread.php?t=110734
 }
 
+draw_collision_box <- function(ent, duration, color = Vector(255, 255, 0)) {
+	local mins = ent.GetOrigin() + propvec(ent, "m_Collision.m_vecMins")
+	local maxs = ent.GetOrigin() + propvec(ent, "m_Collision.m_vecMaxs")
+	DebugDrawLine_vCol( Vector(mins.x, mins.y, mins.z), Vector(mins.x, maxs.y, mins.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(mins.x, mins.y, mins.z), Vector(maxs.x, mins.y, mins.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(mins.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, mins.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, maxs.y, mins.z), color, false, duration )
+	
+	DebugDrawLine_vCol( Vector(mins.x, mins.y, maxs.z), Vector(mins.x, maxs.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(mins.x, mins.y, maxs.z), Vector(maxs.x, mins.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(mins.x, maxs.y, maxs.z), Vector(maxs.x, maxs.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(maxs.x, mins.y, maxs.z), Vector(maxs.x, maxs.y, maxs.z), color, false, duration )
+	
+	DebugDrawLine_vCol( Vector(mins.x, mins.y, mins.z), Vector(mins.x, mins.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(mins.x, maxs.y, mins.z), Vector(mins.x, maxs.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, mins.y, maxs.z), color, false, duration )
+	DebugDrawLine_vCol( Vector(maxs.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, maxs.z), color, false, duration )
+}
+
+mark <- function(vec, duration, color = Vector(255, 0, 255)) {
+	DebugDrawBoxDirection(vec, Vector(-4, -4, -4), Vector(4, 4, 4), Vector(0, 0, 1), color, 255, duration)
+}
+
 /* set_speed_multiplier <- function(player, multiplier) {
 	propfloat(player, "m_flLaggedMovementValue", multiplier)
 	propfloat(player, "m_flGravity", 1.0 / multiplier / multiplier)
@@ -1364,14 +1410,27 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 
 if (!("__current_hints" in this) || forced) __current_hints <- {}
 
-create_particles <- function(effect_name, origin, duration = -1) {
+create_particles <- function(effect_name, origin_or_parent, duration = -1, attachment = null) {
+	local origin = null
+	local parent = null
+	if (typeof(origin_or_parent) == "Vector")
+		origin = origin_or_parent
+	else
+		parent = origin_or_parent
 	local effect = SpawnEntityFromTable("info_particle_system", {
 		effect_name = effect_name,
-		origin = origin,
+		origin = origin ? origin : parent.GetOrigin(),
 	});
-	DoEntFire("!self", "Start", "", 0, null, effect);
+	DoEntFire("!self", "Start", "", 0, null, effect)
+	if (parent) DoEntFire("!self", "SetParent", "!activator", 0, parent, effect)
 	if (duration != -1) DoEntFire("!self", "Kill", "", duration, null, effect);
-	return effect;
+	if (attachment) {
+		if (!parent)
+			log("WARNING! Create_particles(): attachment without parent, ignored")
+		else
+			DoEntFire("!self", "SetParentAttachment", attachment, 0.01, null, target)
+	}
+	return effect
 }
 
 vector_to_angle <- function(vec) {
@@ -1711,17 +1770,6 @@ log_event <- function(event, enabled = true) {
 
 log_events <- function(enabled = true) {
 	cvar("net_showevents", enabled ? 2 : 0);
-}
-
-//cant' use constants or enums, because vm don't see them from
-//other files if we IncludeScript() this library into them
-
-Team  <-{
-	ANY = -1
-	UNASSIGNED = 1 << 0
-	SPECTATORS = 1 << 1
-	SURVIVORS = 1 << 2
-	INFECTED = 1 << 3
 }
 
 ClientType <- {

@@ -150,6 +150,7 @@
  min(a, b)						min of two numbers
  max(a, b)						max of two numbers
  roundf(a)						round float to int
+ decompose_by_orthonormal_basis(vec, basis_x, basis_y, basis_z)		returns vector of coefficients
  
  CLOCK FUNCTIONS
  clock.sec()					returns engine time (stops if game is paused)
@@ -594,6 +595,21 @@ constants.MOVETYPE_LADDER <- 9; //For players, when moving on a ladder
 constants.MOVETYPE_OBSERVER <- 10; //Spectator movetype. DO NOT use this to make player spectate
 constants.MOVETYPE_CUSTOM <- 11; //Custom movetype, can be applied to the player to prevent the default movement code from running, while still calling the related hooks
 
+//for trigger spawnflags
+constants.SF_TRIGGER_ALLOW_CLIENTS <- 0x01		// Players can fire this trigger
+constants.SF_TRIGGER_ALLOW_NPCS <- 0x02		// NPCS can fire this trigger
+constants.SF_TRIGGER_ALLOW_PUSHABLES <- 0x04		// Pushables can fire this trigger
+constants.SF_TRIGGER_ALLOW_PHYSICS <- 0x08		// Physics objects can fire this trigger
+constants.SF_TRIGGER_ONLY_PLAYER_ALLY_NPCS <- 0x10		// *if* NPCs can fire this trigger, this flag means only player allies do so
+constants.SF_TRIGGER_ONLY_CLIENTS_IN_VEHICLES <- 0x20		// *if* Players can fire this trigger, this flag means only players inside vehicles can 
+constants.SF_TRIGGER_ALLOW_ALL <- 0x40		// Everything can fire this trigger EXCEPT DEBRIS!
+constants.SF_TRIGGER_ONLY_CLIENTS_OUT_OF_VEHICLES <- 0x200	// *if* Players can fire this trigger, this flag means only players outside vehicles can 
+constants.SF_TRIG_PUSH_ONCE <- 0x80		// trigger_push removes itself after firing once
+constants.SF_TRIG_PUSH_AFFECT_PLAYER_ON_LADDER <- 0x100	// if pushed object is player on a ladder, then this disengages them from the ladder (HL2only)
+constants.SF_TRIG_TOUCH_DEBRIS <- 0x400	// Will touch physics debris objects
+constants.SF_TRIGGER_ONLY_NPCS_IN_VEHICLES <- 0x800	// *if* NPCs can fire this trigger, only NPCs in vehicles do so (respects player ally flag too)
+constants.SF_TRIGGER_DISALLOW_BOTS <- 0x1000   // Bots are not allowed to fire this trigger
+
 //look https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/const.h for other constants
 
 constants.NUMBER <- -1
@@ -604,6 +620,8 @@ constants.BOOL <- -4
 constants.DEFAULT_TICKRATE <- 30.0
 
 constants.INF <- 10e100000000
+
+constants.RAD_TO_DEG <- 57.2957795
 
 g_ModeScript.InjectTable(constants, this);
 
@@ -1483,6 +1501,10 @@ roundf <- function(a) {
 	if (a_abs_part >= 0.5)
 		a_abs_round++
 	return (a > 0) ? a_abs_round : 0 - a_abs_round
+}
+
+decompose_by_orthonormal_basis <- function(vec, basis_x, basis_y, basis_z) {
+	return Vector(vec.Dot(basis_x), vec.Dot(basis_y), vec.Dot(basis_z))
 }
 
 ///////////////////////////////

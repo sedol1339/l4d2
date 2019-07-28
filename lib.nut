@@ -151,6 +151,9 @@
  max(a, b)						max of two numbers
  roundf(a)						round float to int
  decompose_by_orthonormal_basis(vec, basis_x, basis_y, basis_z)		returns vector of coefficients
+ linear_interp(x1, y1, x2, y2, clump_left = false, clump_right = false)
+ quadratic_interp(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false)
+ bilinear_interp(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false)
  
  CLOCK FUNCTIONS
  clock.sec()					returns engine time (stops if game is paused)
@@ -164,7 +167,7 @@
  clock.evaluate_framerate.stop()	stops counting frames and returns framerate (game shound not be paused!)
  
  ENTITY FUNCTIONS
- deleted_ent(ent)				returns true if entity doesn't exist anymore
+ invalid(ent)					returns true if entity doesn't exist anymore or has never existed
  player()						for singleplayer: fast function that returns human player
  bot()							for testing: returns first found bot player
  server_host()					returns listenserver host player or null
@@ -172,7 +175,10 @@
  scope(player)					validates and returns player's scope
  for_each_player(func)			calls function for every player, passes player as param; better use "foreach(player in players())"
  players()						returns array of player entities, optionally pass team: players(Team.SURVIVORS | Team.SPECTATORS)
- get_team(player)					returns team of player (of Team enum)
+ get_team(player)				returns team of player (of Team enum)
+ mapname()						returns current map name
+ modename()						returns current mode name (including mutations)
+ set_ability_cooldown(player, cooldown)		set cooldown for custom ability
  remove_dying_infected()		removes all infected bots that were killed recently and have death cam
  spawn_infected(type, pos)		spawns special infected and returns it, returns null if can't spawn
  teleport_entity(ent, pos, ang)	teleports entity (using point_teleport); pos == null means don't change pos, ang == null means don't change ang
@@ -699,12 +705,12 @@ log_table <- function(table, max_depth = 3, current_depth = 0, manual_call = tru
 }
 
 player_to_str <- function(player) {
-	if (deleted_ent(player)) return "(deleted entity)";
+	if (invalid(player)) return "(deleted entity)";
 	return format("(player %d | %s)", player.GetEntityIndex().tointeger(), player.GetPlayerName());
 }
 
 ent_to_str <- function(ent) {
-	if (deleted_ent(ent)) return "(deleted entity)";
+	if (invalid(ent)) return "(deleted entity)";
 	local id = ent.GetEntityIndex().tointeger();
 	if ("CTerrorPlayer" in getroottable() && ent instanceof ::CTerrorPlayer)
 		return player_to_str(ent);
@@ -1026,10 +1032,12 @@ cvars_restore_all <- function() {
 
 ///////////////////////////////
 
-deleted_ent <- function(ent) {
+invalid <- function(ent) {
 	if (!("IsValid" in ent)) return true;
 	return !ent.IsValid();
 }
+
+deleted_ent <- invalid //legacy
 
 /* returns single player */
 player <- function() {
@@ -1102,6 +1110,20 @@ players <- function (teams = Team.ANY) {
 
 get_team <- function(player) {
 	return 1 << propint(player, "m_iTeamNum")
+}
+
+mapname <- function() {
+	return SessionState.MapName
+}
+
+modename <- function() {
+	return cvarstr("mp_gamemode")
+}
+
+set_ability_cooldown <- function(player, cooldown) {
+	local ability = propent(player, "m_customAbility")
+	propfloat(ability, "m_nextActivationTimer.m_timestamp", clock.sec() + cooldown)
+	propfloat(ability, "m_nextActivationTimer.m_duration", cooldown)
 }
 
 //kill bots with death camera
@@ -1307,8 +1329,8 @@ draw_collision_box <- function(ent, duration, color = Vector(255, 255, 0)) {
 	DebugDrawLine_vCol( Vector(maxs.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, maxs.z), color, false, duration )
 }
 
-mark <- function(vec, duration, color = Vector(255, 0, 255)) {
-	DebugDrawBoxDirection(vec, Vector(-4, -4, -4), Vector(4, 4, 4), Vector(0, 0, 1), color, 255, duration)
+mark <- function(vec, duration, color = Vector(255, 0, 255), radius = 4) {
+	DebugDrawBoxDirection(vec, Vector(-radius, -radius, -radius), Vector(radius, radius, radius), Vector(0, 0, 1), color, 255, duration)
 }
 
 /* set_speed_multiplier <- function(player, multiplier) {
@@ -1472,8 +1494,11 @@ angle_between_vectors <- function(vec1, vec2) {
 trace_line <- function(start, end, mask = TRACE_MASK_VISIBLE_AND_NPCS, ignore = null) {
 	local table = { start = start, end = end, mask = mask, ignore = ignore };
 	TraceLine(table);
-	if ("startsolid" in table && table.startsolid)
-		table.fraction = 0;
+	if ("startsolid" in table) {
+		if (table.startsolid) table.fraction = 0;
+	} else {
+		table.startsolid <- false
+	}
 	if (table.hit)
 		table.hitpos <- table.start + (table.end - table.start).Scale(table.fraction);
 	//DebugDrawLine_vCol(start, end, table.hit ? Vector(255,0,0) : Vector(0,255,0), false, 1);
@@ -1505,6 +1530,68 @@ roundf <- function(a) {
 
 decompose_by_orthonormal_basis <- function(vec, basis_x, basis_y, basis_z) {
 	return Vector(vec.Dot(basis_x), vec.Dot(basis_y), vec.Dot(basis_z))
+}
+
+linear_interp <- function(x1, y1, x2, y2, clump_left = false, clump_right = false) {
+	x1 = x1.tofloat()
+	y1 = y1.tofloat()
+	x2 = x2.tofloat()
+	y2 = y2.tofloat()
+	local a = (y2 - y1)/(x2 - x1)
+	local b = y1 - a*x1
+	local maxX = max(x1, x2)
+	local minX = min(x1, x2)
+	return function(x) {
+		if (clump_left && x < minX) x = minX
+		else if (clump_right && x > maxX) x = maxX
+		return a*x + b
+	}
+}
+
+quadratic_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
+	x1 = x1.tofloat()
+	y1 = y1.tofloat()
+	x2 = x2.tofloat()
+	y2 = y2.tofloat()
+	x3 = x3.tofloat()
+	y3 = y3.tofloat()
+	local y2y3 = y2 - y3
+	local y1y3 = y1 - y3
+	local y1y2 = y1 - y2
+	local x2x3 = x2 - x3
+	local x1x3 = x1 - x3
+	local x1x2 = x1 - x2
+	local xDifs = x1x2*x1x3*x2x3
+	local a = (x1*-y2y3 + x2*y1y3 + x3*-y1y2) / xDifs
+	local b = (x1*x1*y2y3 + x2*x2*-y1y3 + x3*x3*y1y2) / xDifs
+	local c = (x2*(x1*x1*y3-x3*x3*y1) + x2*x2*(x3*y1-x1*y3) + x1*x3*y2*-x1x3) / xDifs
+	local maxX = max(x1, max(x2, x3))
+	local minX = min(x1, min(x2, x3))
+	return function(x) {
+		if (clump_left && x < minX) x = minX
+		else if (clump_right && x > maxX) x = maxX
+		return a*x*x + b*x + c
+	}
+}
+
+bilinear_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
+	x1 = x1.tofloat()
+	y1 = y1.tofloat()
+	x2 = x2.tofloat()
+	y2 = y2.tofloat()
+	x3 = x3.tofloat()
+	y3 = y3.tofloat()
+	if (x1 >= x2 || x2 >= x3) throw "wrong x1 x2 x3"
+	local a1 = (y2 - y1)/(x2 - x1)
+	local b1 = y1 - a1*x1
+	local a2 = (y3 - y2)/(x3 - x2)
+	local b2 = y2 - a2*x2
+	return function(x) {
+		if (clump_left && x < x1) return y1
+		if (x <= x2) return a1*x + b1
+		if (clump_right && x > x3) return y3
+		return a2*x + b2
+	}
 }
 
 ///////////////////////////////
@@ -1593,16 +1680,17 @@ delayed_call <- function(func, delay, scope_or_ent = null) {
 	local scope = null
 	if ("CBaseEntity" in getroottable() && scope_or_ent instanceof ::CBaseEntity) {
 		ent = scope_or_ent
-		if (deleted_ent(ent))
+		if (invalid(ent))
 			throw "trying to register a delayed call for deleted entity"
 		ent.ValidateScriptScope()
 		local scope_key = "__dc" + key
 		ent.GetScriptScope().scope_key <- function() {
-			try {
+			func()
+			/*try {
 				func()
 			} catch(exception) {
 				error(format("Exception for delayed call (%s) [ent %s]: %s\n", key, ent_to_str(ent), exception));
-			}
+			}*/
 			delete ::__dc_ents[key]
 		}
 		::__dc_ents[key] <- {
@@ -1638,11 +1726,12 @@ worldspawn <- Entities.FindByClassname(null, "worldspawn")
 	local time = Time()
 	foreach (key, table in ::__dc_func) {
 		if (table.time <= time) {
-			try {
+			table.func()
+			/*try {
 				table.func()
 			} catch(exception) {
 				error(format("Exception for delayed call (%s): %s\n", key, exception))
-			}
+			}*/
 			delete ::__dc_func[key]
 		}
 	}
@@ -1865,7 +1954,7 @@ if function returns false, ticker will be removed
 
 register_ticker <- function(key, func) {
 	if (!key) key = UniqueString();
-	if (!__ticker_ent || deleted_ent(__ticker_ent))
+	if (!__ticker_ent || invalid(__ticker_ent))
 		__ticker_init();
 	__tickers[key] <- {
 		func = func,
@@ -1884,7 +1973,7 @@ ticker_info <- {
 }
 
 __ticker_init <- function() {
-	if (__ticker_ent && !deleted_ent(__ticker_ent))
+	if (__ticker_ent && !invalid(__ticker_ent))
 		return;
 	__ticker_ent = SpawnEntityFromTable("logic_timer", {
 		RefireTime = 0,
@@ -2131,7 +2220,7 @@ remove_task_on_entity <- function(ent) {
 
 remove_all_tasks_on_entities <- function() {
 	foreach(ent in __tasks_ent)
-		if (!deleted_ent(ent))
+		if (!invalid(ent))
 			AddThinkToEnt(ent, null);
 	__tasks_ent <- {}
 }

@@ -40,6 +40,7 @@
 									type can be int constant: NUMBER (integer or float), FUNC (function or native function), STRING or BOOL constants
 									type can be array of string types
  unique_str_id(ent)					converts entity to string, suitable for using as string key
+ del(var, scope)					if var is in scope, deletes it
  
  TASK & CALLBACKS SHEDULING
  delayed_call(func, delay)					runs func after delay; pass scope or entity as additional param; returns key;
@@ -908,6 +909,11 @@ unique_str_id <- function(ent) {
 	return ent.GetEntityHandle().tointeger()
 }
 
+del <- function(var, scope) {
+	if (var in scope)
+		delete scope[var]
+}
+
 //////////////////////////
 
 /*
@@ -1460,8 +1466,8 @@ create_particles <- function(effect_name, origin_or_parent, duration = -1, attac
 	local effect = SpawnEntityFromTable("info_particle_system", {
 		effect_name = effect_name,
 		origin = origin ? origin : parent.GetOrigin(),
+		start_active = 1
 	});
-	DoEntFire("!self", "Start", "", 0, null, effect)
 	if (parent) DoEntFire("!self", "SetParent", "!activator", 0, parent, effect)
 	if (duration != -1) DoEntFire("!self", "Kill", "", duration, null, effect);
 	if (attachment) {
@@ -1685,13 +1691,13 @@ delayed_call <- function(func, delay, scope_or_ent = null) {
 		ent.ValidateScriptScope()
 		local scope_key = "__dc" + key
 		ent.GetScriptScope().scope_key <- function() {
+			delete ::__dc_ents[key]
 			func()
 			/*try {
 				func()
 			} catch(exception) {
 				error(format("Exception for delayed call (%s) [ent %s]: %s\n", key, ent_to_str(ent), exception));
 			}*/
-			delete ::__dc_ents[key]
 		}
 		::__dc_ents[key] <- {
 			ent = ent,
@@ -1726,13 +1732,14 @@ worldspawn <- Entities.FindByClassname(null, "worldspawn")
 	local time = Time()
 	foreach (key, table in ::__dc_func) {
 		if (table.time <= time) {
-			table.func()
+			local func = table.func
+			delete ::__dc_func[key]
+			func()
 			/*try {
 				table.func()
 			} catch(exception) {
 				error(format("Exception for delayed call (%s): %s\n", key, exception))
 			}*/
-			delete ::__dc_func[key]
 		}
 	}
 }

@@ -27,16 +27,25 @@ printl("Well, okay")
 if (!("IncludeScriptDefault" in getroottable())) {
 	::IncludeScriptDefault <- IncludeScript
 	::IncludeScript <- function(name, scope = null) {
+		local return_value
 		if (getstackinfos(2).src.find("vscripts/scriptedmode")) {
 			//calling IncludeScript from scriptedmode.nut, should always return true
 			try {
 				if (!IncludeScriptDefault(name, scope))
-					error("WARNING! Cannot include \"" + name + "\", file is missing or empty\n")
+					printl("WARNING! Cannot include \"" + name + "\", file is missing or empty")
 			} catch (exception) {}
-			return true
+			return_value = true
 		} else {
-			return IncludeScriptDefault(name, scope)
+			return_value = IncludeScriptDefault(name, scope)
 		}
+		//check if ScriptMode_OnGameplayStart() was changed (for Admin System compatibility)
+		if ("__valid_finisher__" in getroottable() && ::__valid_finisher__ != ::g_MapScript.ScriptMode_OnGameplayStart) {
+			printl("ScriptedMode Enabler: restoring ScriptMode_OnGameplayStart()")
+			::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
+			printl("Shit happened after including " + name)
+			::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
+		}
+		return return_value
 	}
 }
 
@@ -65,7 +74,7 @@ local hooks = {
 	}
 }
 
-local err_logger = function(exception, caller_name) {
+local err_logger = function(exception) {
 	error("[ScriptedMode hooks] AN ERROR HAS OCCURED [" + exception + "]\n\nCALLSTACK\n")
 	for(local i = 2;;i++) {
 		local stack = getstackinfos(i)
@@ -74,28 +83,71 @@ local err_logger = function(exception, caller_name) {
 	}
 }
 
-foreach(_name, _ in hooks) {
-	local name = _name //variable should be local
+::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
+//first and second calls
+::__valid_finisher__ <- function(modename, mapname) {
+	local return_value = ::ScriptMode_OnGameplayStartWrapped(modename, mapname)
+	::ScriptedModeEnabler_Finish()
+	return return_value
+}
+::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
+
+foreach(name, _ in hooks)
 	getroottable()[name + "_hooks"] <- []
-	g_MapScript[name] <- function(...) {
-		if(developer()) printl("ScriptedMode event fired: " + name)
-		local last_result = null
-		foreach(hook in getroottable()[name + "_hooks"]) {
-			try {
-				local args = [this]
-				args.extend(vargv)
-				last_result = hook.acall(args)
-				if (!last_result && name != "AllowBash") break
-			} catch (exception) {
-				err_logger(exception)
-			}
+
+::dummyhit <- @(...)printl("hit!!")
+::ScriptedModeEnabler_Finish <- function() {
+	::IncludeScript <- ::IncludeScriptDefault
+	foreach(_name, _ in hooks) {
+		local name = _name //variable should be local
+		if (name in getroottable()) {
+			getroottable()[name + "_hooks"].push(getroottable()[name])
+			delete getroottable()[name]
+			printl("ScriptedMode Enabler: found hook " + name + " in root table, moved it to listeners")
 		}
-		return last_result
+		if (name in ::g_MapScript) {
+			getroottable()[name + "_hooks"].push(::g_MapScript[name])
+			delete ::g_MapScript[name]
+			printl("ScriptedMode Enabler: found hook " + name + " in ::g_MapScript, moved it to listeners")
+		}
+		if (name in ::g_ModeScript) {
+			getroottable()[name + "_hooks"].push(::g_ModeScript[name])
+			delete ::g_ModeScript[name]
+			printl("ScriptedMode Enabler: found hook " + name + " in ::g_ModeScript, moved it to listeners")
+		}
+		local func = function(...) {
+			if(developer()) printl("ScriptedMode event fired: " + name)
+			local last_result = null
+			foreach(hook in getroottable()[name + "_hooks"]) {
+				try {
+					local args = [this]
+					args.extend(vargv)
+					last_result = hook.acall(args)
+					if (!last_result && name != "AllowBash") break
+				} catch (exception) {
+					err_logger(exception)
+				}
+			}
+			return last_result
+		}
+		::g_ModeScript[name] <- func
+		::g_MapScript[name] <- func   //do we need this?
+		getroottable()[name] <- func   //do we need this?
+		printl("ScriptedMode Enabler: registered hook for " + name)
 	}
-	printl("ScriptedMode Enabler: registered hook for " + name)
+	
+	printl("ScriptedMode Enabler including custom scripts...")
+	printl("--------------------------------------------------------")
+	IncludeScipts.call(getroottable())
+	printl("--------------------------------------------------------")
+	printl("ScriptedMode Enabler included custom scripts")
 }
 
-IncludeScipts()
+// do not IncludeScript files here directly, or it hangs for some reason
+// wish to fix but was too tired upon a midnight dreary
+// problem here: ::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
+
+ScriptedMode_Hook("AllowTakeDamage", @(p)printl("hit"))
 
 ///////////////////////////////////////////////////////////////////////////
 //                       End of modified code

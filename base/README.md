@@ -46,3 +46,5 @@ If, for example `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` functio
 The last big problem is VSLib compatibility. This library completely overrides functions `ScriptMode_OnActivate`, `ScriptMode_OnGameplayStart`, `ScriptMode_SystemCall`, `Update` (instead of hooking them): all functions that are called after step 4. The VSLib itself is often loaded on steps 2 (different mods) or 3 (admin system). Also we can't use delayed calls in sm_utilities, because in dedicated server delay between step 4 and step 9 may be zero.
 
 But we need to run our code AFTER VSLib code, to override ScriptedMode hooks that are defined in it. In other words, to override ScriptedMode hooks our code should be run after all other `IncludeScript()` statements but not later than `ScriptMode_OnActivate()` is called.
+
+Hacky solution: since we already have `IncludeScript()` hook, after including a script we can check if `ScriptMode_OnActivate()` was changed. If so, we make a backflip: restoring it to saved function and moving new function to `ScriptMode_OnActivateWrapped`.

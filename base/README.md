@@ -25,7 +25,7 @@ If we create a workshop addon, that contains modified sm_utilities.nut, which in
 
 As for ScriptedMode, we should have coop.nut ... onslaught.nut files present, but it will again break compatibility (at least addons will be marked red). Hopefully, there is a solution. Since sm_utilities.nut is included earlier than modename.nut, we can override `IncludeScript()` function so that it will always return true. In this case Scripted Mode will be activated even without modename.nut file.
 
-The next problem is ScriptedMode hooks (`AllowTakeDamage()`, `AllowBash()` and others), that can be overwritten by next script files. We solve this problem by searching for these functions after some delay and replacing them. Custom VScripts Loader is registering new function `ScriptedMode_Hook()` than is able to register multiple listeners for ScriptedMode events.
+The next problem is ScriptedMode hooks (`AllowTakeDamage()`, `AllowBash()` and others), that can be overwritten by next script files. We solve this problem by searching for these functions on ScriptMode activation and replacing them. Custom VScripts Loader is registering new function `ScriptedMode_Hook()` than is able to register multiple listeners for ScriptedMode events.
 
 Usage:
 

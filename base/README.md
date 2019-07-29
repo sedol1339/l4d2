@@ -41,4 +41,4 @@ Usage:
 
 `ScriptedMode_Hook("UserConsoleCommand", function(player, args))`
 
-Fir example, if `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.
+If, for example `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.

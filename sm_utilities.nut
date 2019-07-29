@@ -1,7 +1,7 @@
-///////////////////////////////////////////////////////////////////////////
-//			     ScriptedMode Enabler & Script loader
-//                           by kapkan
-//                      version 29-Jul-2019
+////////////////////////////////////////////////////////////////////////////////////////////////
+//                          ScriptedMode Enabler & Script loader
+//                                      by kapkan
+//                                  version 29-Jul-2019
 //
 // add your script to IncludeScipts() function to make it work
 // 
@@ -15,7 +15,7 @@
 //
 // details: https://developer.valvesoftware.com/wiki/List_of_L4D2_Script_Functions#Hooks_4
 //
-///////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 local function IncludeScipts() {
 	IncludeScript("kapkan/lib")

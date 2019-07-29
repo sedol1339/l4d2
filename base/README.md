@@ -24,3 +24,16 @@ So, it's not possible to change scriptedmode.nut, director_base.nut, coop.nut ..
 If we create a workshop addon, that contains modified sm_utilities.nut, which includes all dependent scripts, they will be fully compatible with each other and with other workshop addons.
 
 As for ScriptedMode, we should have coop.nut ... onslaught.nut files present, but it will again break compatibility (at least addons will be marked red). Hopefully, there is a solution. Since sm_utilities.nut is included earlier than modename.nut, we can override `IncludeScript()` function so that it will always return true. In this case Scripted Mode will be activated even without modename.nut file.
+
+The last problem is ScriptedMode hooks (`AllowTakeDamage()`, `AllowBash()` and others), that can be overwritten by next script files. We solve this problem by searching for these functions after some delay and replacing them. Custom VScripts Loader is registering new function `ScriptedMode_Hook()` than is able to register multiple listeners for ScriptedMode events.
+
+Usage:
+
+``     ScriptedMode_Hook("AllowTakeDamage", function(dmgTable))
+     ScriptedMode_Hook("AllowBash", function(basher, bashee))
+     ScriptedMode_Hook("BotQuery", function(flag, bot, val))
+     ScriptedMode_Hook("CanPickupObject", function(object))
+     ScriptedMode_Hook("InterceptChat", function(msg, speaker))
+     ScriptedMode_Hook("UserConsoleCommand", function(player, args))``
+
+Fir example, if `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.

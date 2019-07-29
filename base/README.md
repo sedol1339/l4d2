@@ -21,3 +21,6 @@ After a little research I've listed all changes that popular workshop mods make 
 
 So, it's not possible to change scriptedmode.nut, director_base.nut, coop.nut ... onslaught.nut files if we want full compatibility with other workshop mods (without even marking them red in addons list). But sm_utilities.nut and sm_spawn.nut files are free for edit.
 
+If we create a workshop addon, that contains modified sm_utilities.nut, which includes all dependent scripts, they will be fully compatible with each other and with other workshop addons.
+
+As for ScriptedMode, we should have coop.nut ... onslaught.nut files present, but it will again break compatibility (at least addons will be marked red). Hopefully, there is a solution. Since sm_utilities.nut is included earlier than modename.nut, we can override `IncludeScript()` function so that it will always return true. In this case Scripted Mode will be activated even without modename.nut file.

@@ -42,3 +42,5 @@ Usage:
 `ScriptedMode_Hook("UserConsoleCommand", function(player, args))`
 
 If, for example `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.
+
+The last big problem is VSLib compatibility. This library overrides `ScriptMode_OnActivate`, `ScriptMode_OnGameplayStart`, `ScriptMode_SystemCall`, `Update`: all functions that are called after step 4. The VSLib itself can be loaded on steps 2 (different mods) or 3 (admin system).

@@ -30,10 +30,15 @@ The last problem is ScriptedMode hooks (`AllowTakeDamage()`, `AllowBash()` and o
 Usage:
 
 `ScriptedMode_Hook("AllowTakeDamage", function(dmgTable))`
+
 `ScriptedMode_Hook("AllowBash", function(basher, bashee))`
+
 `ScriptedMode_Hook("BotQuery", function(flag, bot, val))`
+
 `ScriptedMode_Hook("CanPickupObject", function(object))`
+
 `ScriptedMode_Hook("InterceptChat", function(msg, speaker))`
+
 `ScriptedMode_Hook("UserConsoleCommand", function(player, args))`
 
 Fir example, if `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.

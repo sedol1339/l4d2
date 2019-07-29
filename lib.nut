@@ -272,11 +272,6 @@
 
 ///////////////////////////////
 
-//don't change this line
-include_lib <- function() {
-
-///////////////////////////////
-
 if (!("forced" in this)) forced <- false
 
 local constants = getconsttable();
@@ -630,9 +625,15 @@ constants.INF <- 10e100000000
 
 constants.RAD_TO_DEG <- 57.2957795
 
-g_ModeScript.InjectTable(constants, this);
+//g_ModeScript.InjectTable(constants, this); //may be null
+foreach (constant, value in constants)
+	this[constant] <- value
 
+///////////////////////////////
+
+local overwrite_lib
 if (!("__lib" in this)) {
+	overwrite_lib = false
 	if (this == getroottable())
 		ln <- log; //logarifm
 		
@@ -641,7 +642,11 @@ if (!("__lib" in this)) {
 	if (!("__lib_scopes" in getroottable()))
 		::__lib_scopes <- {};
 	::__lib_scopes[__lib] <- this;
+} else {
+	overwrite_lib = true
 }
+
+///////////////////////////////
 
 log <- printl
 
@@ -3155,15 +3160,47 @@ hud <- {
 
 ///////////////////////////////
 
-//don't change this lines
+local gettablename = function() {
+	if (this == getroottable()) return "root table"
+	foreach(key, val in getroottable()) {
+		if (key == "__lib_scopes") continue
+		if (val == this) {
+			return key
+		} else {
+			try {
+				foreach(key2, val2 in val) {
+					if (val2 == this) {
+						return key + "." + key2
+					} else {
+						try {
+							foreach(key3, val3 in val2) {
+								if (val3 == this) {
+									return key + "." + key2 + "." + key3
+								} else {
+									try {
+										foreach(key4, val4 in val3) {
+											if (val4 == this) {
+												return key + "." + key2 + "." + key3 + "." + key4
+											} else {
+											
+											}
+										}
+									} catch (e3) {}
+								}
+							}
+						} catch (e2) {}
+					}
+				}
+			} catch (e) {}
+		}
+	}
+	return "?"
 }
-include_lib()
 
-///////////////////////////////
+local tablename = gettablename()
+tablename = tablename ? tablename : (this ? this.tostring() : "null")
 
-lib <- function() {
-	forced <- true
-	IncludeScript("kapkan/lib")
-}
-
-log("library included");
+log("library included")
+log("\t in table [" + tablename + "]")
+log("\t with key " + __lib);
+log("\t was overwritten: " + overwrite_lib);

@@ -11,7 +11,7 @@ I edited sm_utilities.nut, that remained untouched by all VScript addons, and ad
 
 I'll start a detailed explanation by demonstrating script loading order in L4D2
 
-![img](https://pp.userapi.com/c858420/v858420346/2b9e8/BJhp4TG3wDc.jpg)
+![img](https://pp.userapi.com/c855432/v855432672/a4df3/1j0WosClEa8.jpg)
 
 As can be seen, scripted mode is activated only when `ScriptMode_Init()` function returns true. This happens only when `IncludeScript(modename, g_ModeScript)` returns true, and this happens when file modename.nut or modename.nuc exists and is not empty.
 

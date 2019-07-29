@@ -1,4 +1,4 @@
-**Code for Custom VScripts Loader**
+**Code for compatible Custom VScripts Loader**
 -------------------------------------
 
 As an introduction I will remind that since EMS Update a lot of Left 4 Dead 2 VScripts have been released, but there's still a large problem over the scripting community. Valve didn't make a folder for auto-executing scripts, so scripters had to replace scriptedmode.nut file in their addons, which led to a poor compatibility of addons. In short:
@@ -20,3 +20,4 @@ After a little research I've listed all changes that popular workshop mods make 
 ![img](https://pp.userapi.com/c855416/v855416346/a6f67/hYocYWPuOI4.jpg)
 
 So, it's not possible to change scriptedmode.nut, director_base.nut, coop.nut ... onslaught.nut files if we want full compatibility with other workshop mods (without even marking them red in addons list). But sm_utilities.nut and sm_spawn.nut files are free for edit.
+

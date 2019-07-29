@@ -17,6 +17,6 @@ As can be seen, scripted mode is activated only when `ScriptMode_Init()` functio
 
 After a little research I've listed all changes that popular workshop mods make to default VScript files.
 
-![img](https://pp.userapi.com/c858420/v858420346/2b9f0/2WAZiTjAmmk.jpg)
+![img](https://pp.userapi.com/c855416/v855416346/a6f67/hYocYWPuOI4.jpg)
 
 So, it's not possible to change scriptedmode.nut, director_base.nut, coop.nut ... onslaught.nut files if we want full compatibility with other workshop mods (without even marking them red in addons list). But sm_utilities.nut and sm_spawn.nut files are free for edit.

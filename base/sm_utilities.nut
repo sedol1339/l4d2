@@ -83,8 +83,8 @@ local err_logger = function(exception) {
 	}
 }
 
-::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
 //first and second calls
+::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
 ::__valid_finisher__ <- function(modename, mapname) {
 	local return_value = ::ScriptMode_OnGameplayStartWrapped(modename, mapname)
 	::ScriptedModeEnabler_Finish()
@@ -95,7 +95,6 @@ local err_logger = function(exception) {
 foreach(name, _ in hooks)
 	getroottable()[name + "_hooks"] <- []
 
-::dummyhit <- @(...)printl("hit!!")
 ::ScriptedModeEnabler_Finish <- function() {
 	::IncludeScript <- ::IncludeScriptDefault
 	foreach(_name, _ in hooks) {
@@ -116,7 +115,8 @@ foreach(name, _ in hooks)
 			printl("ScriptedMode Enabler: found hook " + name + " in ::g_ModeScript, moved it to listeners")
 		}
 		local func = function(...) {
-			if(developer()) printl("ScriptedMode event fired: " + name)
+			if(Convars.GetFloat("developer") == 2)
+				printl("ScriptedMode event fired: " + name)
 			local last_result = null
 			foreach(hook in getroottable()[name + "_hooks"]) {
 				try {
@@ -146,8 +146,6 @@ foreach(name, _ in hooks)
 // do not IncludeScript files here directly, or it hangs for some reason
 // wish to fix but was too tired upon a midnight dreary
 // problem here: ::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
-
-ScriptedMode_Hook("AllowTakeDamage", @(p)printl("hit"))
 
 ///////////////////////////////////////////////////////////////////////////
 //                       End of modified code

@@ -19,6 +19,10 @@
  log(str)						prints to console
  say_chat(str, ...)				prints to chat for all players; if more than one argument, using formatting like say_chat(format(str, ...))	
 								this function uses multiple Say() statements to print long strings
+ debug_enable()					enables debug (pass false to disable)
+ debug(str)						prints string to console if debug=true
+ debug_t(str)					prints string to console with \t if debug=true
+ degug(func)					runs function if debug=true
  log_table(table|class|array)	dumps deep structure of table (better version of DeepPrintTable); additinal param: max_depth
  var_to_str(var)				converts any variable to string (better version of tostring())
  ent_to_str(ent)				converts entity to string (prints entity index and targetname)
@@ -660,6 +664,29 @@ say_chat <- function(message, ...) {
 	for (local i = 0; i < message.len(); i += MAX_LENGTH)
 		Say(null, message.slice(i, min(message.len(), i + MAX_LENGTH)), false)
 	//TODO break by words
+}
+
+is_debug <- false
+
+debug_enable <- function(enable = true) {
+	is_debug = enable
+}
+
+debug <- function(str_or_func) {
+	if (is_debug) {
+		if (typeof(str_or_func) == "function" || typeof(str_or_func) == "native function")
+			str_or_func()
+		else
+			log(str_or_func)
+	}
+}
+
+debug_t <- function(str) {
+	if (is_debug) { print("\t"); printl(str) }
+}
+
+degug <- function(func) {
+	if (is_debug) func()
 }
 
 /* for example output: log_table(getroottable()) */
@@ -3160,7 +3187,7 @@ hud <- {
 
 ///////////////////////////////
 
-local gettablename = function() {
+get_current_table_name <- function() {
 	if (this == getroottable()) return "root table"
 	foreach(key, val in getroottable()) {
 		if (key == "__lib_scopes") continue
@@ -3197,7 +3224,7 @@ local gettablename = function() {
 	return "?"
 }
 
-local tablename = gettablename()
+local tablename = get_current_table_name()
 tablename = tablename ? tablename : (this ? this.tostring() : "null")
 
 log("library included")

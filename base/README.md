@@ -48,3 +48,5 @@ The last big problem is VSLib compatibility. This library completely overrides f
 But we need to run our code AFTER VSLib code, to override ScriptedMode hooks that are defined in it. In other words, to override ScriptedMode hooks our code should be run after all other `IncludeScript()` statements but not later than `ScriptMode_OnActivate()` is called.
 
 Hacky solution: since we already have `IncludeScript()` hook, after including a script we can check if `ScriptMode_OnActivate()` was changed. If so, we make a backflip: restoring it to saved function and moving new function to `ScriptMode_OnActivateWrapped`.
+
+Finally this is working

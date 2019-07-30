@@ -7,7 +7,30 @@ As an introduction I will remind that since EMS Update a lot of Left 4 Dead 2 VS
 2. Even compatible scripts are often colored RED in addons list
 3. Hooks (`AllowTakeDamage` and others) are not always available
 
+--------------------
+
+**What is this script for?**
+
+This addon solves all three problems. I've made this addon for my scripts, but any third party developer can use Custom VScripts Loader for his script. Benefits that it gives:
+1. Your script will be compatible with each other and with almost all addons in workshop, including Admin System, CSS unlocker, Map Entities Extensions, Alternate Difficulties mod, Custom Weapon Base, First Person Animations, Speedrunner tools etc.
+2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
+3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) using new script function `ScriptedMode_Hook()`.
+
+This addon DOES NOT TOUCH scriptedmode.nut file!
+
 I edited sm_utilities.nut, that remained untouched by all VScript addons, and added some custom code which always activates Scripted Mode (even without coop.nut, versus.nut and other stubs). But I'm not a magican and cannot create a folder for auto-executing scripts. So, links to script files should be added manually.
+
+--------------------
+
+**How to use**
+
+If you want to use Custom VScripts Loader for your custom mode, map or other script, do the following:
+1. When developing your mod, download sm_utilities.nut from this repository, place it in scripts/vscripts folder and add `IncludeScript` statement for your script to `IncludeScipts()` function in sm_utilities.nut. When you run a map, it will be automatically executed, see console for details.
+2. When you want to release your mod, just tell me to add your script into Custom VScripts Loader, add dependency in workshop and write in description, that this mod requires Custom VScripts Loader.
+
+--------------------
+
+**How does it work**
 
 I'll start a detailed explanation by demonstrating script loading order in L4D2
 

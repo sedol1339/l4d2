@@ -24,27 +24,51 @@ local function IncludeScipts() {
 
 printl("Well, okay")
 
+local err_logger = function(exception) {
+	error("[Custom VScripts Loader] AN ERROR HAS OCCURED [" + exception + "]\n\nCALLSTACK\n")
+	for(local i = 2;;i++) {
+		local stack = getstackinfos(i)
+		if (!stack) break
+		error("*FUNCTION [" + stack.func + "] " + stack.src + " line [" + stack.line + "]\n")
+	}
+}
+
+
+printl("Custom VScripts Loader: started code execution")
 if (!("IncludeScriptDefault" in getroottable())) {
+	printl("Custom VScripts Loader: overriding IncludeScript() function")
 	::IncludeScriptDefault <- IncludeScript
 	::IncludeScript <- function(name, scope = null) {
 		local return_value
+		if (getstackinfos(2).src.find("vscripts/sm_utilities")) {
+			printl("Custom VScripts Loader: including \"" + name + "\" to scope " + scope + " from sm_utilities.nut")
+			return_value = IncludeScriptDefault(name, scope)
+			if (!return_value)
+				printl("Custom VScripts Loader: Cannot include \"" + name + "\", file is missing or empty")
+			return return_value
+		}
 		if (getstackinfos(2).src.find("vscripts/scriptedmode")) {
 			//calling IncludeScript from scriptedmode.nut, should always return true
+			printl("Custom VScripts Loader: including \"" + name + "\" to scope " + scope + " from scriptedmode.nut")
 			try {
-				if (!IncludeScriptDefault(name, scope))
-					printl("WARNING! Cannot include \"" + name + "\", file is missing or empty")
-			} catch (exception) {}
+				IncludeScriptDefault(name, scope)
+			} catch (exception) {
+				err_logger(exception)
+				printl("Custom VScripts Loader: exception while loading \"" + name + "\", still returning true to scriptedmode.nut")
+			}
 			return_value = true
 		} else {
+			printl("Custom VScripts Loader: including \"" + name + "\" to scope " + scope)
 			return_value = IncludeScriptDefault(name, scope)
 		}
-		//check if ScriptMode_OnGameplayStart() was changed (for Admin System compatibility)
+		//check if ScriptMode_OnGameplayStart() was changed (for VSLib compatibility)
 		if ("__valid_finisher__" in getroottable() && ::__valid_finisher__ != ::g_MapScript.ScriptMode_OnGameplayStart) {
-			printl("ScriptedMode Enabler: restoring ScriptMode_OnGameplayStart()")
+			printl("Custom VScripts Loader: restoring ScriptMode_OnGameplayStart(), shit happened after including " + name)
 			::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
-			printl("Shit happened after including " + name)
 			::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
 		}
+		if (!return_value)
+			printl("Custom VScripts Loader: Cannot include \"" + name + "\", file is missing or empty")
 		return return_value
 	}
 }
@@ -60,33 +84,28 @@ local hooks = {
 
 ::ScriptedMode_Hook <- function(name, func) {
 	if (typeof(func) != "function" && typeof(func) != "native function" && !func.rawin("_call")) {
-		throw "Cannot hook event \"" + name + "\": second argument is not a valid function"
+		throw "Custom VScripts Loader: Cannot hook event \"" + name + "\": second argument is not a valid function"
 	}
 	local infos = func.getinfos()
 	local argnum = ("typecheck" in infos) ? (infos.typecheck.len() - 1) : (infos.parameters.len() - 1)
 	if (name in hooks) {
 		if (argnum != hooks[name]) {
-			throw "Cannot hook event \"" + name + "\": function should accept " + hooks[name] + " argument(s)"
+			throw "Custom VScripts Loader: Cannot hook event \"" + name + "\": function should accept " + hooks[name] + " argument(s)"
 		}
 		getroottable()[name + "_hooks"].push(func)
+		printl("Custom VScripts Loader: Registered listener " + func + " for event \"" + name + "\"")
+		printl("Custom VScripts Loader: from " + getstackinfos(2).src)
 	} else {
-		throw "Cannot hook unknown event \"" + name + "\""
-	}
-}
-
-local err_logger = function(exception) {
-	error("[ScriptedMode hooks] AN ERROR HAS OCCURED [" + exception + "]\n\nCALLSTACK\n")
-	for(local i = 2;;i++) {
-		local stack = getstackinfos(i)
-		if (!stack) break
-		error("*FUNCTION [" + stack.func + "] " + stack.src + " line [" + stack.line + "]\n")
+		throw "Custom VScripts Loader: Cannot hook unknown event \"" + name + "\""
 	}
 }
 
 //first and second calls
 ::ScriptMode_OnGameplayStartWrapped <- ::g_MapScript.ScriptMode_OnGameplayStart.bindenv(::g_MapScript)
 ::__valid_finisher__ <- function(modename, mapname) {
+	printl("Custom VScripts Loader: running wrapped ScriptMode_OnGameplayStart()")
 	local return_value = ::ScriptMode_OnGameplayStartWrapped(modename, mapname)
+	printl("Custom VScripts Loader: running ScriptedModeEnabler_Finish()")
 	::ScriptedModeEnabler_Finish()
 	return return_value
 }
@@ -96,23 +115,51 @@ foreach(name, _ in hooks)
 	getroottable()[name + "_hooks"] <- []
 
 ::ScriptedModeEnabler_Finish <- function() {
-	::IncludeScript <- ::IncludeScriptDefault
+	printl("Custom VScripts Loader: overriding IncludeScript() before including custom scripts")
+	::IncludeScriptDebug <- function(name, scope = null) {
+		::IncludeScript <- IncludeScriptDefault
+		local result
+		try {
+			result = IncludeScriptDefault(name, scope)
+		} catch (exception) {
+			err_logger(exception)
+		}
+		if (!result)
+			printl("Custom VScripts Loader: cannot include \"" + name + "\": script is not installed or exception occured")
+		else
+			printl("Custom VScripts Loader: included \"" + name + "\" successfully")
+		::IncludeScript <- IncludeScriptDebug
+		return result
+	}
+	::IncludeScript <- IncludeScriptDebug
+	
+	printl("--------------------------------------------------------")
+	printl("Custom VScripts Loader including custom scripts...")
+	printl("--------------------------------------------------------")
+	IncludeScipts.call(getroottable())
+	printl("--------------------------------------------------------")
+	printl("Custom VScripts Loader included custom scripts")
+	printl("--------------------------------------------------------")
+	
+	printl("Custom VScripts Loader: restoring IncludeScript()")
+	::IncludeScript <- IncludeScriptDefault
+	
 	foreach(_name, _ in hooks) {
 		local name = _name //variable should be local
 		if (name in getroottable()) {
 			getroottable()[name + "_hooks"].push(getroottable()[name])
 			delete getroottable()[name]
-			printl("ScriptedMode Enabler: found hook " + name + " in root table, moved it to listeners")
+			printl("Custom VScripts Loader: found hook " + name + " in root table, moved it to listeners")
 		}
 		if (name in ::g_MapScript) {
 			getroottable()[name + "_hooks"].push(::g_MapScript[name])
 			delete ::g_MapScript[name]
-			printl("ScriptedMode Enabler: found hook " + name + " in ::g_MapScript, moved it to listeners")
+			printl("Custom VScripts Loader: found hook " + name + " in ::g_MapScript, moved it to listeners")
 		}
 		if (name in ::g_ModeScript) {
 			getroottable()[name + "_hooks"].push(::g_ModeScript[name])
 			delete ::g_ModeScript[name]
-			printl("ScriptedMode Enabler: found hook " + name + " in ::g_ModeScript, moved it to listeners")
+			printl("Custom VScripts Loader: found hook " + name + " in ::g_ModeScript, moved it to listeners")
 		}
 		local func = function(...) {
 			if(Convars.GetFloat("developer") == 2)
@@ -133,15 +180,11 @@ foreach(name, _ in hooks)
 		::g_ModeScript[name] <- func
 		::g_MapScript[name] <- func   //do we need this?
 		getroottable()[name] <- func   //do we need this?
-		printl("ScriptedMode Enabler: registered hook for " + name)
+		printl("Custom VScripts Loader: registered hook for \"" + name + "\"")
 	}
-	
-	printl("ScriptedMode Enabler including custom scripts...")
-	printl("--------------------------------------------------------")
-	IncludeScipts.call(getroottable())
-	printl("--------------------------------------------------------")
-	printl("ScriptedMode Enabler included custom scripts")
 }
+
+printl("Custom VScripts Loader: finished code execution")
 
 // do not IncludeScript files here directly, or it hangs for some reason
 // wish to fix but was too tired upon a midnight dreary

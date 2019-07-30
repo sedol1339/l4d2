@@ -14,7 +14,7 @@ As an introduction I will remind that since EMS Update a lot of Left 4 Dead 2 VS
 This addon solves all three problems. I've made this addon for my scripts, but any third party developer can use Custom VScripts Loader for his script. Benefits that it gives:
 1. Your script will be compatible with each other and with almost all addons in workshop, including Admin System, CSS unlocker, Map Entities Extensions, Alternate Difficulties mod, Custom Weapon Base, First Person Animations, Speedrunner tools etc.
 2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
-3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) using new script function `ScriptedMode_Hook()`.
+3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) using new script function `ScriptMode_Hook()`.
 
 This addon DOES NOT TOUCH scriptedmode.nut file!
 

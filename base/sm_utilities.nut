@@ -5,24 +5,39 @@
 //
 // add your script to IncludeScipts() function to make it work
 // 
-// new function ScriptedMode_Hook() added, usage:
-//     ScriptedMode_Hook("AllowTakeDamage", function(dmgTable))
-//     ScriptedMode_Hook("AllowBash", function(basher, bashee))
-//     ScriptedMode_Hook("BotQuery", function(flag, bot, val))
-//     ScriptedMode_Hook("CanPickupObject", function(object))
-//     ScriptedMode_Hook("InterceptChat", function(msg, speaker))
-//     ScriptedMode_Hook("UserConsoleCommand", function(player, args))
+// new function ScriptMode_Hook() added, usage:
+//     ScriptMode_Hook("AllowTakeDamage", function(dmgTable))
+//     ScriptMode_Hook("AllowBash", function(basher, bashee))
+//     ScriptMode_Hook("BotQuery", function(flag, bot, val))
+//     ScriptMode_Hook("CanPickupObject", function(object))
+//     ScriptMode_Hook("InterceptChat", function(msg, speaker))
+//     ScriptMode_Hook("UserConsoleCommand", function(player, args))
 //
 // details: https://developer.valvesoftware.com/wiki/List_of_L4D2_Script_Functions#Hooks_4
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-local function IncludeScipts() {
+local function IncludeSciptsManually() {
+	
+	///////////////////////////////////
+	//   all manual includes go here
+	///////////////////////////////////
+	
 	IncludeScript("kapkan/lib")
 	IncludeScript("kapkan/upgrades/core")
+	IncludeScript("test4")
+	
 }
 
 printl("Well, okay")
+
+printl("Custom VScripts Loader: started code execution")
+
+//getting list of scripts to auto-include
+
+
+
+//enabling scriptedmode
 
 local err_logger = function(exception) {
 	error("[Custom VScripts Loader] AN ERROR HAS OCCURED [" + exception + "]\n\nCALLSTACK\n")
@@ -33,8 +48,6 @@ local err_logger = function(exception) {
 	}
 }
 
-
-printl("Custom VScripts Loader: started code execution")
 if (!("IncludeScriptDefault" in getroottable())) {
 	printl("Custom VScripts Loader: overriding IncludeScript() function")
 	::IncludeScriptDefault <- IncludeScript
@@ -82,7 +95,7 @@ local hooks = {
 	UserConsoleCommand = 2
 }
 
-::ScriptedMode_Hook <- function(name, func) {
+::ScriptMode_Hook <- function(name, func) {
 	if (typeof(func) != "function" && typeof(func) != "native function" && !func.rawin("_call")) {
 		throw "Custom VScripts Loader: Cannot hook event \"" + name + "\": second argument is not a valid function"
 	}
@@ -136,7 +149,7 @@ foreach(name, _ in hooks)
 	printl("--------------------------------------------------------")
 	printl("Custom VScripts Loader including custom scripts...")
 	printl("--------------------------------------------------------")
-	IncludeScipts.call(getroottable())
+	IncludeSciptsManually.call(getroottable())
 	printl("--------------------------------------------------------")
 	printl("Custom VScripts Loader included custom scripts")
 	printl("--------------------------------------------------------")
@@ -164,18 +177,18 @@ foreach(name, _ in hooks)
 		local func = function(...) {
 			if(Convars.GetFloat("developer") == 2)
 				printl("ScriptedMode event fired: " + name)
-			local last_result = null
+			local return_value = true
 			foreach(hook in getroottable()[name + "_hooks"]) {
 				try {
 					local args = [this]
 					args.extend(vargv)
-					last_result = hook.acall(args)
-					if (!last_result && name != "AllowBash") break
+					return_value = hook.acall(args)
+					if (!return_value && name != "AllowBash") break
 				} catch (exception) {
 					err_logger(exception)
 				}
 			}
-			return last_result
+			return return_value
 		}
 		::g_ModeScript[name] <- func
 		::g_MapScript[name] <- func   //do we need this?

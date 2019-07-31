@@ -3,10 +3,12 @@
 
 This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
 
-I've made this addon for my scripts, but any third party developer can use Custom VScripts Loader for his custom map, mutation or any other script. Benefits that it gives:
+This addon DOES NOT TOUCH scriptedmode.nut file!
+
+I've made this addon as a loader for my scripts, but any third party developer can use Custom VScripts Loader for his custom map, mutation or any other script. Benefits that it gives:
 1. Your script will be compatible with each other and with almost all addons in workshop, including Admin System, CSS unlocker, Map Entities Extensions, Alternate Difficulties mod, Custom Weapon Base, First Person Animations, Speedrunner tools etc.
 2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
-3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) using new script function `ScriptMode_Hook()`.
+3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) directly or using new script function `ScriptMode_Hook()`.
 
 **How to use it**
 

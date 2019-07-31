@@ -38,7 +38,7 @@ I've made this addon as a loader for my scripts, but any third party developer c
 ### Some more details
 
 I edited sm_utilities.nut file, that remained untouched by all VScript addons, and added some sofisticated code, which was written after deep research of how the game works. This code does the following:
-1. Automatically loads <scriptname>.nut if there is file scripts_<scriptname>.bsp in maps/ folder
+1. Automatically loads `<scriptname>.nut` if there is file `scripts_<scriptname>.bsp` in `maps` folder
 2. Always activates ScriptMode (even without coop.nut, versus.nut and other stubs)
 3. Collects ScriptMode hooks from all different scripts, chains them and allows to add new hooks
 

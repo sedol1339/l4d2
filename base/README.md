@@ -56,7 +56,7 @@ As an introduction I remind that since EMS Update a lot of Left 4 Dead 2 VScript
 
 **How does this code auto-loads scripts without knowing their names**
 
-1. Sets CVar `con_logfile = ems/scriptloader/<filename>`
+1. Sets cvar `con_logfile = ems/scriptloader/<filename>`
 2. Issues command `maps script_`, so list of `script_*.bsp` files is written to `<filename>`
 3. Reads and parsing `<filename>`, extracting script names
 4. Does `IncludeScript("<script>")` for each `script_<script>.bsp` file

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //                          ScriptedMode Enabler & Script loader
 //                                      by kapkan
-//                                  version 29-Jul-2019
+//                                  version 31-Jul-2019
 //
 // add your script to IncludeScipts() function to make it work
 // 
@@ -166,6 +166,27 @@ local hooks = {
 foreach(name, _ in hooks)
 	getroottable()[name + "_hooks"] <- []
 
+local move_hooks_to_listeners <- function() {
+	printl("[Custom VScripts Loader] moving hooks to listeners...")
+	foreach(_name, _ in hooks) {
+		if (name in getroottable()) {
+			getroottable()[name + "_hooks"].push(getroottable()[name])
+			delete getroottable()[name]
+			printl("[Custom VScripts Loader] found hook " + name + " in root table, moved it to listeners")
+		}
+		if (name in ::g_MapScript) {
+			getroottable()[name + "_hooks"].push(::g_MapScript[name])
+			delete ::g_MapScript[name]
+			printl("[Custom VScripts Loader] found hook " + name + " in ::g_MapScript, moved it to listeners")
+		}
+		if (name in ::g_ModeScript) {
+			getroottable()[name + "_hooks"].push(::g_ModeScript[name])
+			delete ::g_ModeScript[name]
+			printl("[Custom VScripts Loader] found hook " + name + " in ::g_ModeScript, moved it to listeners")
+		}
+	}
+}
+
 ::ScriptedModeEnabler_Finish <- function() {
 	printl("[Custom VScripts Loader] overriding IncludeScript() before including custom scripts")
 	::IncludeScriptDebug <- function(name, scope = null) {
@@ -185,6 +206,8 @@ foreach(name, _ in hooks)
 	}
 	::IncludeScript <- IncludeScriptDebug
 	
+	move_hooks_to_listeners() //for VSlib or others script that have already loaded itself
+	
 	printl("--------------------------------------------------------")
 	printl("Custom VScripts Loader including custom scripts...")
 	printl("--------------------------------------------------------")
@@ -196,23 +219,10 @@ foreach(name, _ in hooks)
 	printl("[Custom VScripts Loader] restoring IncludeScript()")
 	::IncludeScript <- IncludeScriptDefault
 	
+	move_hooks_to_listeners() //for loaded scripts that made ScriptMode hooks directly
+	
 	foreach(_name, _ in hooks) {
 		local name = _name //variable should be local
-		if (name in getroottable()) {
-			getroottable()[name + "_hooks"].push(getroottable()[name])
-			delete getroottable()[name]
-			printl("[Custom VScripts Loader] found hook " + name + " in root table, moved it to listeners")
-		}
-		if (name in ::g_MapScript) {
-			getroottable()[name + "_hooks"].push(::g_MapScript[name])
-			delete ::g_MapScript[name]
-			printl("[Custom VScripts Loader] found hook " + name + " in ::g_MapScript, moved it to listeners")
-		}
-		if (name in ::g_ModeScript) {
-			getroottable()[name + "_hooks"].push(::g_ModeScript[name])
-			delete ::g_ModeScript[name]
-			printl("[Custom VScripts Loader] found hook " + name + " in ::g_ModeScript, moved it to listeners")
-		}
 		local func = function(...) {
 			if(Convars.GetFloat("developer") == 2)
 				printl("ScriptedMode event fired: " + name)

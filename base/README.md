@@ -3,6 +3,8 @@
 
 This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
 
+![img](https://pp.userapi.com/c853624/v853624556/ad2ef/gEul3dI4XR0.jpg)
+
 Link to workshop: coming soon
 
 This addon DOES NOT TOUCH scriptedmode.nut file!
@@ -41,8 +43,6 @@ I edited sm_utilities.nut file, that remained untouched by all VScript addons, a
 1. Automatically loads `<scriptname>.nut` if there is file `scripts_<scriptname>.bsp` in `maps` folder
 2. Always activates ScriptMode (even without coop.nut, versus.nut and other stubs)
 3. Collects ScriptMode hooks from all different scripts, chains them and allows to add new hooks
-
-![img](https://pp.userapi.com/c853624/v853624556/ad2ef/gEul3dI4XR0.jpg)
 
 ### How exactly does it work
 

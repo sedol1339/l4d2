@@ -58,7 +58,7 @@ As an introduction I remind that since EMS Update a lot of Left 4 Dead 2 VScript
 
 1. Sets cvar `con_logfile = ems/scriptloader/<filename>`
 2. Issues command `maps script_`, so list of `script_*.bsp` files is written to `<filename>`
-3. Reads and parsing `<filename>`, extracting script names
+3. Reads and parses `<filename>`, extracting script names
 4. Does `IncludeScript("<script>")` for each `script_<script>.bsp` file
 
 **How does this code enables ScriptMode**

@@ -1,4 +1,4 @@
-**Code for compatible Custom VScripts Loader**
+**Compatible Custom VScripts Loader**
 -------------------------------------
 
 As an introduction I will remind that since EMS Update a lot of Left 4 Dead 2 VScripts have been released, but there's still a large problem over the scripting community. Valve didn't make a folder for auto-executing scripts, so scripters had to replace scriptedmode.nut file in their addons, which led to a poor compatibility of addons. In short:

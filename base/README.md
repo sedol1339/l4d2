@@ -29,7 +29,7 @@ I've made this addon as a loader for my scripts, but any third party developer c
              `scripts/vscripts/shchuka.nut`
              `addoninfo.txt`
 
-4. Upload addon and add Custom VScripts Loader as a dependency (button "Add/Remove Required Items"). Also you better start your description from words "this addon requires Custom VSCripts Loader" and give a link to this addon to make it more clear.
+4. Upload addon and add Custom VScripts Loader as a dependency (button "Add/Remove Required Items"). Also you better start your description from words "this addon requires Custom VScripts Loader" and give a link to this addon to make it more clear.
 
              `Example: coming soon`
 

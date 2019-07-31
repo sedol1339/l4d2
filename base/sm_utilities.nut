@@ -14,6 +14,7 @@
 //     ScriptMode_Hook("UserConsoleCommand", function(player, args))
 //
 // details: https://developer.valvesoftware.com/wiki/List_of_L4D2_Script_Functions#Hooks_4
+// repository: https://github.com/sedol1339/l4d2/tree/master/base
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

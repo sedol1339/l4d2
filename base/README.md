@@ -12,8 +12,6 @@ I've made this addon as a loader for my scripts, but any third party developer c
 2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
 3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) directly or using new script function `ScriptMode_Hook()`.
 
-![img](https://pp.userapi.com/c853624/v853624556/ad301/MraM5gj_1OY.jpg)
-
 ### How to use it
 
 1. Place your script into vscripts folder and give it a unique name

@@ -42,7 +42,7 @@ I edited sm_utilities.nut file, that remained untouched by all VScript addons, a
 2. Always activates ScriptMode (even without coop.nut, versus.nut and other stubs)
 3. Collects ScriptMode hooks from all different scripts, chains them and allows to add new hooks
 
-![img](https://scheme)
+![img](https://pp.userapi.com/c853624/v853624556/ad2ef/gEul3dI4XR0.jpg)
 
 ### How exactly does it work
 

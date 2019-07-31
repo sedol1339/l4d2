@@ -1,36 +1,44 @@
 **Compatible Custom VScripts Loader**
 -------------------------------------
 
-As an introduction I will remind that since EMS Update a lot of Left 4 Dead 2 VScripts have been released, but there's still a large problem over the scripting community. Valve didn't make a folder for auto-executing scripts, so scripters had to replace scriptedmode.nut file in their addons, which led to a poor compatibility of addons. In short:
+This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
 
-1. Scripts are generally incompatible with each other
-2. Even compatible scripts are often colored RED in addons list
-3. Hooks (`AllowTakeDamage` and others) are not always available
-
---------------------
-
-**What is this script for?**
-
-This addon solves all three problems. I've made this addon for my scripts, but any third party developer can use Custom VScripts Loader for his script. Benefits that it gives:
+I've made this addon for my scripts, but any third party developer can use Custom VScripts Loader for his custom map, mutation or any other script. Benefits that it gives:
 1. Your script will be compatible with each other and with almost all addons in workshop, including Admin System, CSS unlocker, Map Entities Extensions, Alternate Difficulties mod, Custom Weapon Base, First Person Animations, Speedrunner tools etc.
 2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
 3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) using new script function `ScriptMode_Hook()`.
 
-This addon DOES NOT TOUCH scriptedmode.nut file!
+**How to use it**
 
-I edited sm_utilities.nut, that remained untouched by all VScript addons, and added some custom code which always activates Scripted Mode (even without coop.nut, versus.nut and other stubs). But I'm not a magican and cannot create a folder for auto-executing scripts. So, links to script files should be added manually.
+1. Place your script into vscripts folder and give it a unique name
+		Example: left4dead2/scripts/vscripts/shchuka.nut
+2. Create empty file maps/scripts_<scriptname>.bsp (important!)
+		Example: left4dead2/maps/scripts_shchuka.bsp
+3. Place both files into your addon
+		Example: maps/scripts_shchuka.bsp
+             scripts/vscripts/shchuka.nut
+             addoninfo.txt
+4. Upload addon and add Custom VScripts Loader as a dependency (button "Add/Remove Required Items"). Also you better start your description from words "this addon requires Custom VSCripts Loader" and give a link to this addon to make it more clear.
+		Example: coming soon
 
---------------------
+**Sone more details**
 
-**How to use**
+This addon DOES NOT TOUCH scriptedmode.nut file! Instead I edited sm_utilities.nut, that remained untouched by all VScript addons, and added some sofisticated code, which was written after deep research of how the game works. This code does the following:
+1. Automatically loads <scriptname>.nut if there is file scripts_<scriptname>.bsp in maps/ folder
+2. Always activates ScriptMode (even without coop.nut, versus.nut and other stubs)
+3. Collects ScriptMode hooks from all different scripts, chains them and allows to add new hooks
 
-If you want to use Custom VScripts Loader for your custom mode, map or other script, do the following:
-1. When developing your mod, download sm_utilities.nut from this repository, place it in scripts/vscripts folder and add `IncludeScript` statement for your script to `IncludeScipts()` function in sm_utilities.nut. When you run a map, it will be automatically executed, see console for details.
-2. When you want to release your mod, just tell me to add your script into Custom VScripts Loader, add dependency in workshop and write in description, that this mod requires Custom VScripts Loader.
+![img](https://scheme)
 
---------------------
+**How exactly does it work**
 
-**How does it work**
+It's a long time to explain.
+
+As an introduction I remind that since EMS Update a lot of Left 4 Dead 2 VScripts have been released, but there's still a large problem over the scripting community. Valve didn't make a folder for auto-executing scripts, so scripters had to replace scriptedmode.nut file in their addons, which led to a poor compatibility of addons. In short:
+
+1. Scripts are generally incompatible with each other
+2. Even compatible scripts are often colored RED in addons list
+3. Hooks (`AllowTakeDamage` and others) are not always available
 
 I'll start a detailed explanation by demonstrating script loading order in L4D2
 

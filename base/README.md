@@ -1,4 +1,4 @@
-**Compatible Custom VScripts Loader**
+# Compatible Custom VScripts Loader
 -------------------------------------
 
 This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
@@ -12,7 +12,7 @@ I've made this addon as a loader for my scripts, but any third party developer c
 2. Your addon will not be colored red in addons list (without Custom VScripts Loader this often happens even with compatible addons)
 3. You will always have access to ScriptedMode hooks (`AllowTakeDamage`, `InterceptChat`, `UserConsoleCommand` and others) directly or using new script function `ScriptMode_Hook()`.
 
-**How to use it**
+### How to use it
 
 1. Place your script into vscripts folder and give it a unique name
 
@@ -35,16 +35,16 @@ I've made this addon as a loader for my scripts, but any third party developer c
 
 **So, all you need is to create a file with required name in maps/ folder and add this addon as a dependency.**
 
-**Sone more details**
+### Some more details
 
-This addon DOES NOT TOUCH scriptedmode.nut file! Instead I edited sm_utilities.nut, that remained untouched by all VScript addons, and added some sofisticated code, which was written after deep research of how the game works. This code does the following:
+I edited sm_utilities.nut file, that remained untouched by all VScript addons, and added some sofisticated code, which was written after deep research of how the game works. This code does the following:
 1. Automatically loads <scriptname>.nut if there is file scripts_<scriptname>.bsp in maps/ folder
 2. Always activates ScriptMode (even without coop.nut, versus.nut and other stubs)
 3. Collects ScriptMode hooks from all different scripts, chains them and allows to add new hooks
 
 ![img](https://scheme)
 
-**How exactly does it work**
+### How exactly does it work
 
 It's a long time to explain.
 
@@ -54,11 +54,20 @@ As an introduction I remind that since EMS Update a lot of Left 4 Dead 2 VScript
 2. Even compatible scripts are often colored RED in addons list
 3. Hooks (`AllowTakeDamage` and others) are not always available
 
+**How does this code auto-loads scripts without knowing their names**
+
+1. Sets CVar `con_logfile = ems/scriptloader/<filename>`
+2. Issues command `maps script_`, so list of `script_*.bsp` files is written to `<filename>`
+3. Reads and parsing `<filename>`, extracting script names
+4. Does `IncludeScript("<script>")` for each `script_<script>.bsp` file
+
+**How does this code enables ScriptMode**
+
 I'll start a detailed explanation by demonstrating script loading order in L4D2
 
 ![img](https://pp.userapi.com/c855432/v855432672/a4df3/1j0WosClEa8.jpg)
 
-As can be seen, scripted mode is activated only when `ScriptMode_Init()` function returns true. This happens only when `IncludeScript(modename, g_ModeScript)` returns true, and this happens when file modename.nut or modename.nuc exists and is not empty.
+As can be seen, script mode is activated only when `ScriptMode_Init()` function returns true. This happens only when `IncludeScript(modename, g_ModeScript)` returns true, and this happens when file modename.nut or modename.nuc exists and is not empty.
 
 After a little research I've listed all changes that popular workshop mods make to default VScript files.
 
@@ -68,30 +77,28 @@ So, it's not possible to change scriptedmode.nut, director_base.nut, coop.nut ..
 
 If we create a workshop addon, that contains modified sm_utilities.nut, which includes all dependent scripts, they will be fully compatible with each other and with other workshop addons.
 
-As for ScriptedMode, we should have coop.nut ... onslaught.nut files present, but it will again break compatibility (at least addons will be marked red). Hopefully, there is a solution. Since sm_utilities.nut is included earlier than modename.nut, we can override `IncludeScript()` function so that it will always return true. In this case Scripted Mode will be activated even without modename.nut file.
+As for ScriptMode, we should have coop.nut ... onslaught.nut files present, but it will again break compatibility (at least addons will be marked red). Hopefully, there is a solution. Since sm_utilities.nut is included earlier than modename.nut, we can override `IncludeScript()` function so that it will always return true. In this case Script Mode will be activated even without modename.nut file.
 
-The next problem is ScriptedMode hooks (`AllowTakeDamage()`, `AllowBash()` and others), that can be overwritten by next script files. We solve this problem by searching for these functions on ScriptMode activation and replacing them. Custom VScripts Loader includes new function `ScriptedMode_Hook()` than is able to register multiple listeners for ScriptedMode events.
+The next problem is ScriptMode hooks (`AllowTakeDamage()`, `AllowBash()` and others), that can be overwritten by next script files. We solve this problem by searching for these functions on ScriptMode activation and replacing them. Custom VScripts Loader includes new function `ScriptMode_Hook()` than is able to register multiple listeners for ScriptMode events.
 
 Usage:
 
-`ScriptedMode_Hook("AllowTakeDamage", function(dmgTable))`
+`ScriptMode_Hook("AllowTakeDamage", function(dmgTable))`
 
-`ScriptedMode_Hook("AllowBash", function(basher, bashee))`
+`ScriptMode_Hook("AllowBash", function(basher, bashee))`
 
-`ScriptedMode_Hook("BotQuery", function(flag, bot, val))`
+`ScriptMode_Hook("BotQuery", function(flag, bot, val))`
 
-`ScriptedMode_Hook("CanPickupObject", function(object))`
+`ScriptMode_Hook("CanPickupObject", function(object))`
 
-`ScriptedMode_Hook("InterceptChat", function(msg, speaker))`
+`ScriptMode_Hook("InterceptChat", function(msg, speaker))`
 
-`ScriptedMode_Hook("UserConsoleCommand", function(player, args))`
+`ScriptMode_Hook("UserConsoleCommand", function(player, args))`
 
 If, for example `g_MapScript.AllowTakeDamage()` or `::AllowTakeDamage()` function already existed, Custom VScripts Loader will add it as listener and will allow to create new listeners for the same event.
 
-The last big problem is VSLib compatibility. This library completely overrides functions `ScriptMode_OnActivate`, `ScriptMode_OnGameplayStart`, `ScriptMode_SystemCall`, `Update` (instead of hooking them): all functions that are called after step 4. The VSLib itself is often loaded on steps 2 (different mods) or 3 (admin system). Also we can't use delayed calls in sm_utilities, because in dedicated server delay between step 4 and step 9 may be zero.
+Now the problem is VSLib compatibility. This library completely overrides functions `ScriptMode_OnActivate`, `ScriptMode_OnGameplayStart`, `ScriptMode_SystemCall`, `Update` (instead of hooking them): all functions that are called after step 4. The VSLib itself is often loaded on steps 2 (different mods) or 3 (admin system). Also we can't use delayed calls in sm_utilities, because in dedicated server delay between step 4 and step 9 may be zero.
 
-But we need to run our code AFTER VSLib code, to override ScriptedMode hooks that are defined in it. In other words, to override ScriptedMode hooks our code should be run after all other `IncludeScript()` statements but not later than `ScriptMode_OnActivate()` is called.
+But we need to run our code AFTER VSLib code, to override ScriptMode hooks that are defined in it. In other words, to override ScriptMode hooks our code should be run after all other `IncludeScript()` statements but not later than `ScriptMode_OnActivate()` is called.
 
 Hacky solution: since we already have `IncludeScript()` hook, after including a script we can check if `ScriptMode_OnActivate()` was changed. If so, we make a backflip: restoring it to saved function and moving new function to `ScriptMode_OnActivateWrapped`.
-
-Finally this is working

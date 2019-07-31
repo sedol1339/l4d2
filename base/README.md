@@ -20,7 +20,8 @@ I've made this addon for my scripts, but any third party developer can use Custo
 
 3. Place both files into your addon
 
-             `Example: maps/scripts_shchuka.bsp`
+             `Example:`
+             `maps/scripts_shchuka.bsp`
              `scripts/vscripts/shchuka.nut`
              `addoninfo.txt`
 

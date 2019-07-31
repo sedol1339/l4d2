@@ -3,6 +3,8 @@
 
 This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
 
+Link to workshop: coming soon
+
 This addon DOES NOT TOUCH scriptedmode.nut file!
 
 I've made this addon as a loader for my scripts, but any third party developer can use Custom VScripts Loader for his custom map, mutation or any other script. Benefits that it gives:
@@ -30,6 +32,8 @@ I've made this addon as a loader for my scripts, but any third party developer c
 4. Upload addon and add Custom VScripts Loader as a dependency (button "Add/Remove Required Items"). Also you better start your description from words "this addon requires Custom VSCripts Loader" and give a link to this addon to make it more clear.
 
              `Example: coming soon`
+
+**So, all you need is to create a file with required name in maps/ folder and add this addon as a dependency.**
 
 **Sone more details**
 

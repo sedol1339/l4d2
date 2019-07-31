@@ -3,7 +3,7 @@
 //                                      by kapkan
 //                                  version 31-Jul-2019
 //
-// add your script to IncludeScipts() function to make it work
+// add file scripts_<scriptname>.bsp to load <scriptname>.nut from vscripts folder
 // 
 // new function ScriptMode_Hook() added, usage:
 //     ScriptMode_Hook("AllowTakeDamage", function(dmgTable))

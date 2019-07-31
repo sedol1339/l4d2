@@ -1,5 +1,4 @@
 # Compatible Custom VScripts Loader
--------------------------------------
 
 This is a code for Workshop addon, that does not do anything by itself, but it allows modders to load their VScript addons without compatibility problems and with full access to ScriptedMode hooks.
 

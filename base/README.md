@@ -14,7 +14,7 @@ I've made this addon for my scripts, but any third party developer can use Custo
 
              `Example: left4dead2/scripts/vscripts/shchuka.nut`
 
-2. Create empty file maps/scripts_<scriptname>.bsp (important!)
+2. Create empty file maps/scripts_\<scriptname>\.bsp (important!)
 
              `Example: left4dead2/maps/scripts_shchuka.bsp`
 

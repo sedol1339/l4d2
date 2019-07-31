@@ -32,47 +32,54 @@ printl("Well, okay")
 
 printl("[Custom VScripts Loader] started code execution")
 
+::ScriptMode_error <- ""
+::IncludeScript_Report <- []
+
 //getting list of scripts to auto-include
 
 if (!("__custom_scripts_list__" in getroottable())) {
 	::__custom_scripts_list__ <- []
 	//creating a folder scriptloader
 	if (!StringToFile("scriptloader/_readme.txt", "You can safely remove this folder\n")) {
-		error("[Custom VScripts Loader] Cannot create ems/scriptloader folder, probably you have file with same name\n")
+		error("[Custom VScripts Loader] Cannot create ems/scriptloader folder, probably you have file with the same name\n")
 		error("[Custom VScripts Loader] Cannot include custom scripts\n")
-	}
-	//printint list of custom script shadows
-	local unique_filename = ""
-	for(local i = 0; i < 8; i++) unique_filename += RandomInt(97, 122).tochar()
-	// we need unique filename because StringToFile creates null-terminated file, con_logfile appends text after NUL, but FileToString reads file until NUL; this means that we cannot erase file and then print console log in it, so our file will grow
-	local old_logfile = Convars.GetStr("con_logfile")
-	Convars.SetValue("con_logfile", "ems/scriptloader/" + unique_filename)
-	SendToServerConsole("maps script_") //nav_check_file_consistency also works
-	printl("[Custom VScripts Loader] successfully created file " + unique_filename + " and wrote custom scripts list in it")
-	EntFire("worldspawn", "CallScriptFunction", "__scriptloader__") //this will be executed later in this tick
-	::__scriptloader__ <- function() {
-		Convars.SetValue("con_logfile", old_logfile)
-		local file_contents = FileToString("scriptloader/" + unique_filename)
-		if (!file_contents) {
-			error("[Custom VScripts Loader] Cannot load file " + unique_filename + ", cannot include custom scripts\n")
-			return
-		}
-		local lines = split(file_contents, "\n")
-		printl("[Custom VScripts Loader] Loaded file " + unique_filename + " containing " + lines.len() + " lines")
-		for (local i = lines.len() - 1; i >= 0; i--) {
-			printl("[Custom VScripts Loader] parsing line: " + lines[i])
-			if (lines[i] == "-------------") break
-			local tokens = split(lines[i], " ")
-			if (tokens.len() == 0 || tokens[0] != "PENDING:") continue
-			local mapname = tokens[tokens.len() - 1]
-			if (mapname.len() < "script_X.bsp".len()) {
-				printl("[Custom VScripts Loader] odd mapname: \"" + mapname + "\", skipping")
-				continue
+		IncludeScript_Report = ["Cannot create folder"]
+	} else {
+		//printint list of custom script shadows
+		local unique_filename = ""
+		for(local i = 0; i < 8; i++) unique_filename += RandomInt(97, 122).tochar()
+		// we need unique filename because StringToFile creates null-terminated file, con_logfile appends text after NUL, but FileToString reads file until NUL; this means that we cannot erase file and then print console log in it, so our file will grow
+		local old_logfile = Convars.GetStr("con_logfile")
+		Convars.SetValue("con_logfile", "ems/scriptloader/" + unique_filename)
+		SendToServerConsole("maps script_") //nav_check_file_consistency also works
+		printl("[Custom VScripts Loader] successfully created file " + unique_filename + " and wrote custom scripts list in it")
+		EntFire("worldspawn", "CallScriptFunction", "__scriptloader__") //this will be executed later in this tick
+		::__scriptloader__ <- function() {
+			Convars.SetValue("con_logfile", old_logfile)
+			local file_contents = FileToString("scriptloader/" + unique_filename)
+			if (!file_contents) {
+				error("[Custom VScripts Loader] Cannot load file " + unique_filename + ", cannot include custom scripts\n")
+				IncludeScript_Report = ["Cannot load file"]
+				return
 			}
-			local scriptname = mapname.slice(7, mapname.len() - 4)
-			__custom_scripts_list__.push(scriptname)
-			StringToFile("scriptloader/" + unique_filename, "")
-			printl("[Custom VScripts Loader] script added to query: \"" + scriptname + "\"")
+			local lines = split(file_contents, "\n")
+			printl("[Custom VScripts Loader] Loaded file " + unique_filename + " containing " + lines.len() + " lines")
+			for (local i = lines.len() - 1; i >= 0; i--) {
+				printl("[Custom VScripts Loader] parsing line: " + lines[i])
+				if (lines[i] == "-------------") break
+				local tokens = split(lines[i], " ")
+				if (tokens.len() == 0 || tokens[0] != "PENDING:") continue
+				local mapname = tokens[tokens.len() - 1]
+				if (mapname.len() < "script_X.bsp".len()) {
+					printl("[Custom VScripts Loader] odd mapname: \"" + mapname + "\", skipping")
+					IncludeScript_Report.push("Odd mapname: \"" + mapname + "\", skipping")
+					continue
+				}
+				local scriptname = mapname.slice(7, mapname.len() - 4)
+				__custom_scripts_list__.push(scriptname)
+				StringToFile("scriptloader/" + unique_filename, "")
+				printl("[Custom VScripts Loader] script added to query: \"" + scriptname + "\"")
+			}
 		}
 	}
 }
@@ -98,6 +105,7 @@ if (!("IncludeScriptDefault" in getroottable())) {
 			return_value = IncludeScriptDefault(name, scope)
 			if (!return_value)
 				printl("[Custom VScripts Loader] Cannot include \"" + name + "\", file is missing or empty")
+				IncludeScript_Report.push("Cannot include \"" + name + "\", file is missing or empty")
 			return return_value
 		}
 		if (getstackinfos(2).src.find("vscripts/scriptedmode")) {
@@ -107,7 +115,8 @@ if (!("IncludeScriptDefault" in getroottable())) {
 				IncludeScriptDefault(name, scope)
 			} catch (exception) {
 				err_logger(exception)
-				printl("[Custom VScripts Loader] exception while loading \"" + name + "\", still returning true to scriptedmode.nut")
+				printl("[Custom VScripts Loader] exception while including \"" + name + "\", still returning true to scriptedmode.nut")
+				IncludeScript_Report.push("Exception while including \"" + name + "\" from scriptedmode.nut")
 			}
 			return_value = true
 		} else {
@@ -158,8 +167,8 @@ local hooks = {
 ::__valid_finisher__ <- function(modename, mapname) {
 	printl("[Custom VScripts Loader] running wrapped ScriptMode_OnGameplayStart()")
 	local return_value = ::ScriptMode_OnGameplayStartWrapped(modename, mapname)
-	printl("[Custom VScripts Loader] running ScriptedModeEnabler_Finish()")
-	::ScriptedModeEnabler_Finish()
+	printl("[Custom VScripts Loader] running ScriptModeEnabler_Finish()")
+	::ScriptModeEnabler_Finish()
 	return return_value
 }
 ::g_MapScript.ScriptMode_OnGameplayStart <- ::__valid_finisher__
@@ -188,20 +197,25 @@ local move_hooks_to_listeners = function() {
 	}
 }
 
-::ScriptedModeEnabler_Finish <- function() {
+::ScriptModeEnabler_Finish <- function() {
 	printl("[Custom VScripts Loader] overriding IncludeScript() before including custom scripts")
 	::IncludeScriptDebug <- function(name, scope = null) {
 		::IncludeScript <- IncludeScriptDefault
-		local result
+		local result, exception
 		try {
 			result = IncludeScriptDefault(name, scope)
-		} catch (exception) {
-			err_logger(exception)
+		} catch (_exception) {
+			exception = _exception
+			err_logger(_exception)
 		}
-		if (!result)
-			printl("[Custom VScripts Loader] cannot include \"" + name + "\": script is not installed or exception occured")
-		else
+		if (!result) {
+			local err_report = exception ? exception : "script is missing or empty"
+			printl("[Custom VScripts Loader] Cannot include \"" + name + "\": " + err_report)
+			IncludeScript_Report.push("\"" + name + "\": ERROR: " + err_report)
+		} else {
 			printl("[Custom VScripts Loader] included \"" + name + "\" successfully")
+			IncludeScript_Report.push("\"" + name + "\": SUCCESS")
+		}
 		::IncludeScript <- IncludeScriptDebug
 		return result
 	}
@@ -238,6 +252,8 @@ local move_hooks_to_listeners = function() {
 					err_logger(exception)
 				}
 			}
+			if (name == "UserConsoleCommand" && !("ScriptMode_test_success" in getroottable()))
+				::ScriptMode_test_success <- true
 			return return_value
 		}
 		::g_ModeScript[name] <- func
@@ -245,6 +261,40 @@ local move_hooks_to_listeners = function() {
 		getroottable()[name] <- func   //do we need this?
 		printl("[Custom VScripts Loader] registered hook for \"" + name + "\"")
 	}
+	
+	//testing if everything was allright
+	
+	::ScriptModeEnabler_Test <- function() {
+		if (ScriptMode_error != "") {
+			VScriptsLoader_Report()
+			return
+		}
+		if (!("ScriptMode_test_success" in getroottable()))
+			ScriptMode_error = "ScriptMode hooks doesn't seem to work"
+		VScriptsLoader_Report()
+	}
+	
+	::VScriptsLoader_Report <- function() {
+		printl("------------------------------------------------------------------------------------")
+		printl("Custom VScripts Loader report")
+		printl("------------------------------------------------------------------------------------")
+		if (ScriptMode_error == "") {
+			printl("ScriptMode Enabler\n\tSUCCESS")
+		} else {
+			printl("ScriptMode Enabler\n\t" + ScriptMode_error)
+		}
+		if (IncludeScript_Report.len() == 0) {
+			printl("Script Loader\n\tno scripts")
+		} else {
+			printl("Script Loader")
+			foreach (report in IncludeScript_Report)
+				printl("\t" + report)
+		}
+		printl("------------------------------------------------------------------------------------")
+	}
+	
+	SendToServerConsole("scripted_user_func")
+	EntFire("worldspawn", "CallScriptFunction", "ScriptModeEnabler_Test", 0.1)
 }
 
 printl("[Custom VScripts Loader] finished code execution")

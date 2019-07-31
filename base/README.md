@@ -12,18 +12,21 @@ I've made this addon for my scripts, but any third party developer can use Custo
 
 1. Place your script into vscripts folder and give it a unique name
 
-`Example: left4dead2/scripts/vscripts/shchuka.nut`
+             `Example: left4dead2/scripts/vscripts/shchuka.nut`
+
 2. Create empty file maps/scripts_<scriptname>.bsp (important!)
 
-`Example: left4dead2/maps/scripts_shchuka.bsp`
+             `Example: left4dead2/maps/scripts_shchuka.bsp`
+
 3. Place both files into your addon
 
-`Example: maps/scripts_shchuka.bsp`
+             `Example: maps/scripts_shchuka.bsp`
              `scripts/vscripts/shchuka.nut`
              `addoninfo.txt`
+
 4. Upload addon and add Custom VScripts Loader as a dependency (button "Add/Remove Required Items"). Also you better start your description from words "this addon requires Custom VSCripts Loader" and give a link to this addon to make it more clear.
 
-`Example: coming soon`
+             `Example: coming soon`
 
 **Sone more details**
 

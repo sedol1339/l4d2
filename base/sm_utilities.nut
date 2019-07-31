@@ -169,7 +169,7 @@ foreach(name, _ in hooks)
 
 local move_hooks_to_listeners = function() {
 	printl("[Custom VScripts Loader] moving hooks to listeners...")
-	foreach(_name, _ in hooks) {
+	foreach(name, _ in hooks) {
 		if (name in getroottable()) {
 			getroottable()[name + "_hooks"].push(getroottable()[name])
 			delete getroottable()[name]

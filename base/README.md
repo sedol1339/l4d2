@@ -44,8 +44,6 @@ I edited sm_utilities.nut file, that remained untouched by all VScript addons, a
 
 ### How exactly does it work
 
-It's a long time to explain.
-
 As an introduction I remind that since EMS Update a lot of Left 4 Dead 2 VScripts have been released, but there's still a large problem over the scripting community. Valve didn't make a folder for auto-executing scripts, so scripters had to replace scriptedmode.nut file in their addons, which led to a poor compatibility of addons. In short:
 
 1. Scripts are generally incompatible with each other

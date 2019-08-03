@@ -12,6 +12,7 @@
 	- parenting function, more options to create_pacticles (cpoint1, cpoint2, ...?)
 	- stop coding and live a real life
 	- add "forced" support from line 1550
+	- fix on_key_action for player, not team
  
  Short documentation:
  
@@ -550,7 +551,7 @@ constants.DMG_BLAST_SURFACE <- 134217728;
 constants.DMG_DIRECT <- 268435456;
 constants.DMG_BUCKSHOT <- 536870912;
 
-//solid types
+//solid types m_nSolidType
 constants.SOLID_NONE <- 0; // no solid model
 constants.SOLID_BSP <- 1; // a BSP tree
 constants.SOLID_BBOX <- 2; // an AABB
@@ -615,6 +616,48 @@ constants.SF_TRIG_PUSH_AFFECT_PLAYER_ON_LADDER <- 0x100	// if pushed object is p
 constants.SF_TRIG_TOUCH_DEBRIS <- 0x400	// Will touch physics debris objects
 constants.SF_TRIGGER_ONLY_NPCS_IN_VEHICLES <- 0x800	// *if* NPCs can fire this trigger, only NPCs in vehicles do so (respects player ally flag too)
 constants.SF_TRIGGER_DISALLOW_BOTS <- 0x1000   // Bots are not allowed to fire this trigger
+
+//m_CollisionGroup
+constants.COLLISION_GROUP_NONE <- 0	//Normal
+constants.COLLISION_GROUP_DEBRIS <- 1	//Collides with nothing but world and static stuff
+constants.COLLISION_GROUP_DEBRIS_TRIGGER <- 2	//Same as debris, but hits triggers. Useful for an item that can be shot, but doesn't collide.
+constants.COLLISION_GROUP_INTERACTIVE_DEBRIS <- 3	//Collides with everything except other interactive debris or debris
+constants.COLLISION_GROUP_INTERACTIVE <- 4	//Collides with everything except interactive debris or debris
+constants.COLLISION_GROUP_PLAYER <- 5	
+constants.COLLISION_GROUP_BREAKABLE_GLASS <- 6	//NPCs can see straight through an Entity with this applied.
+constants.COLLISION_GROUP_VEHICLE <- 7	
+constants.COLLISION_GROUP_PLAYER_MOVEMENT <- 8	//For HL2, same as Collision_Group_Player, for TF2, this filters out other players and CBaseObjects
+constants.COLLISION_GROUP_NPC <- 9	
+constants.COLLISION_GROUP_IN_VEHICLE <- 10	//Doesn't collide with anything, no traces
+constants.COLLISION_GROUP_WEAPON <- 11	//Doesn't collide with players and vehicles
+constants.COLLISION_GROUP_VEHICLE_CLIP <- 12	//Only collides with vehicles
+constants.COLLISION_GROUP_PROJECTILE <- 13	
+constants.COLLISION_GROUP_DOOR_BLOCKER <- 14	//Blocks entities not permitted to get near moving doors
+constants.COLLISION_GROUP_PASSABLE_DOOR <- 15	//Let's the Player through, nothing else.
+constants.COLLISION_GROUP_DISSOLVING <- 16	//Things that are dissolving are in this group
+constants.COLLISION_GROUP_PUSHAWAY <- 17	//Nonsolid on client and server, pushaway in player code
+constants.COLLISION_GROUP_NPC_ACTOR <- 18	
+constants.COLLISION_GROUP_NPC_SCRIPTED <- 19	
+constants.COLLISION_GROUP_WORLD <- 20	//Doesn't collide with players/props
+
+//movecollide
+constants.MOVECOLLIDE_DEFAULT <- 0,
+// These ones only work for MOVETYPE_FLY + MOVETYPE_FLYGRAVITY
+constants.MOVECOLLIDE_FLY_BOUNCE <- 1,	// bounces, reflects, based on elasticity of surface and object - applies friction (adjust velocity)
+constants.MOVECOLLIDE_FLY_CUSTOM <- 2,	// Touch() will modify the velocity however it likes
+constants.MOVECOLLIDE_FLY_SLIDE <- 3,  // slides along surfaces (no bounce) - applies friciton (adjusts velocity)
+
+//m_usSolidFlags
+constants.FSOLID_CUSTOMRAYTEST <- 1	//Ignore solid type + always call into the entity for ray tests
+constants.FSOLID_CUSTOMBOXTEST <- 2	//Ignore solid type + always call into the entity for swept box tests
+constants.FSOLID_NOT_SOLID <- 4	//The object is currently not solid
+constants.FSOLID_TRIGGER <- 8	//This is something may be collideable but fires touch functions even when it's not collideable (when the FSOLID_NOT_SOLID flag is set)
+constants.FSOLID_NOT_STANDABLE <- 16	//The player can't stand on this
+constants.FSOLID_VOLUME_CONTENTS <- 32	//Contains volumetric contents (like water)
+constants.FSOLID_FORCE_WORLD_ALIGNED <- 64	//Forces the collision representation to be world-aligned even if it's SOLID_BSP or SOLID_VPHYSICS
+constants.FSOLID_USE_TRIGGER_BOUNDS <- 128	//Uses a special trigger bounds separate from the normal OBB
+constants.FSOLID_ROOT_PARENT_ALIGNED <- 256	//Collisions are defined in root parent's local coordinate space
+constants.FSOLID_TRIGGER_TOUCH_DEBRIS <- 512	//This trigger will touch debris objects
 
 //look https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/const.h for other constants
 
@@ -3221,7 +3264,7 @@ get_current_table_name <- function() {
 			} catch (e) {}
 		}
 	}
-	return "?"
+	return null
 }
 
 local tablename = get_current_table_name()

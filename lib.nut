@@ -659,6 +659,18 @@ constants.FSOLID_USE_TRIGGER_BOUNDS <- 128	//Uses a special trigger bounds separ
 constants.FSOLID_ROOT_PARENT_ALIGNED <- 256	//Collisions are defined in root parent's local coordinate space
 constants.FSOLID_TRIGGER_TOUCH_DEBRIS <- 512	//This trigger will touch debris objects
 
+//m_iAddonBits - which items to show on a player
+constants.CSAddon_NONE <- 0
+constants.CSAddon_Flashbang1 <- (1 << 0)
+constants.CSAddon_Flashbang2 <- (1 << 1)
+constants.CSAddon_HEGrenade <- (1 << 2)
+constants.CSAddon_SmokeGrenade <- 1 << 3)
+constants.CSAddon_C4 <- (1 << 4)
+constants.CSAddon_DefuseKit <- (1 << 5)
+constants.CSAddon_PrimaryWeapon <- (1 << 6)
+constants.CSAddon_SecondaryWeapon <- (1 << 7)
+constants.CSAddon_Holster <- (1 << 8)
+
 //look https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/const.h for other constants
 
 constants.NUMBER <- -1

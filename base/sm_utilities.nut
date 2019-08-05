@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //                          ScriptedMode Enabler & Script loader
 //                                      by kapkan
-//                                  version 31-Jul-2019
+//                                  version 05-Aug-2019
 //
-// add file scripts_<scriptname>.bsp to load <scriptname>.nut from vscripts folder
+// add file maps/scripts_<script>.bsp to load <script>.nut from vscripts folder
 // 
 // new function ScriptMode_Hook() added, usage:
 //     ScriptMode_Hook("AllowTakeDamage", function(dmgTable))
@@ -16,12 +16,16 @@
 // details: https://developer.valvesoftware.com/wiki/List_of_L4D2_Script_Functions#Hooks_4
 // repository: https://github.com/sedol1339/l4d2/tree/master/base
 //
+// todo: check for duplicates in *_hooks
+// todo: fix on round end
+// todo why does not work ScriptMode_Hook("AllowTakeDamage", logt)
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-local function IncludeScipt() {
+local function IncludeCustomScipts() {
 	
 	IncludeScript("kapkan/lib")
-	IncludeScript("kapkan/upgrades/core")
+	//IncludeScript("complite", g_MapScript)
 	
 	foreach(scriptname in __custom_scripts_list__)
 		IncludeScript(scriptname)
@@ -37,9 +41,36 @@ printl("[Custom VScripts Loader] started code execution")
 
 //getting list of scripts to auto-include
 
+//DoIncludeScript("kapkan/lib", getroottable()) //don't mess with IncludeScript overrides
+
+::read_console_output <- function(command, on_read) {
+	if ("_console_called" in getroottable() && _console_called)
+		throw "console reading is in progress"
+	local filename = "console"
+	local con_file = format("ems/%s.csv", filename)
+	local old_logfile = Convars.GetStr("con_logfile")
+	if (old_logfile == con_file) old_logfile = null //probably some exception last time
+	Convars.SetValue("con_logfile", "")
+	SendToServerConsole(format("vprof_record_start ems/%s; vprof_record_stop; vprof_to_csv ems/%s;", filename, filename))
+	//don't ask why I use vprof, it's too complex to explain
+	//in short, this is because StringToFile creates NUL-terminated file, con_logfile appends after NUL, and
+	//FileToString cannot read after NUL; I use vprof just to create a small text file, that's all;
+	//if I create file with con_logfile, it will grow next read_console_output() calls, until it becomes too large
+	//to read it with FileToString
+	SendToServerConsole(command)
+	EntFire("worldspawn", "CallScriptFunction", "_console_on_read")
+	::_console_on_read <- function() {
+		Convars.SetValue("con_logfile", old_logfile)
+		local file_contents = FileToString(format("%s.csv", filename))
+		_console_called = false
+		on_read(file_contents) //may throw exception
+	}
+	::_console_called <- true
+}
+
 if (!("__custom_scripts_list__" in getroottable())) {
 	::__custom_scripts_list__ <- []
-	//creating a folder scriptloader
+	//creating a folder ems/scriptloader/
 	if (!StringToFile("scriptloader/_readme.txt", "You can safely remove this folder\n")) {
 		error("[Custom VScripts Loader] Cannot create ems/scriptloader folder, probably you have file with the same name\n")
 		error("[Custom VScripts Loader] Cannot include custom scripts\n")
@@ -104,8 +135,8 @@ if (!("IncludeScriptDefault" in getroottable())) {
 			printl("[Custom VScripts Loader] including \"" + name + "\" to scope " + scope + " from sm_utilities.nut")
 			return_value = IncludeScriptDefault(name, scope)
 			if (!return_value)
-				printl("[Custom VScripts Loader] Cannot include \"" + name + "\", file is missing or empty")
-				IncludeScript_Report.push("Cannot include \"" + name + "\", file is missing or empty")
+				printl("[Custom VScripts Loader] Cannot include \"" + name + "\", file is missing or empty, or exception occured")
+				IncludeScript_Report.push("Cannot include \"" + name + "\", file is missing or empty, or exception occured")
 			return return_value
 		}
 		if (getstackinfos(2).src.find("vscripts/scriptedmode")) {
@@ -141,7 +172,8 @@ local hooks = {
 	BotQuery = 3,
 	CanPickupObject = 1,
 	InterceptChat = 2,
-	UserConsoleCommand = 2
+	UserConsoleCommand = 2,
+	Update = 0
 }
 
 ::ScriptMode_Hook <- function(name, func) {
@@ -211,22 +243,22 @@ local move_hooks_to_listeners = function() {
 		if (!result) {
 			local err_report = exception ? exception : "script is missing or empty"
 			printl("[Custom VScripts Loader] Cannot include \"" + name + "\": " + err_report)
-			IncludeScript_Report.push("\"" + name + "\": ERROR: " + err_report)
+			IncludeScript_Report.push("[ERROR] \"" + name + "\": " + err_report)
 		} else {
 			printl("[Custom VScripts Loader] included \"" + name + "\" successfully")
-			IncludeScript_Report.push("\"" + name + "\": SUCCESS")
+			IncludeScript_Report.push("[SUCCESS] \"" + name + "\"")
 		}
 		::IncludeScript <- IncludeScriptDebug
 		return result
 	}
 	::IncludeScript <- IncludeScriptDebug
 	
-	move_hooks_to_listeners() //for VSlib or others script that have already loaded itself
+	move_hooks_to_listeners() //for VSlib or others script that has already loaded itself
 	
 	printl("--------------------------------------------------------")
 	printl("Custom VScripts Loader including custom scripts...")
 	printl("--------------------------------------------------------")
-	IncludeScipt.call(getroottable())
+	IncludeCustomScipts.call(getroottable())
 	printl("--------------------------------------------------------")
 	printl("Custom VScripts Loader included custom scripts")
 	printl("--------------------------------------------------------")

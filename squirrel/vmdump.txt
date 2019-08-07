@@ -1,0 +1,4825 @@
+//executed script_dump_all with empty scriptedmode.nut and director_base.nut
+
+_lasterror: the index 'caller' does not exist [2]
+_errorhandler: (native function : 0x06259EC0) [1]
+{
+}
+_roottable: (table : 0x052D57A0) [4]
+{
+  split: (native function : 0x06259E80) [1]
+  {
+  }
+  ShowMessage: (native function : 0x0635CE10) [1]
+  {
+    (userdata : 0x052DD440) [1]
+    {
+    }
+  }
+  GetAverageSurvivorFlowDistance: (native function : 0x0635C3F0) [1]
+  {
+    (userdata : 0x03A0AE50) [1]
+    {
+    }
+  }
+  GetFlowDistanceForPosition: (native function : 0x0635C708) [1]
+  {
+    (userdata : 0x03970090) [1]
+    {
+    }
+  }
+  resurrectunreachable: (native function : 0x06259740) [1]
+  {
+  }
+  GetFlowPercentForPosition: (native function : 0x0635C360) [1]
+  {
+    (userdata : 0x03A16820) [1]
+    {
+    }
+  }
+  DoEntFire: (native function : 0x0635CCA8) [1]
+  {
+    (userdata : 0x060BF1B0) [1]
+    {
+    }
+  }
+  print_indent: 0
+  IsPlayerABot: (native function : 0x062DB9F0) [1]
+  {
+    (userdata : 0x052DD380) [1]
+    {
+    }
+  }
+  FindCircularReference: (function : 0x052D68B0) [1]
+  {
+  }
+  GetPhysVelocity: (native function : 0x062DB888) [1]
+  {
+    (userdata : 0x052D45A0) [1]
+    {
+    }
+  }
+  atan2: (native function : 0x062599C0) [1]
+  {
+  }
+  _charsize_: 1
+  ScriptDebugClearWatches: (function : 0x05195500) [1]
+  {
+  }
+  IsWeakref: (native function : 0x06259F40) [1]
+  {
+  }
+  NavMesh: (instance : 0x067AB598) [2]
+  {
+    _class : (class : 0x060D1680) [4]
+  }
+  cos: (native function : 0x06259800) [1]
+  {
+  }
+  Vector4D: (class : 0x03B49C20) [2]
+  {
+    _members: 
+    {
+      constructor: (native function : 0x0625A8C0) [2]
+      {
+      }
+      LengthSqr: (native function : 0x0625ABC0) [2]
+      {
+      }
+      Dot: (native function : 0x0625AC00) [2]
+      {
+      }
+      Norm: (native function : 0x0625A900) [2]
+      {
+      }
+      Length: (native function : 0x0625AB80) [2]
+      {
+      }
+      ToKVString: (native function : 0x0625AB40) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _add: (native function : 0x0625AA80) [1]
+      {
+      }
+      _sub: (native function : 0x0625AAC0) [1]
+      {
+      }
+      _mul: (native function : 0x0625AB00) [1]
+      {
+      }
+      _set: (native function : 0x0625A980) [1]
+      {
+      }
+      _get: (native function : 0x0625A940) [1]
+      {
+      }
+      _typeof: (native function : 0x0625AA00) [1]
+      {
+      }
+      _nexti: (native function : 0x0625AA40) [1]
+      {
+      }
+      _tostring: (native function : 0x0625A9C0) [1]
+      {
+      }
+    }
+  }
+  __RunEventCallbacks: (function : 0x05195290) [1]
+  {
+  }
+  ScriptEventCallbacks: (table : 0x05196F40) [1]
+  {
+  }
+  PI: 3.14159
+  __RunGameEventCallbacks: (function : 0x051952C0) [1]
+  {
+  }
+  Director: (instance : 0x068AA178) [2]
+  {
+    _class : (class : 0x060D12C0) [4]
+  }
+  strip: (native function : 0x06259DC0) [1]
+  {
+  }
+  lstrip: (native function : 0x06259E00) [1]
+  {
+  }
+  format: (native function : 0x06259D80) [1]
+  {
+  }
+  rstrip: (native function : 0x06259E40) [1]
+  {
+  }
+  DropFire: (native function : 0x0635C048) [1]
+  {
+    (userdata : 0x052D74B0) [1]
+    {
+    }
+  }
+  ScriptDebugDumpKeys: (function : 0x067A88F8) [1]
+  {
+    (null : 0x00000000)
+  }
+  __DumpScope: (function : 0x05194960) [1]
+  {
+  }
+  __CollectGameEventCallbacks: (function : 0x05195260) [2]
+  {
+  }
+  abs: (native function : 0x06259BC0) [1]
+  {
+  }
+  DebugDrawScreenTextLine: (native function : 0x062DBA38) [1]
+  {
+    (userdata : 0x052D4BA0) [1]
+    {
+    }
+  }
+  ScriptDebugTraceAllOn: false
+  ZSpawn: (native function : 0x062DAA30) [1]
+  {
+    (userdata : 0x052D7ED0) [1]
+    {
+    }
+  }
+  RotateOrientation: (native function : 0x062DBD50) [1]
+  {
+    (userdata : 0x05DA17A0) [1]
+    {
+    }
+  }
+  DirectorScript: (table : 0x060A5380) [3]
+  {
+    _delegate : (table : 0x052D57A0) [-2147483643]
+    HUD_MID_TOP: 2
+    FINALE_CUSTOM_TANK: 8
+    SPAWNDIR_NE: 2
+    DMG_BUCKSHOT: 536870912
+    HUD_SCORE_3: 13
+    HUD_SPECIAL_ROUNDTIME: 5
+    HUD_SCORE_1: 11
+    FINALE_GAUNTLET_HORDE_BONUSTIME: 14
+    HUD_SPECIAL_COOLDOWN: 4
+    HUD_SCORE_4: 14
+    SPAWNDIR_SW: 32
+    SPAWNDIR_E: 4
+    TRACE_MASK_PLAYER_SOLID: 33636363
+    HUD_RIGHT_TOP: 4
+    ZOMBIE_SMOKER: 1
+    SPAWN_BEHIND_SURVIVORS: 1
+    FINALE_FINAL_BOSS: 5
+    IN_RIGHT: 1024
+    FINALE_HALFTIME_BOSS: 2
+    SPAWNDIR_N: 1
+    HUD_FLAG_TEAM_INFECTED: 2048
+    DMG_BURN: 8
+    SPAWNDIR_S: 16
+    SPAWN_VERSUS_FINALE_DISTANCE: 8
+    DMG_STUMBLE: 33554432
+    STAGE_NONE: 9
+    STAGE_DELAY: 2
+    SCRIPT_SHUTDOWN_MANUAL: 0
+    DMG_BLAST: 64
+    ZOMBIE_NORMAL: 0
+    HUD_LEFT_BOT: 1
+    FINALE_CUSTOM_PANIC: 7
+    SPAWNDIR_NW: 128
+    SPAWN_SURVIVORS: 1
+    ZOMBIE_CHARGER: 6
+    SPAWN_SPECIALS_ANYWHERE: 4
+    ZSPAWN_WITCHBRIDE: 11
+    SCRIPT_SHUTDOWN_EXIT_GAME: 4
+    FINALE_HORDE_ATTACK_2: 4
+    DMG_MELEE: 2097152
+    TIMER_COUNTDOWN: 2
+    INFECTED_FLAG_CANT_HEAR_SURVIVORS: 16384
+    __vrefs: 1
+    TRACE_MASK_ALL: -1
+    FINALE_GAUNTLET_ESCAPE: 17
+    TRACE_MASK_SHOT: 1174421507
+    DMG_BLAST_SURFACE: 134217728
+    ZSPAWN_MOB: 10
+    SPAWN_FAR_AWAY_FROM_SURVIVORS: 5
+    HUD_LEFT_TOP: 0
+    SPAWN_POSITIONAL: 3
+    IN_FORWARD: 8
+    FINALE_CUSTOM_DELAY: 10
+    UPGRADE_EXPLOSIVE_AMMO: 1
+    FINALE_GAUNTLET_HORDE: 13
+    TIMER_COUNTUP: 1
+    SPAWNDIR_SE: 8
+    IN_ATTACK2: 2048
+    SPAWN_FINALE: 0
+    HUD_FLAG_AS_TIME: 16
+    TRACE_MASK_NPC_SOLID: 33701899
+    TIMER_DISABLE: 0
+    FINALE_GAUNTLET_1: 0
+    SCRIPT_SHUTDOWN_TEAM_SWAP: 2
+    ZSPAWN_MUDMEN: 12
+    STAGE_SETUP: 5
+    HUD_FLAG_ALIGN_CENTER: 512
+    HUD_FAR_RIGHT: 8
+    HUD_SCORE_TITLE: 10
+    HUD_FLAG_NOTVISIBLE: 16384
+    INFECTED_FLAG_CANT_SEE_SURVIVORS: 8192
+    TIMER_SET: 4
+    FINALE_GAUNTLET_BOSS: 16
+    HUD_FLAG_BLINK: 8
+    SPAWN_NEAR_POSITION: 10
+    ZOMBIE_JOCKEY: 5
+    __vname: DirectorScript [3]
+    SPAWN_NEAR_IT_VICTIM: 2
+    SPAWN_ANYWHERE: 0
+    HUD_SPECIAL_TIMER1: 1
+    HUD_SPECIAL_TIMER2: 2
+    HUD_SPECIAL_TIMER3: 3
+    HUD_FLAG_COUNTDOWN_WARN: 32
+    HUD_SPECIAL_TIMER0: 0
+    UPGRADE_LASER_SIGHT: 2
+    UPGRADE_INCENDIARY_AMMO: 0
+    IN_RELOAD: 8192
+    IN_LEFT: 512
+    IN_CANCEL: 64
+    IN_USE: 32
+    STAGE_CLEAROUT: 4
+    BOT_CANT_FEEL: 4
+    IN_BACK: 16
+    SPAWN_NO_PREFERENCE: -1
+    IN_DUCK: 4
+    SPAWN_IN_FRONT_OF_SURVIVORS: 7
+    HUD_MID_BOX: 9
+    IN_ATTACK: 1
+    HUD_SPECIAL_MODENAME: 7
+    BOT_CANT_SEE: 1
+    ALLOW_BASH_NONE: 2
+    SPAWN_BATTLEFIELD: 2
+    STAGE_PANIC: 0
+    ZOMBIE_TANK: 8
+    HUD_FLAG_ALIGN_LEFT: 256
+    MapScript: (table : 0x060A5800) [4]
+    {
+      _delegate : (table : 0x060A5380) [-2147483644]
+      __vname: MapScript [3]
+      __vrefs: 1
+      LocalScript: (table : 0x060A5260) [2]
+      {
+        _delegate : (table : 0x060A5800) [-2147483643]
+        __vname: LocalScript [3]
+        __vrefs: 1
+      }
+      ChallengeScript: (table : 0x05197F30) [2]
+      {
+        _delegate : (table : 0x060A5800) [-2147483643]
+        __vname: ChallengeScript [3]
+        __vrefs: 1
+      }
+    }
+    BOT_CMD_RESET: 3
+    SCRIPT_SHUTDOWN_ROUND_RESTART: 1
+    BOT_QUERY_NOTARGET: 1
+    FINALE_GAUNTLET_START: 12
+    BOT_CMD_ATTACK: 0
+    HUD_FLAG_ALLOWNEGTIMER: 128
+    ALLOW_BASH_ALL: 0
+    HUD_MID_BOT: 3
+    IN_JUMP: 2
+    SCRIPTED_SPAWN_SURVIVORS: 1
+    FINALE_CUSTOM_SCRIPTED: 9
+    TRACE_MASK_VISIBLE_AND_NPCS: 33579137
+    INFECTED_FLAG_CANT_FEEL_SURVIVORS: 32768
+    SPAWN_SPECIALS_IN_FRONT_OF_SURVIVORS: 3
+    BOT_CMD_RETREAT: 2
+    FINALE_HORDE_ESCAPE: 6
+    SPAWN_ABOVE_SURVIVORS: 6
+    SCRIPTED_SPAWN_POSITIONAL: 3
+    SPAWN_LARGE_VOLUME: 9
+    FINALE_GAUNTLET_BOSS_INCOMING: 15
+    HUD_RIGHT_BOT: 5
+    STAGE_ESCAPE: 7
+    STAGE_RESULTS: 8
+    HUD_FLAG_NOBG: 64
+    ZOMBIE_WITCH: 7
+    ZOMBIE_HUNTER: 3
+    SCRIPT_SHUTDOWN_LEVEL_TRANSITION: 3
+    DMG_HEADSHOT: 1073741824
+    BOT_CANT_HEAR: 2
+    HUD_SPECIAL_MAPNAME: 6
+    SCRIPTED_SPAWN_FINALE: 0
+    FINALE_CUSTOM_CLEAROUT: 11
+    HUD_SCORE_2: 12
+    STAGE_TANK: 1
+    SCRIPTED_SPAWN_BATTLEFIELD: 2
+    HUD_FLAG_POSTSTR: 2
+    HUD_FLAG_BEEP: 4
+    TRACE_MASK_VISION: 33579073
+    BOT_CMD_MOVE: 1
+    ZOMBIE_BOOMER: 2
+    HUD_FAR_LEFT: 7
+    HUD_FLAG_TEAM_MASK: 3072
+    HUD_FLAG_TEAM_SURVIVORS: 1024
+    HUD_TICKER: 6
+    FINALE_HORDE_ATTACK_1: 1
+    TIMER_STOP: 3
+    HUD_FLAG_PRESTR: 1
+    FINALE_GAUNTLET_2: 3
+    DMG_BULLET: 2
+    HUD_FLAG_ALIGN_RIGHT: 768
+    ZOMBIE_SPITTER: 4
+    ALLOW_BASH_PUSHONLY: 1
+    SPAWNDIR_W: 64
+  }
+  LateBinder: (class : 0x060D11D0) [1]
+  {
+    _members: 
+    {
+      RemoveDelegation: (function : 0x052D6EB0) [2]
+      {
+      }
+      End: (function : 0x052D40C0) [2]
+      {
+      }
+      UnhookRootMetamethod: (function : 0x052DD800) [2]
+      {
+      }
+      Resolve: (function : 0x0669F838) [2]
+      {
+        false
+      }
+      HookRootMetamethod: (function : 0x052DDC50) [2]
+      {
+      }
+      m_logIndent: 0
+      Log: (function : 0x039680F0) [2]
+      {
+      }
+      Begin: (function : 0x0669E728) [2]
+      {
+        false
+      }
+      m_bindNamesStack: (array : 0x03938050) [2]
+      {
+      }
+      m_fixupSet: (array : 0x03938028) [2]
+      {
+      }
+      m_targetTable: (null : 0x00000000)
+      m_log: false
+      EstablishDelegation: (function : 0x052D6EE0) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+    }
+  }
+  Time: (native function : 0x0635CCF0) [1]
+  {
+    (userdata : 0x052DDAA0) [1]
+    {
+    }
+  }
+  DebugDrawBoxDirection: (native function : 0x0635C798) [1]
+  {
+    (userdata : 0x052D4BD0) [1]
+    {
+    }
+  }
+  ScriptDebugIterateKeys: (function : 0x067A9B58) [1]
+  {
+    (null : 0x00000000)
+  }
+  GetPlayerFromCharacter: (native function : 0x062DBAC8) [1]
+  {
+    (userdata : 0x052D4A20) [1]
+    {
+    }
+  }
+  CDirector: (class : 0x060D12C0) [3]
+  {
+    _members: 
+    {
+      GetGameMode: (native function : 0x06337AC8) [2]
+      {
+        (userdata : 0x052D5B60) [1]
+        {
+        }
+      }
+      L4D1SurvivorGiveItem: (native function : 0x06337918) [2]
+      {
+        (userdata : 0x03983090) [1]
+        {
+        }
+      }
+      ResetMobTimer: (native function : 0x06337B58) [2]
+      {
+        (userdata : 0x052D5A40) [1]
+        {
+        }
+      }
+      ForceNextStage: (native function : 0x06337378) [2]
+      {
+        (userdata : 0x052D4570) [1]
+        {
+        }
+      }
+      GetHoldoutCooldownEndTime: (native function : 0x06337648) [2]
+      {
+        (userdata : 0x052D5710) [1]
+        {
+        }
+      }
+      IsValid: (native function : 0x06270000) [2]
+      {
+      }
+      GetAveragedSurvivorSpeed: (native function : 0x06337960) [2]
+      {
+        (userdata : 0x052D5D10) [1]
+        {
+        }
+      }
+      IsPlayingOnConsole: (native function : 0x06337840) [2]
+      {
+        (userdata : 0x052D5B30) [1]
+        {
+        }
+      }
+      PlayMegaMobWarningSounds: (native function : 0x06337C30) [2]
+      {
+        (userdata : 0x052D5CB0) [1]
+        {
+        }
+      }
+      GetFurthestSurvivorFlow: (native function : 0x063379F0) [2]
+      {
+        (userdata : 0x052D5BF0) [1]
+        {
+        }
+      }
+      UserDefinedEvent3: (native function : 0x06336F88) [2]
+      {
+        (userdata : 0x052D44B0) [1]
+        {
+        }
+      }
+      GetPendingMobCount: (native function : 0x06337528) [2]
+      {
+        (userdata : 0x052D4510) [1]
+        {
+        }
+      }
+      UserDefinedEvent4: (native function : 0x06337018) [2]
+      {
+        (userdata : 0x03980750) [1]
+        {
+        }
+      }
+      GetCommonInfectedCount: (native function : 0x06337180) [2]
+      {
+        (userdata : 0x052D46F0) [1]
+        {
+        }
+      }
+      UserDefinedEvent2: (native function : 0x06337330) [2]
+      {
+        (userdata : 0x052D4480) [1]
+        {
+        }
+      }
+      UserDefinedEvent1: (native function : 0x06337258) [2]
+      {
+        (userdata : 0x052D45D0) [1]
+        {
+        }
+      }
+      ClearCachedBotQueries: (native function : 0x06337450) [2]
+      {
+        (userdata : 0x052D4630) [1]
+        {
+        }
+      }
+      IsAnySurvivorInCombat: (native function : 0x06337570) [2]
+      {
+        (userdata : 0x038B5D70) [1]
+        {
+        }
+      }
+      SetHoldoutCooldownEndTime: (native function : 0x063376D8) [2]
+      {
+        (userdata : 0x060BE130) [1]
+        {
+        }
+      }
+      IsTankInPlay: (native function : 0x06337600) [2]
+      {
+        (userdata : 0x038B6610) [1]
+        {
+        }
+      }
+      ResetSpecialTimers: (native function : 0x06337BA0) [2]
+      {
+        (userdata : 0x052D59E0) [1]
+        {
+        }
+      }
+      GetAveragedSurvivorSpan: (native function : 0x06337D08) [2]
+      {
+        (userdata : 0x052D5CE0) [1]
+        {
+        }
+      }
+      HasAnySurvivorLeftSafeArea: (native function : 0x06337A80) [2]
+      {
+        (userdata : 0x052D5980) [1]
+        {
+        }
+      }
+      IsSinglePlayerGame: (native function : 0x06337768) [2]
+      {
+        (userdata : 0x052D5C50) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x0625BFC0) [1]
+      {
+      }
+    }
+  }
+  _PublishedHelp: (table : 0x039DEA00) [1]
+  {
+  }
+  ScriptDebugDrawWatchesEnabled: true
+  ScriptDebugInDebugDraw: false
+  GetPhysAngularVelocity: (native function : 0x062DB768) [1]
+  {
+    (userdata : 0x052D4720) [1]
+    {
+    }
+  }
+  GetFriction: (native function : 0x062DBC30) [1]
+  {
+    (userdata : 0x052D4CC0) [1]
+    {
+    }
+  }
+  FireScriptEvent: (function : 0x051952F0) [1]
+  {
+  }
+  setroottable: (native function : 0x062593C0) [1]
+  {
+  }
+  BeginScriptDebug: (function : 0x051956B0) [1]
+  {
+  }
+  HUDManageTimers: (native function : 0x0635C480) [1]
+  {
+    (userdata : 0x0396B270) [1]
+    {
+    }
+  }
+  CSimpleCallChainer: (class : 0x060D13B0) [1]
+  {
+    _members: 
+    {
+      constructor: (function : 0x0625B640) [2]
+      {
+        (null : 0x00000000)
+        false
+      }
+      scope: (null : 0x00000000)
+      prefix: (null : 0x00000000)
+      PostScriptExecute: (function : 0x0397D080) [2]
+      {
+      }
+      exactMatch: false
+      chain: (null : 0x00000000)
+      Call: (function : 0x03A59230) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+    }
+  }
+  PlayerInstanceFromIndex: (native function : 0x0635CA68) [1]
+  {
+    (userdata : 0x038B4A20) [1]
+    {
+    }
+  }
+  ScriptDebugRemoveWatchPattern: (function : 0x051954D0) [1]
+  {
+  }
+  log10: (native function : 0x06259900) [1]
+  {
+  }
+  ScriptDebugTraces: (table : 0x05195350) [1]
+  {
+  }
+  RAND_MAX: 32767
+  pow: (native function : 0x06259A00) [1]
+  {
+  }
+  SpawnEntityGroupFromTable: (native function : 0x0635CA20) [1]
+  {
+    (userdata : 0x03A52AC0) [1]
+    {
+    }
+  }
+  type: (native function : 0x06259640) [1]
+  {
+  }
+  ScriptDebugTraceAll: (function : 0x0669E648) [1]
+  {
+    true
+  }
+  developer: (native function : 0x06259F00) [1]
+  {
+  }
+  compilestring: (native function : 0x06259540) [1]
+  {
+  }
+  SaveTable: (native function : 0x0635C318) [1]
+  {
+    (userdata : 0x052D7150) [1]
+    {
+    }
+  }
+  setconsttable: (native function : 0x06259440) [1]
+  {
+  }
+  tan: (native function : 0x06259940) [1]
+  {
+  }
+  error: (native function : 0x06259500) [1]
+  {
+  }
+  GetMaxFlowDistance: (native function : 0x0635C3A8) [1]
+  {
+    (userdata : 0x039FEF10) [1]
+    {
+    }
+  }
+  ScriptDebugIterateKeysRecursive: (function : 0x052D6160) [1]
+  {
+  }
+  _version_: Squirrel 3.0.4 stable [2]
+  DebugDrawLine_vCol: (native function : 0x0635C750) [1]
+  {
+    (userdata : 0x052D4AE0) [1]
+    {
+    }
+  }
+  ScriptDebugTextTrace: (function : 0x0669CA10) [1]
+  {
+    (array : 0x0610FEA8) [1]
+    {
+      255
+      255
+      255
+    }
+  }
+  sin: (native function : 0x062597C0) [1]
+  {
+  }
+  rr_QueryBestResponse: (native function : 0x0635C8B8) [1]
+  {
+    (userdata : 0x052D4C30) [1]
+    {
+    }
+  }
+  Vector2D: (class : 0x03B4A850) [2]
+  {
+    _members: 
+    {
+      constructor: (native function : 0x0625AC40) [2]
+      {
+      }
+      LengthSqr: (native function : 0x0625AF40) [2]
+      {
+      }
+      Dot: (native function : 0x0625AF80) [2]
+      {
+      }
+      Norm: (native function : 0x0625AC80) [2]
+      {
+      }
+      Length: (native function : 0x0625AF00) [2]
+      {
+      }
+      ToKVString: (native function : 0x0625AEC0) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _add: (native function : 0x0625AE00) [1]
+      {
+      }
+      _sub: (native function : 0x0625AE40) [1]
+      {
+      }
+      _mul: (native function : 0x0625AE80) [1]
+      {
+      }
+      _set: (native function : 0x0625AD00) [1]
+      {
+      }
+      _get: (native function : 0x0625ACC0) [1]
+      {
+      }
+      _typeof: (native function : 0x0625AD80) [1]
+      {
+      }
+      _nexti: (native function : 0x0625ADC0) [1]
+      {
+      }
+      _tostring: (native function : 0x0625AD40) [1]
+      {
+      }
+    }
+  }
+  PrecacheEntityFromTable: (native function : 0x062DBE28) [1]
+  {
+    (userdata : 0x03968660) [1]
+    {
+    }
+  }
+  ConnectOutputs: (function : 0x05194930) [1]
+  {
+  }
+  FileToString: (native function : 0x0635C0D8) [1]
+  {
+    (userdata : 0x052D7420) [1]
+    {
+    }
+  }
+  RandomInt: (native function : 0x0635CE58) [1]
+  {
+    (userdata : 0x03A3DF50) [1]
+    {
+    }
+  }
+  callee: (native function : 0x06259680) [1]
+  {
+  }
+  DebugDrawText: (native function : 0x062DBA80) [1]
+  {
+    (userdata : 0x052D5680) [1]
+    {
+    }
+  }
+  ScriptDebugAddWatchPattern: (function : 0x051954A0) [1]
+  {
+  }
+  Convars: (instance : 0x06793F00) [2]
+  {
+    _class : (class : 0x03B4A940) [3]
+  }
+  CNetPropManager: (class : 0x060D14A0) [3]
+  {
+    _members: 
+    {
+      SetPropEntityArray: (native function : 0x063361C0) [2]
+      {
+        (userdata : 0x05194600) [1]
+        {
+        }
+      }
+      SetPropIntArray: (native function : 0x06336448) [2]
+      {
+        (userdata : 0x05194570) [1]
+        {
+        }
+      }
+      GetPropVector: (native function : 0x063367A8) [2]
+      {
+        (userdata : 0x05194150) [1]
+        {
+        }
+      }
+      GetPropFloatArray: (native function : 0x06336640) [2]
+      {
+        (userdata : 0x05194480) [1]
+        {
+        }
+      }
+      GetPropStringArray: (native function : 0x063363B8) [2]
+      {
+        (userdata : 0x05194510) [1]
+        {
+        }
+      }
+      HasProp: (native function : 0x06336328) [2]
+      {
+        (userdata : 0x051946C0) [1]
+        {
+        }
+      }
+      GetPropVectorArray: (native function : 0x06336688) [2]
+      {
+        (userdata : 0x051944B0) [1]
+        {
+        }
+      }
+      IsValid: (native function : 0x06270900) [2]
+      {
+      }
+      GetPropEntityArray: (native function : 0x06336760) [2]
+      {
+        (userdata : 0x051944E0) [1]
+        {
+        }
+      }
+      GetPropEntity: (native function : 0x063367F0) [2]
+      {
+        (userdata : 0x051941B0) [1]
+        {
+        }
+      }
+      GetPropIntArray: (native function : 0x063365F8) [2]
+      {
+        (userdata : 0x05194450) [1]
+        {
+        }
+      }
+      SetPropVector: (native function : 0x06336958) [2]
+      {
+        (userdata : 0x05194330) [1]
+        {
+        }
+      }
+      GetPropInt: (native function : 0x06336AC0) [2]
+      {
+        (userdata : 0x052D7000) [1]
+        {
+        }
+      }
+      SetPropEntity: (native function : 0x06336910) [2]
+      {
+        (userdata : 0x05194390) [1]
+        {
+        }
+      }
+      SetPropFloatArray: (native function : 0x063364D8) [2]
+      {
+        (userdata : 0x051945A0) [1]
+        {
+        }
+      }
+      GetPropType: (native function : 0x06336010) [2]
+      {
+        (userdata : 0x05194720) [1]
+        {
+        }
+      }
+      SetPropFloat: (native function : 0x063368C8) [2]
+      {
+        (userdata : 0x051942D0) [1]
+        {
+        }
+      }
+      GetPropArraySize: (native function : 0x063362E0) [2]
+      {
+        (userdata : 0x05194690) [1]
+        {
+        }
+      }
+      SetPropInt: (native function : 0x06336880) [2]
+      {
+        (userdata : 0x05194270) [1]
+        {
+        }
+      }
+      GetPropString: (native function : 0x06336838) [2]
+      {
+        (userdata : 0x05194210) [1]
+        {
+        }
+      }
+      SetPropStringArray: (native function : 0x06336250) [2]
+      {
+        (userdata : 0x05194630) [1]
+        {
+        }
+      }
+      SetPropString: (native function : 0x063365B0) [2]
+      {
+        (userdata : 0x051943F0) [1]
+        {
+        }
+      }
+      SetPropVectorArray: (native function : 0x06336568) [2]
+      {
+        (userdata : 0x051945D0) [1]
+        {
+        }
+      }
+      GetPropFloat: (native function : 0x06336B08) [2]
+      {
+        (userdata : 0x052D7090) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x06270880) [1]
+      {
+      }
+    }
+  }
+  Vector: (class : 0x060D0FF0) [2]
+  {
+    _members: 
+    {
+      Length2D: (native function : 0x0625A080) [2]
+      {
+      }
+      Dot: (native function : 0x0625A400) [2]
+      {
+      }
+      Length2DSqr: (native function : 0x0625A3C0) [2]
+      {
+      }
+      Length: (native function : 0x0625A340) [2]
+      {
+      }
+      Cross: (native function : 0x0625A440) [2]
+      {
+      }
+      constructor: (native function : 0x0625A040) [2]
+      {
+      }
+      LengthSqr: (native function : 0x0625A380) [2]
+      {
+      }
+      Scale: (native function : 0x0625A4C0) [2]
+      {
+      }
+      Norm: (native function : 0x0625A480) [2]
+      {
+      }
+      ToKVString: (native function : 0x0625A300) [2]
+      {
+      }
+      tostring: (native function : 0x0625A180) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _add: (native function : 0x0625A240) [1]
+      {
+      }
+      _sub: (native function : 0x0625A280) [1]
+      {
+      }
+      _mul: (native function : 0x0625A2C0) [1]
+      {
+      }
+      _set: (native function : 0x0625A100) [1]
+      {
+      }
+      _get: (native function : 0x0625A0C0) [1]
+      {
+      }
+      _typeof: (native function : 0x0625A1C0) [1]
+      {
+      }
+      _nexti: (native function : 0x0625A200) [1]
+      {
+      }
+      _tostring: (native function : 0x0625A140) [1]
+      {
+      }
+    }
+  }
+  print: (function : 0x052D7D50) [1]
+  {
+  }
+  _floatsize_: 4
+  getstackinfos: (native function : 0x06259340) [1]
+  {
+  }
+  __VScriptServerDebugHook: (function : 0x05195680) [1]
+  {
+  }
+  exp: (native function : 0x06259AC0) [1]
+  {
+  }
+  HUDReadTimer: (native function : 0x0635C4C8) [1]
+  {
+    (userdata : 0x0397EEB0) [1]
+    {
+    }
+  }
+  StringToFile: (native function : 0x0635C090) [1]
+  {
+    (userdata : 0x052D7330) [1]
+    {
+    }
+  }
+  ScriptDebugDrawWatches: (function : 0x051953B0) [1]
+  {
+  }
+  __OutputsPattern: (instance : 0x067A8818) [1]
+  {
+    _class : (class : 0x060D10E0) [3]
+  }
+  seterrorhandler: (native function : 0x06259280) [1]
+  {
+  }
+  RandomFloat: (native function : 0x0635CEA0) [1]
+  {
+    (userdata : 0x052DD5C0) [1]
+    {
+    }
+  }
+  HUDPlace: (native function : 0x0635C1B0) [1]
+  {
+    (userdata : 0x052D72A0) [1]
+    {
+    }
+  }
+  VSquirrel_OnReleaseScope: (function : 0x052D4060) [2]
+  {
+  }
+  assert: (native function : 0x06259480) [1]
+  {
+  }
+  FindCircularReferences: (function : 0x052D4FC0) [1]
+  {
+  }
+  DoUniqueString: (native function : 0x0635CC60) [1]
+  {
+    (userdata : 0x03A0AB80) [1]
+    {
+    }
+  }
+  EmitSoundOnClient: (native function : 0x062DBCC0) [1]
+  {
+    (userdata : 0x039946C0) [1]
+    {
+    }
+  }
+  asin: (native function : 0x06259840) [1]
+  {
+  }
+  FireGameEvent: (native function : 0x0635CAF8) [1]
+  {
+    (userdata : 0x03A0A970) [1]
+    {
+    }
+  }
+  GetInvTable: (native function : 0x0635C1F8) [1]
+  {
+    (userdata : 0x052D7120) [1]
+    {
+    }
+  }
+  Quaternion: (class : 0x03B4B660) [2]
+  {
+    _members: 
+    {
+      constructor: (native function : 0x0625A500) [2]
+      {
+      }
+      ToQAngle: (native function : 0x0625A840) [2]
+      {
+      }
+      Invert: (native function : 0x0625A880) [2]
+      {
+      }
+      Dot: (native function : 0x0625A7C0) [2]
+      {
+      }
+      SetPitchYawRoll: (native function : 0x0625A540) [2]
+      {
+      }
+      ToKVString: (native function : 0x0625A780) [2]
+      {
+      }
+      Norm: (native function : 0x0625A800) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _add: (native function : 0x0625A6C0) [1]
+      {
+      }
+      _sub: (native function : 0x0625A700) [1]
+      {
+      }
+      _mul: (native function : 0x0625A740) [1]
+      {
+      }
+      _set: (native function : 0x0625A5C0) [1]
+      {
+      }
+      _get: (native function : 0x0625A580) [1]
+      {
+      }
+      _typeof: (native function : 0x0625A640) [1]
+      {
+      }
+      _nexti: (native function : 0x0625A680) [1]
+      {
+      }
+      _tostring: (native function : 0x0625A600) [1]
+      {
+      }
+    }
+  }
+  SendToConsole: (native function : 0x0635CD80) [1]
+  {
+    (userdata : 0x052DDA40) [1]
+    {
+    }
+  }
+  ScriptDebugRemoveWatches: (function : 0x05195470) [1]
+  {
+  }
+  dummy: (native function : 0x062596C0) [1]
+  {
+  }
+  AddToScriptHelp: (function : 0x052DD530) [1]
+  {
+  }
+  GetFrameCount: (native function : 0x06337F00) [1]
+  {
+    (userdata : 0x052D5B90) [1]
+    {
+    }
+  }
+  newthread: (native function : 0x06259580) [1]
+  {
+  }
+  ScriptDebugDraw: (function : 0x05195380) [1]
+  {
+  }
+  RegisterFunctionDocumentation: (function : 0x052D4EA0) [1]
+  {
+  }
+  IncludeScript: (function : 0x067A8EE0) [1]
+  {
+    (null : 0x00000000)
+  }
+  GameEventCallbacks: (table : 0x05197630) [1]
+  {
+  }
+  ScriptDebugAddTrace: (function : 0x05195530) [1]
+  {
+  }
+  GetCharacterDisplayName: (native function : 0x062DBBA0) [1]
+  {
+    (userdata : 0x052D7F00) [1]
+    {
+    }
+  }
+  acos: (native function : 0x06259880) [1]
+  {
+  }
+  GetCurrentFlowPercentForPlayer: (native function : 0x0635C678) [1]
+  {
+    (userdata : 0x038B78D0) [1]
+    {
+    }
+  }
+  ScriptDebugRemoveTrace: (function : 0x05195560) [1]
+  {
+  }
+  Documentation: (table : 0x052D61C0) [1]
+  {
+    classes: (table : 0x052D54A0) [1]
+    {
+    }
+    instances: (table : 0x052D5080) [1]
+    {
+    }
+    functions: (table : 0x03A69200) [1]
+    {
+      DebugDrawText: (array : 0x038D5DD8) [1]
+      {
+        void DebugDrawText(Vector, string, bool, float) [2]
+        Draw text in 3d (origin, text, bViewCheck, duration) [2]
+      }
+      Convars::GetStr: (array : 0x03BAC640) [1]
+      {
+        <unknown> Convars::GetStr(string) [2]
+        GetFloat(name) : returns the convar as a string. May return null if no such convar. [2]
+      }
+      CNetPropManager::GetPropFloat: (array : 0x0392BC28) [1]
+      {
+        float CNetPropManager::GetPropFloat(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      ShowMessage: (array : 0x03BEE968) [1]
+      {
+        void ShowMessage(string) [2]
+        Print a hud message on all clients [2]
+      }
+      GetAverageSurvivorFlowDistance: (array : 0x0392F6B0) [1]
+      {
+        float GetAverageSurvivorFlowDistance() [2]
+        Gets the average flow distance of all the survivors. [2]
+      }
+      GetFlowDistanceForPosition: (array : 0x03938B18) [1]
+      {
+        float GetFlowDistanceForPosition(Vector) [2]
+        Gets distance from the start of the map for a given position. [2]
+      }
+      EntIndexToHScript: (array : 0x039368F0) [1]
+      {
+        handle EntIndexToHScript(int) [2]
+        Turn an entity index integer to an HScript representing that entity's script instance. [2]
+      }
+      CNetPropManager::SetPropStringArray: (array : 0x03BA57E8) [1]
+      {
+        void CNetPropManager::SetPropStringArray(handle, string, string, int) [2]
+        Arguments: ( entity, propertyName, value, arrayElement ) [6]
+      }
+      HUDReadTimer: (array : 0x0394CC08) [1]
+      {
+        float HUDReadTimer(int) [2]
+        Read value from a system timer [2]
+      }
+      CNetPropManager::SetPropFloat: (array : 0x038E1D60) [1]
+      {
+        void CNetPropManager::SetPropFloat(handle, string, float) [2]
+        Arguments: ( entity, propertyName, value ) [6]
+      }
+      CBaseEntity::Kill: (array : 0x0603A468) [1]
+      {
+        void CBaseEntity::Kill() [2]
+         [28]
+      }
+      StringToFile: (array : 0x03BAF1D8) [1]
+      {
+        bool StringToFile(string, string) [2]
+        Store a string to a file for later reading [2]
+      }
+      CEntities::FindByModel: (array : 0x03BA5018) [1]
+      {
+        handle CEntities::FindByModel(handle, string) [2]
+        Find entities by model name. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      RandomFloat: (array : 0x0392C7A8) [1]
+      {
+        float RandomFloat(float, float) [2]
+        Generate a random floating point number within a range, inclusive [2]
+      }
+      IsPlayerABot: (array : 0x038DD3D8) [1]
+      {
+        bool IsPlayerABot(handle) [2]
+        Is this player/entity a bot [2]
+      }
+      GetPhysVelocity: (array : 0x03915798) [1]
+      {
+        Vector GetPhysVelocity(handle) [2]
+        Get Velocity for VPHYS or normal object [2]
+      }
+      CDirector::ForceNextStage: (array : 0x03915540) [1]
+      {
+        void CDirector::ForceNextStage() [2]
+        Push the ScriptedMode to next stage - i.e. request GNSS be called [2]
+      }
+      CEntities::FindByClassnameNearest: (array : 0x03BA50B8) [1]
+      {
+        handle CEntities::FindByClassnameNearest(string, Vector, float) [2]
+        Find entities by class name nearest to a point. [2]
+      }
+      CDirector::GetAveragedSurvivorSpan: (array : 0x03BAF2A0) [1]
+      {
+        float CDirector::GetAveragedSurvivorSpan() [2]
+        Get the distance between the lead and trailing survivors, smoothed over time [2]
+      }
+      HUDSetLayout: (array : 0x03938D98) [1]
+      {
+        void HUDSetLayout(handle) [2]
+        Pass the HUD definition table for your mode [2]
+      }
+      CDirector::IsAnySurvivorInCombat: (array : 0x03BAF138) [1]
+      {
+        bool CDirector::IsAnySurvivorInCombat() [2]
+        Returns true if any survivor recently dealt or took damage [2]
+      }
+      CDirector::IsTankInPlay: (array : 0x03920370) [1]
+      {
+        bool CDirector::IsTankInPlay() [2]
+        Returns true if any tanks are aggro on survivors [2]
+      }
+      CNetPropManager::SetPropVector: (array : 0x03BED9C8) [1]
+      {
+        void CNetPropManager::SetPropVector(handle, string, Vector) [2]
+        Arguments: ( entity, propertyName, value ) [6]
+      }
+      CBaseEntity::GetLocalVelocity: (array : 0x05FC0ED8) [1]
+      {
+        Vector CBaseEntity::GetLocalVelocity() [2]
+        Get Entity relative velocity [2]
+      }
+      CBaseEntity::SetAngles: (array : 0x0392B1B0) [1]
+      {
+        void CBaseEntity::SetAngles(QAngle) [2]
+         [28]
+      }
+      CDirector::GetGameMode: (array : 0x03BABA20) [1]
+      {
+        string CDirector::GetGameMode() [2]
+        Get the current game mode [2]
+      }
+      CBaseEntity::SetGravity: (array : 0x038E7480) [1]
+      {
+        void CBaseEntity::SetGravity(float) [2]
+        Set PLAYER gravity, ignored for objects [2]
+      }
+      CEntities::FindByClassnameWithin: (array : 0x03BA50E0) [1]
+      {
+        handle CEntities::FindByClassnameWithin(handle, string, Vector, float) [2]
+        Find entities by class name within a radius. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      GetInvTable: (array : 0x039352C0) [1]
+      {
+        void GetInvTable(handle, handle) [2]
+        Put Player's inventory data into a passed in table [2]
+      }
+      CBaseEntity::IsPlayer: (array : 0x03956800) [1]
+      {
+        bool CBaseEntity::IsPlayer() [2]
+         [28]
+      }
+      SendToConsole: (array : 0x038F0848) [1]
+      {
+        void SendToConsole(string) [2]
+        Send a string to the console as a client command [2]
+      }
+      CBaseEntity::GetOrigin: (array : 0x038D63F0) [1]
+      {
+        Vector CBaseEntity::GetOrigin() [2]
+         [28]
+      }
+      CEntities::First: (array : 0x03BE8F28) [1]
+      {
+        handle CEntities::First() [2]
+        Begin an iteration over the list of entities [2]
+      }
+      GetFrameCount: (array : 0x03BAF3B8) [1]
+      {
+        int GetFrameCount() [2]
+        Returns the engines current frame count [2]
+      }
+      ReloadMOTD: (array : 0x03BAF318) [1]
+      {
+        void ReloadMOTD() [2]
+        Reloads the MotD file [2]
+      }
+      CDirector::GetHoldoutCooldownEndTime: (array : 0x039155E0) [1]
+      {
+        float CDirector::GetHoldoutCooldownEndTime() [2]
+        Get the end time of the cooldown timer [2]
+      }
+      CBaseEntity::GetVelocity: (array : 0x03B956F8) [1]
+      {
+        Vector CBaseEntity::GetVelocity() [2]
+         [28]
+      }
+      CNetPropManager::GetPropEntity: (array : 0x038E1CE8) [1]
+      {
+        handle CNetPropManager::GetPropEntity(handle, string) [2]
+        Arguments: ( entity, propertyName ) - returns an entity [2]
+      }
+      CDirector::ResetMobTimer: (array : 0x03BABB10) [1]
+      {
+        void CDirector::ResetMobTimer() [2]
+        Trigger a mob as soon as possible when in BUILD_UP [2]
+      }
+      DropFire: (array : 0x03BAC578) [1]
+      {
+        void DropFire(Vector) [2]
+        Drop a fire pool from the specified location [2]
+      }
+      CDirector::GetPendingMobCount: (array : 0x03920488) [1]
+      {
+        int CDirector::GetPendingMobCount() [2]
+        Returns tnumber of infected waiting to spawn [2]
+      }
+      GetCharacterDisplayName: (array : 0x038DD248) [1]
+      {
+        string GetCharacterDisplayName(handle) [2]
+        Return null if not a survivor, else the survivors 'real name' [2]
+      }
+      GetCurrentFlowPercentForPlayer: (array : 0x03BF0A00) [1]
+      {
+        float GetCurrentFlowPercentForPlayer(handle) [2]
+        Gets the percentage of how far the given player has made it to the goal. [2]
+      }
+      CDirector::GetAveragedSurvivorSpeed: (array : 0x03BAF430) [1]
+      {
+        float CDirector::GetAveragedSurvivorSpeed() [2]
+        Get the rate at which the lead survivor is moving along the flow, smoothed over time [2]
+      }
+      CNetPropManager::HasProp: (array : 0x06114E88) [1]
+      {
+        bool CNetPropManager::HasProp(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      CBaseEntity::SetContextNum: (array : 0x03BE0D70) [1]
+      {
+        void CBaseEntity::SetContextNum(string, float, float) [2]
+        SetContext( name , value, duration ): store any key/value pair in this entity's dialog contexts. Value must be a number (int or float). Will last for duration (set 0 to mean 'forever'). [2]
+      }
+      Decider::FindBestMatch: (array : 0x04BC29E0) [1]
+      {
+        handle Decider::FindBestMatch(handle) [2]
+        Binding_FindBestMatch(query) : Query the database and return the best result found. If multiple of equal score found, an arbitrary one returns.  [2]
+      }
+      DebugDrawScreenTextLine: (array : 0x0392E710) [1]
+      {
+        void DebugDrawScreenTextLine(float, float, int, string, int, int, int, int, float) [2]
+        Draw text with a line offset [2]
+      }
+      CBaseEntity::GetScriptId: (array : 0x038EC190) [1]
+      {
+        string CBaseEntity::GetScriptId() [2]
+        Retrieve the unique identifier used to refer to the entity within the scripting system [2]
+      }
+      CDirector::IsPlayingOnConsole: (array : 0x03BAF020) [1]
+      {
+        bool CDirector::IsPlayingOnConsole() [2]
+        Return true if game is running on a console (such as Xbox 360) [2]
+      }
+      ZSpawn: (array : 0x038DD388) [1]
+      {
+        bool ZSpawn(handle) [2]
+        Does a z_spawn like spawn based on an input table [2]
+      }
+      CBaseEntity::NextMovePeer: (array : 0x0392CEB0) [1]
+      {
+        handle CBaseEntity::NextMovePeer() [2]
+         [28]
+      }
+      RotateOrientation: (array : 0x038F0910) [1]
+      {
+        QAngle RotateOrientation(QAngle, QAngle) [2]
+        Rotate a QAngle by another QAngle. [2]
+      }
+      CNetPropManager::GetPropEntityArray: (array : 0x03BEDA90) [1]
+      {
+        handle CNetPropManager::GetPropEntityArray(handle, string, int) [2]
+        Arguments: ( entity, propertyName, arrayElement ) - returns an entity [2]
+      }
+      SendToServerConsole: (array : 0x038E1D38) [1]
+      {
+        void SendToServerConsole(string) [2]
+        Send a string to the console as a server command [2]
+      }
+      RegisterScriptGameEventListener: (array : 0x03946378) [1]
+      {
+        void RegisterScriptGameEventListener(string) [2]
+        Register as a listener for a game event from script. [2]
+      }
+      GetCurrentFlowDistanceForPlayer: (array : 0x03BA33B8) [1]
+      {
+        float GetCurrentFlowDistanceForPlayer(handle) [2]
+        Gets the distance of how far the given player has made it to the goal. [2]
+      }
+      CNetPropManager::GetPropString: (array : 0x038E1CC0) [1]
+      {
+        string CNetPropManager::GetPropString(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      CDirector::UserDefinedEvent4: (array : 0x03BE8D98) [1]
+      {
+        void CDirector::UserDefinedEvent4() [2]
+        generic user defined event fired from a squirrel script [5]
+      }
+      CDirector::UserDefinedEvent1: (array : 0x039154F0) [1]
+      {
+        void CDirector::UserDefinedEvent1() [2]
+        generic user defined event fired from a squirrel script [5]
+      }
+      CDirector::UserDefinedEvent2: (array : 0x039207A8) [1]
+      {
+        void CDirector::UserDefinedEvent2() [2]
+        generic user defined event fired from a squirrel script [5]
+      }
+      CNetPropManager::SetPropVectorArray: (array : 0x03BA5770) [1]
+      {
+        void CNetPropManager::SetPropVectorArray(handle, string, Vector, int) [2]
+        Arguments: ( entity, propertyName, value, arrayElement ) [6]
+      }
+      StartAssault: (array : 0x038E1F40) [1]
+      {
+        void StartAssault() [2]
+        Tells all existing nextbots to swap into assault mode and not hide/dither/loiter [2]
+      }
+      Decider::AddRule: (array : 0x04BC2AA8) [1]
+      {
+        bool Decider::AddRule(handle) [2]
+        AddRule(CRule) : Add a CRule object (defined in rulescript_base.nut)  [2]
+      }
+      GetPlayerFromCharacter: (array : 0x038DD298) [1]
+      {
+        handle GetPlayerFromCharacter(int) [2]
+        Given a character type, return the entity, or null [2]
+      }
+      CDirector::ResetSpecialTimers: (array : 0x03BAF408) [1]
+      {
+        void CDirector::ResetSpecialTimers() [2]
+        Reset all special timers (by type and by slot) so that hopefully mobs will spawn asap [2]
+      }
+      DebugDrawBox: (array : 0x038DD130) [1]
+      {
+        void DebugDrawBox(Vector, Vector, Vector, int, int, int, int, float) [2]
+        Draw a debug overlay box [2]
+      }
+      CDirector::IsSinglePlayerGame: (array : 0x03BB2558) [1]
+      {
+        bool CDirector::IsSinglePlayerGame() [2]
+        Return true if game is in single player [2]
+      }
+      DebugDrawLine: (array : 0x03BAF250) [1]
+      {
+        void DebugDrawLine(Vector, Vector, int, int, int, bool, float) [2]
+        Draw a debug overlay line [2]
+      }
+      CNetPropManager::SetPropFloatArray: (array : 0x038D4078) [1]
+      {
+        void CNetPropManager::SetPropFloatArray(handle, string, float, int) [2]
+        Arguments: ( entity, propertyName, value, arrayElement ) [6]
+      }
+      GetFriction: (array : 0x038D9400) [1]
+      {
+        float GetFriction(handle) [2]
+        Returns the Friction on a player entity, meaningless if not a player [2]
+      }
+      CNetPropManager::GetPropVector: (array : 0x03BA3318) [1]
+      {
+        Vector CNetPropManager::GetPropVector(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      Say: (array : 0x038ED428) [1]
+      {
+        void Say(handle, string, bool) [2]
+        Have Entity say string, and teamOnly or not [2]
+      }
+      CNetPropManager::GetPropVectorArray: (array : 0x03BED9A0) [1]
+      {
+        Vector CNetPropManager::GetPropVectorArray(handle, string, int) [2]
+        Arguments: ( entity, propertyName, arrayElement ) [5]
+      }
+      CNetPropManager::SetPropEntityArray: (array : 0x03BA57C0) [1]
+      {
+        void CNetPropManager::SetPropEntityArray(handle, string, handle, int) [2]
+        Arguments: ( entity, propertyName, value, arrayElement ) [6]
+      }
+      CBaseEntity::GetBaseVelocity: (array : 0x06028ED8) [1]
+      {
+        Vector CBaseEntity::GetBaseVelocity() [2]
+        Get Base? velocity [2]
+      }
+      CBaseEntity::GetScriptScope: (array : 0x03BEB4F8) [1]
+      {
+        handle CBaseEntity::GetScriptScope() [2]
+        Retrieve the script-side data associated with an entity [2]
+      }
+      CBaseEntity::ValidateScriptScope: (array : 0x03BD4F28) [1]
+      {
+        bool CBaseEntity::ValidateScriptScope() [2]
+        Ensure that an entity's script scope has been created [2]
+      }
+      DebugDrawClear: (array : 0x0392E468) [1]
+      {
+        void DebugDrawClear() [2]
+        Try to clear all the debug overlay info [2]
+      }
+      CBaseEntity::FirstMoveChild: (array : 0x0402D518) [1]
+      {
+        handle CBaseEntity::FirstMoveChild() [2]
+         [28]
+      }
+      DebugDrawCircle: (array : 0x03BABA70) [1]
+      {
+        void DebugDrawCircle(Vector, Vector, float, float, bool, float) [2]
+        Draw a debug circle (center, rad, vRgb, a, ztest, duration) [2]
+      }
+      rr_QueryBestResponse: (array : 0x03929068) [1]
+      {
+        handle rr_QueryBestResponse(handle, handle) [2]
+        Params: (entity, query) : tests 'query' against entity's response system and returns the best response found (or null if none found). [2]
+      }
+      PrecacheEntityFromTable: (array : 0x03BEEA08) [1]
+      {
+        bool PrecacheEntityFromTable(handle) [2]
+        Precache an entity from KeyValues in table [2]
+      }
+      CBaseEntity::SetContext: (array : 0x0394C2D0) [1]
+      {
+        void CBaseEntity::SetContext(string, string, float) [2]
+        SetContext( name , value, duration ): store any key/value pair in this entity's dialog contexts. Value must be a string. Will last for duration (set 0 to mean 'forever'). [2]
+      }
+      HUDManageTimers: (array : 0x0392F688) [1]
+      {
+        void HUDManageTimers(int, int, float) [2]
+        Manage the system timers [2]
+      }
+      UniqueString: (array : 0x03944550) [1]
+      {
+        # [5]
+        Generate a string guaranteed to be unique across the life of the script VM, with an optional root string. Useful for adding data to tables when not sure what keys are already in use in that table. [2]
+      }
+      CBaseEntity::TakeDamage: (array : 0x03BEB688) [1]
+      {
+        void CBaseEntity::TakeDamage(float, int, handle) [2]
+        (flDamage, nDamageType, hAttacker) [2]
+      }
+      CDirector::UserDefinedEvent3: (array : 0x03BE8F50) [1]
+      {
+        void CDirector::UserDefinedEvent3() [2]
+        generic user defined event fired from a squirrel script [5]
+      }
+      CBaseEntity::OverrideFriction: (array : 0x038E71D8) [1]
+      {
+        void CBaseEntity::OverrideFriction(float, float) [2]
+        Takes duration, value for a temporary override [2]
+      }
+      CBaseEntity::SetFriction: (array : 0x038DE350) [1]
+      {
+        void CBaseEntity::SetFriction(float) [2]
+        Set PLAYER friction, ignored for objects [2]
+      }
+      CBaseEntity::ApplyLocalAngularVelocityImpulse: (array : 0x03BAC7F8) [1]
+      {
+        void CBaseEntity::ApplyLocalAngularVelocityImpulse(Vector) [2]
+        Apply an Ang Velocity Impulse [2]
+      }
+      CNetPropManager::SetPropIntArray: (array : 0x038D4190) [1]
+      {
+        void CNetPropManager::SetPropIntArray(handle, string, int, int) [2]
+        Arguments: ( entity, propertyName, value, arrayElement ) [6]
+      }
+      CBaseEntity::ApplyAbsVelocityImpulse: (array : 0x03B95860) [1]
+      {
+        void CBaseEntity::ApplyAbsVelocityImpulse(Vector) [2]
+        Apply a Velocity Impulse [2]
+      }
+      ReapplyInfectedFlags: (array : 0x03BAF2F0) [1]
+      {
+        void ReapplyInfectedFlags(int, handle) [2]
+        Apply passed flags to passed infected or all commons if 2nd param is null [2]
+      }
+      CBaseEntity::SetVelocity: (array : 0x04BAB020) [1]
+      {
+        void CBaseEntity::SetVelocity(Vector) [2]
+         [28]
+      }
+      PlayerInstanceFromIndex: (array : 0x03938000) [1]
+      {
+        handle PlayerInstanceFromIndex(int) [2]
+        Get a script instance of a player by index. [2]
+      }
+      CBaseEntity::ConnectOutput: (array : 0x04B887A8) [1]
+      {
+        void CBaseEntity::ConnectOutput(string, string) [2]
+        Adds an I/O connection that will call the named function when the specified output fires [2]
+      }
+      CBaseEntity::SetForwardVector: (array : 0x06029428) [1]
+      {
+        void CBaseEntity::SetForwardVector(Vector) [2]
+        Set the orientation of the entity to have this forward vector [2]
+      }
+      CBaseEntity::GetForwardVector: (array : 0x03BA7BB0) [1]
+      {
+        Vector CBaseEntity::GetForwardVector() [2]
+        Get the forward vector of the entity [2]
+      }
+      CBaseEntity::SetOrigin: (array : 0x0601CA00) [1]
+      {
+        void CBaseEntity::SetOrigin(Vector) [2]
+         [28]
+      }
+      CBaseEntity::GetMoveParent: (array : 0x04BA7548) [1]
+      {
+        handle CBaseEntity::GetMoveParent() [2]
+        If in hierarchy, retrieves the entity's parent [2]
+      }
+      CommandABot: (array : 0x03BAF390) [1]
+      {
+        bool CommandABot(handle) [2]
+        Pass table - Inputs: bot, target, pos, cmd -- cmd BOT_CMD_MOVE, _ATTACK, _RETREAT, _RESET [2]
+      }
+      CBaseEntity::GetPreTemplateName: (array : 0x03BAC910) [1]
+      {
+        string CBaseEntity::GetPreTemplateName() [2]
+        Get the entity name stripped of template unique decoration [2]
+      }
+      CBaseEntity::GetName: (array : 0x06038A00) [1]
+      {
+        string CBaseEntity::GetName() [2]
+         [28]
+      }
+      GetInfectedStats: (array : 0x038EB868) [1]
+      {
+        void GetInfectedStats(handle) [2]
+        Fill passed in table with current stats about infected in the world [2]
+      }
+      CBaseEntity::GetClassname: (array : 0x06039BA8) [1]
+      {
+        string CBaseEntity::GetClassname() [2]
+         [28]
+      }
+      CBaseEntity::PrecacheScriptSound: (array : 0x066F7AE8) [1]
+      {
+        void CBaseEntity::PrecacheScriptSound(string) [2]
+         [28]
+      }
+      SpawnEntityFromTable: (array : 0x038F08C0) [1]
+      {
+        handle SpawnEntityFromTable(string, handle) [2]
+        Spawn entity from KeyValues in table - 'name' is entity name, rest are KeyValues for spawn. [2]
+      }
+      CNetPropManager::GetPropInt: (array : 0x03BAC5F0) [1]
+      {
+        int CNetPropManager::GetPropInt(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      CBaseEntity::PrecacheModel: (array : 0x04BC2B98) [1]
+      {
+        void CBaseEntity::PrecacheModel(string) [2]
+         [28]
+      }
+      AddThinkToEnt: (array : 0x038DD2E8) [1]
+      {
+        void AddThinkToEnt(handle, string) [2]
+        Adds a late bound think function to the C++ think tables for the obj [2]
+      }
+      CNavMesh::UnblockRescueVehicleNav: (array : 0x03BE8DE8) [1]
+      {
+        void CNavMesh::UnblockRescueVehicleNav() [2]
+        Unblock the rescue vehicle nav areas so bots can path through them [2]
+      }
+      rr_AddDecisionRule: (array : 0x0392FB60) [1]
+      {
+        bool rr_AddDecisionRule(handle) [2]
+        Add a rule to the decision database. [2]
+      }
+      StopSoundOn: (array : 0x03BAF110) [1]
+      {
+        void StopSoundOn(string, handle) [2]
+        Stop named sound on Entity [2]
+      }
+      CBaseEntity::GetEntityIndex: (array : 0x038E7390) [1]
+      {
+        int CBaseEntity::GetEntityIndex() [2]
+         [28]
+      }
+      CBaseEntity::SetHealth: (array : 0x038E5928) [1]
+      {
+        void CBaseEntity::SetHealth(int) [2]
+         [28]
+      }
+      CBaseEntity::GetRootMoveParent: (array : 0x04BC00A0) [1]
+      {
+        handle CBaseEntity::GetRootMoveParent() [2]
+        If in hierarchy, walks up the hierarchy to find the root parent [2]
+      }
+      CBaseEntity::DisconnectOutput: (array : 0x038E56F8) [1]
+      {
+        void CBaseEntity::DisconnectOutput(string, string) [2]
+        Removes a connected script function from an I/O event. [2]
+      }
+      CBaseEntity::GetHealth: (array : 0x06115900) [1]
+      {
+        int CBaseEntity::GetHealth() [2]
+         [28]
+      }
+      CNetPropManager::GetPropType: (array : 0x06114EB0) [1]
+      {
+        string CNetPropManager::GetPropType(handle, string) [2]
+        Arguments: ( entity, propertyName ) - return the prop type as a string [2]
+      }
+      CDirector::PlayMegaMobWarningSounds: (array : 0x03BAF368) [1]
+      {
+        void CDirector::PlayMegaMobWarningSounds() [2]
+        Plays a horde scream sound and asks survivors to speak 'incoming horde' lines [2]
+      }
+      CNetPropManager::SetPropString: (array : 0x03BEDA18) [1]
+      {
+        void CNetPropManager::SetPropString(handle, string, string) [2]
+        Arguments: ( entity, propertyName, value ) [6]
+      }
+      CNetPropManager::SetPropEntity: (array : 0x03BEDAB8) [1]
+      {
+        void CNetPropManager::SetPropEntity(handle, string, handle) [2]
+        Arguments: ( entity, propertyName, value ) [6]
+      }
+      DebugDrawBoxDirection: (array : 0x038F0780) [1]
+      {
+        void DebugDrawBoxDirection(Vector, Vector, Vector, Vector, Vector, float, float) [2]
+        Draw a debug forward box (cent, min, max, forward, vRgb, a, duration) [2]
+      }
+      Time: (array : 0x038F07A8) [1]
+      {
+        float Time() [2]
+        Get the current server time [2]
+      }
+      Decider::FindAllMatches: (array : 0x04BC2AD0) [1]
+      {
+        handle Decider::FindAllMatches(handle, float) [2]
+        Binding_FindAllMatches(query,leeway) : Returns an array of all matching responses. If leeway is nonzero, all results scoring within 'leeway' of the best score return.  [2]
+      }
+      CEntities::FindInSphere: (array : 0x03BA4FF0) [1]
+      {
+        handle CEntities::FindInSphere(handle, Vector, float) [2]
+        Find entities within a radius. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      CDirector::L4D1SurvivorGiveItem: (array : 0x03BB2580) [1]
+      {
+        void CDirector::L4D1SurvivorGiveItem() [2]
+        Let the L4D1 survivors know that now is a good time to give the players an item [2]
+      }
+      SpawnEntityGroupFromTable: (array : 0x03BE9FE0) [1]
+      {
+        bool SpawnEntityGroupFromTable(handle) [2]
+        Hierarchically spawn an entity group from a set of spawn tables. [2]
+      }
+      EntFire: (array : 0x038DD568) [1]
+      {
+        # [5]
+        Generate and entity i/o event [2]
+      }
+      SaveTable: (array : 0x03BAC4B0) [1]
+      {
+        void SaveTable(string, handle) [2]
+        Save the passed in table [2]
+      }
+      TraceLine: (array : 0x03BAF340) [1]
+      {
+        bool TraceLine(handle) [2]
+        Pass table - Inputs: start, end, mask, ignore  -- outputs: pos, fraction, hit, enthit, startsolid [2]
+      }
+      CBaseEntity::GetContext: (array : 0x03BAFBD8) [1]
+      {
+        <unknown> CBaseEntity::GetContext(string) [2]
+        GetContext( name ): looks up a context and returns it if available. May return string, float, or null (if the context isn't found) [2]
+      }
+      CEntities::FindByNameNearest: (array : 0x03BA5040) [1]
+      {
+        handle CEntities::FindByNameNearest(string, Vector, float) [2]
+        Find entities by name nearest to a point. [2]
+      }
+      Convars::SetValue: (array : 0x03BF0B90) [1]
+      {
+        void Convars::SetValue(string, <unknown>) [2]
+        SetValue(name, value) : sets the value of the convar. Supported types are bool, int, float, string. [2]
+      }
+      CDirector::ClearCachedBotQueries: (array : 0x039157C0) [1]
+      {
+        void CDirector::ClearCachedBotQueries() [2]
+        Mark all cached bot query results as invalid [2]
+      }
+      RotatePosition: (array : 0x038D93D8) [1]
+      {
+        Vector RotatePosition(Vector, QAngle, Vector) [2]
+        Rotate a Vector around a point. [2]
+      }
+      GetMaxFlowDistance: (array : 0x0394A7B0) [1]
+      {
+        float GetMaxFlowDistance() [2]
+        Gets the max flow distance for the entire map. [2]
+      }
+      CEntities::FindByClassname: (array : 0x03BE8ED8) [1]
+      {
+        handle CEntities::FindByClassname(handle, string) [2]
+        Find entities by class name. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      CEntities::FindByNameWithin: (array : 0x03BA5068) [1]
+      {
+        handle CEntities::FindByNameWithin(handle, string, Vector, float) [2]
+        Find entities by name within a radius. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      CNetPropManager::GetPropStringArray: (array : 0x03BA0618) [1]
+      {
+        string CNetPropManager::GetPropStringArray(handle, string, int) [2]
+        Arguments: ( entity, propertyName, arrayElement ) [5]
+      }
+      CNetPropManager::GetPropArraySize: (array : 0x03BA5810) [1]
+      {
+        int CNetPropManager::GetPropArraySize(handle, string) [2]
+        Arguments: ( entity, propertyName ) [7]
+      }
+      CBaseEntity::GetEntityHandle: (array : 0x03B9E080) [1]
+      {
+        <unknown> CBaseEntity::GetEntityHandle() [2]
+        Get the entity as an EHANDLE [2]
+      }
+      ClearSavedTables: (array : 0x03BAC690) [1]
+      {
+        void ClearSavedTables() [2]
+        Remove all saved tables [2]
+      }
+      CBaseEntity::GetLocalAngularVelocity: (array : 0x060C6D28) [1]
+      {
+        QAngle CBaseEntity::GetLocalAngularVelocity() [2]
+        Maybe local angvel [2]
+      }
+      CNetPropManager::GetPropIntArray: (array : 0x03BED950) [1]
+      {
+        int CNetPropManager::GetPropIntArray(handle, string, int) [2]
+        Arguments: ( entity, propertyName, arrayElement ) [5]
+      }
+      CBaseEntity::GetOwnerEntity: (array : 0x038E2CD8) [1]
+      {
+        handle CBaseEntity::GetOwnerEntity() [2]
+        Get the owner entity, if there is one [2]
+      }
+      RestoreTable: (array : 0x0394F8E0) [1]
+      {
+        void RestoreTable(string, handle) [2]
+        Put saved data back into the passed in table [2]
+      }
+      EmitSoundOnClient: (array : 0x067751D0) [1]
+      {
+        void EmitSoundOnClient(string, handle) [2]
+        Play named sound only on the client for the passed in player [2]
+      }
+      CNetPropManager::GetPropFloatArray: (array : 0x03BEDA68) [1]
+      {
+        float CNetPropManager::GetPropFloatArray(handle, string, int) [2]
+        Arguments: ( entity, propertyName, arrayElement ) [5]
+      }
+      CEntities::Next: (array : 0x03BE8EB0) [1]
+      {
+        handle CEntities::Next(handle) [2]
+        Continue an iteration over the list of entities, providing reference to a previously found entity [2]
+      }
+      GetPhysAngularVelocity: (array : 0x0391C0A0) [1]
+      {
+        Vector GetPhysAngularVelocity(handle) [2]
+        Get Angular Velocity for VPHYS or normal object [2]
+      }
+      CDirector::GetCommonInfectedCount: (array : 0x039204B0) [1]
+      {
+        int CDirector::GetCommonInfectedCount() [2]
+        Returns number fo infected currently spawned [2]
+      }
+      DebugDrawLine_vCol: (array : 0x03BAF1B0) [1]
+      {
+        void DebugDrawLine_vCol(Vector, Vector, Vector, bool, float) [2]
+        Draw a debug line using color vec (start, end, vRgb, a, ztest, duration) [2]
+      }
+      CEntities::FindByName: (array : 0x03BA51F8) [1]
+      {
+        handle CEntities::FindByName(handle, string) [2]
+        Find entities by name. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      CNetPropManager::SetPropInt: (array : 0x038E1C98) [1]
+      {
+        void CNetPropManager::SetPropInt(handle, string, int) [2]
+        Arguments: ( entity, propertyName, value ) [6]
+      }
+      rr_CommitAIResponse: (array : 0x03BA3368) [1]
+      {
+        bool rr_CommitAIResponse(handle, handle) [2]
+        Commit the result of QueryBestResponse back to the given entity to play. Call with params (entity, airesponse) [2]
+      }
+      EmitSoundOn: (array : 0x038F0500) [1]
+      {
+        void EmitSoundOn(string, handle) [2]
+        Play named sound on Entity [2]
+      }
+      CDirector::GetFurthestSurvivorFlow: (array : 0x03BB2508) [1]
+      {
+        float CDirector::GetFurthestSurvivorFlow() [2]
+        Get the maximum distance along the flow that the survivors have reached [2]
+      }
+      CDirector::HasAnySurvivorLeftSafeArea: (array : 0x03BB2620) [1]
+      {
+        bool CDirector::HasAnySurvivorLeftSafeArea() [2]
+        True when one or more survivors have left the starting safe area [2]
+      }
+      CDirector::SetHoldoutCooldownEndTime: (array : 0x03920618) [1]
+      {
+        void CDirector::SetHoldoutCooldownEndTime(float) [2]
+        Set the end time of the cooldown timer [2]
+      }
+      rr_GetResponseTargets: (array : 0x03BA3188) [1]
+      {
+        handle rr_GetResponseTargets() [2]
+        Retrieve a table of all available expresser targets, in the form { name : handle, name: handle }. [2]
+      }
+      CBaseEntity::GetAngles: (array : 0x03935928) [1]
+      {
+        QAngle CBaseEntity::GetAngles() [2]
+         [28]
+      }
+      Convars::GetClientConvarValue: (array : 0x03BAC668) [1]
+      {
+        string Convars::GetClientConvarValue(string, int) [2]
+        GetClientConvarValue(name) : returns the convar value for the entindex as a string. [2]
+      }
+      PickupObject: (array : 0x0394D1F8) [1]
+      {
+        void PickupObject(handle, handle) [2]
+        Have a player pickup a nearby named entity [2]
+      }
+      DoIncludeScript: (array : 0x038D41E0) [1]
+      {
+        bool DoIncludeScript(string, handle) [2]
+        Execute a script (internal) [2]
+      }
+      DropSpit: (array : 0x03BAC528) [1]
+      {
+        void DropSpit(Vector) [2]
+        Drop a spit pool from the specified location [2]
+      }
+      CEntities::FindByTarget: (array : 0x03BE8E88) [1]
+      {
+        handle CEntities::FindByTarget(handle, string) [2]
+        Find entities by targetname. Pass 'null' to start an iteration, or reference to a previously found entity to continue a search [2]
+      }
+      FireGameEvent: (array : 0x038F07D0) [1]
+      {
+        bool FireGameEvent(string, handle) [2]
+        Fire a game event to a listening callback function in script. Parameters are passed in a squirrel table. [2]
+      }
+      GetPlayerFromUserID: (array : 0x038DD1D0) [1]
+      {
+        handle GetPlayerFromUserID(int) [2]
+        Given a user id, return the entity, or null [2]
+      }
+      Convars::GetFloat: (array : 0x03BAC500) [1]
+      {
+        <unknown> Convars::GetFloat(string) [2]
+        GetFloat(name) : returns the convar as a float. May return null if no such convar. [2]
+      }
+      HUDPlace: (array : 0x039343E8) [1]
+      {
+        void HUDPlace(int, float, float, float, float) [2]
+        Place the HUD element for Slot at X,Y,W,H [2]
+      }
+      FileToString: (array : 0x03BAF2C8) [1]
+      {
+        string FileToString(string) [2]
+        Reads a string from a file to send to script [2]
+      }
+      RandomInt: (array : 0x03BE9FB8) [1]
+      {
+        int RandomInt(int, int) [2]
+        Generate a random integer within a range, inclusive [2]
+      }
+      GetFlowPercentForPosition: (array : 0x03BA3340) [1]
+      {
+        float GetFlowPercentForPosition(Vector, bool) [2]
+        Gets the percent of where in the flow a given position is. [2]
+      }
+    }
+  }
+  ScriptDebugTextDraw: (function : 0x051955C0) [1]
+  {
+  }
+  CEntities: (class : 0x060D0000) [3]
+  {
+    _members: 
+    {
+      FindByClassname: (native function : 0x06336E20) [2]
+      {
+        (userdata : 0x051940C0) [1]
+        {
+        }
+      }
+      FindByName: (native function : 0x06336E68) [2]
+      {
+        (userdata : 0x052DD4D0) [1]
+        {
+        }
+      }
+      FindByClassnameWithin: (native function : 0x06336C70) [2]
+      {
+        (userdata : 0x052D50E0) [1]
+        {
+        }
+      }
+      FindByTarget: (native function : 0x06336F40) [2]
+      {
+        (userdata : 0x03A58EA0) [1]
+        {
+        }
+      }
+      FindByModel: (native function : 0x06336EF8) [2]
+      {
+        (userdata : 0x052D4870) [1]
+        {
+        }
+      }
+      FindByClassnameNearest: (native function : 0x06336C28) [2]
+      {
+        (userdata : 0x03A3EC40) [1]
+        {
+        }
+      }
+      IsValid: (native function : 0x06270640) [2]
+      {
+      }
+      FindByNameWithin: (native function : 0x06336BE0) [2]
+      {
+        (userdata : 0x03A53390) [1]
+        {
+        }
+      }
+      FindByNameNearest: (native function : 0x06336B98) [2]
+      {
+        (userdata : 0x052DD2C0) [1]
+        {
+        }
+      }
+      Next: (native function : 0x06336DD8) [2]
+      {
+        (userdata : 0x051940F0) [1]
+        {
+        }
+      }
+      FindInSphere: (native function : 0x06336EB0) [2]
+      {
+        (userdata : 0x03A59140) [1]
+        {
+        }
+      }
+      First: (native function : 0x06336D90) [2]
+      {
+        (userdata : 0x03A26730) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x06270600) [1]
+      {
+      }
+    }
+  }
+  PrintHelp: (function : 0x0625B5C0) [1]
+  {
+    * [3]
+    false
+  }
+  RetrieveNativeSignature: (function : 0x052D4FF0) [1]
+  {
+  }
+  SendToServerConsole: (native function : 0x0635CD38) [1]
+  {
+    (userdata : 0x052D6F40) [1]
+    {
+    }
+  }
+  RegisterScriptGameEventListener: (native function : 0x0635CB88) [1]
+  {
+    (userdata : 0x03A16850) [1]
+    {
+    }
+  }
+  __CollectEventCallbacks: (function : 0x05195230) [1]
+  {
+  }
+  GetCurrentFlowDistanceForPlayer: (native function : 0x0635C630) [1]
+  {
+    (userdata : 0x0396A5B0) [1]
+    {
+    }
+  }
+  realPrint: (native function : 0x062594C0) [1]
+  {
+  }
+  ScriptDebugText: (array : 0x061161C0) [1]
+  {
+  }
+  Assert: (function : 0x067AB330) [1]
+  {
+    (null : 0x00000000)
+  }
+  ScriptDebugAddWatch: (function : 0x051953E0) [1]
+  {
+  }
+  StartAssault: (native function : 0x062DA9E8) [1]
+  {
+    (userdata : 0x052D7F60) [1]
+    {
+    }
+  }
+  g_rr: (table : 0x051948D0) [2]
+  {
+    _delegate : (table : 0x052D57A0) [-2147483643]
+    rr_ProcessRules: (function : 0x05196310) [1]
+    {
+    }
+    rrDebugPrint: (function : 0x05195740) [1]
+    {
+    }
+    RRule: (class : 0x03B4B480) [1]
+    {
+      _members: 
+      {
+        SelectResponse: (function : 0x051960D0) [2]
+        {
+        }
+        criteria: (array : 0x04BC2288) [2]
+        {
+        }
+        Describe: (function : 0x067AA3E0) [2]
+        {
+          true
+        }
+        constructor: (function : 0x05196070) [2]
+        {
+        }
+        group_params: (null : 0x00000000)
+        ChooseRandomFromArray: (function : 0x051960A0) [2]
+        {
+        }
+        selection_state: (table : 0x05196130) [2]
+        {
+          playedresponses: (array : 0x04BC2968) [1]
+          {
+          }
+          nextseq: 0
+        }
+        responses: (array : 0x04BC2328) [2]
+        {
+        }
+        rulename: (null : 0x00000000)
+        Disable: (function : 0x05196100) [2]
+        {
+        }
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    DemoWritingContextToCharacter: (function : 0x051963D0) [2]
+    {
+    }
+    Criterion: (class : 0x03B4B750) [1]
+    {
+      _members: 
+      {
+        constructor: (function : 0x05195BF0) [2]
+        {
+        }
+        top: (null : 0x00000000)
+        Describe: (function : 0x05195DD0) [2]
+        {
+        }
+        key: (null : 0x00000000)
+        bottom: (null : 0x00000000)
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    rr_ProcessResponse: (function : 0x051962E0) [1]
+    {
+    }
+    g_decisionrules: (array : 0x061160A8) [1]
+    {
+      (table : 0x05196730) [1]
+      {
+        group_params: (instance : 0x05116210) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x06116058) [1]
+        {
+          (array : 0x0610FFC0) [1]
+          {
+            concept [10]
+            PlayerMoveOn [5]
+          }
+          (array : 0x06114B68) [5]
+          {
+            Coughing [2]
+            0
+          }
+          (array : 0x03FB9018) [1]
+          {
+            Who [6]
+            Coach [2]
+          }
+          (array : 0x06115658) [6]
+          {
+            map [7]
+            c6m3_port [2]
+          }
+        }
+        name: PlayerMoveOnCoach [2]
+        responses: (array : 0x06038730) [1]
+        {
+          (table : 0x05196760) [1]
+          {
+            scenename: scenes/Coach/MoveOn01.vcd [2]
+          }
+        }
+      }
+      (table : 0x051967C0) [1]
+      {
+        group_params: (instance : 0x05116760) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x04BC22D8) [1]
+        {
+          (array : 0x068484B0) [1]
+          {
+            concept [10]
+            PlayerMoveOn [5]
+          }
+          (array : 0x06114B68) [-2147483643]
+          (array : 0x04BC29B8) [1]
+          {
+            Who [6]
+            Gambler [3]
+          }
+          (array : 0x06115658) [-2147483642]
+        }
+        name: PlayerMoveOnGambler [2]
+        responses: (array : 0x03FB8E88) [1]
+        {
+          (table : 0x051967F0) [1]
+          {
+            scenename: scenes/Gambler/MoveOn01.vcd [2]
+            followup: (instance : 0x05115540) [1]
+            {
+              _class : (class : 0x060D01E0) [3]
+              self [6]
+              (table : 0x05196820) [1]
+              {
+                additionalcontext: whatever [2]
+                concept: DemonstrateScriptFollowup [3]
+              }
+              1.23
+              (function : 0x05196850) [1]
+              {
+              }
+            }
+            func: (function : 0x051963D0) [-2147483646]
+          }
+        }
+      }
+      (table : 0x051968B0) [1]
+      {
+        group_params: (instance : 0x051155E0) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x06038690) [1]
+        {
+          (array : 0x061151A8) [1]
+          {
+            concept [10]
+            DemonstrateScriptFollowup [3]
+          }
+          (array : 0x06114C30) [1]
+          {
+            Who [6]
+            Gambler [3]
+          }
+          (array : 0x06115658) [-2147483642]
+        }
+        name: TestBogusGambler [2]
+        responses: (array : 0x040CC870) [1]
+        {
+          (table : 0x051968E0) [1]
+          {
+            func: (function : 0x051963A0) [3]
+            {
+            }
+          }
+        }
+      }
+      (table : 0x05196940) [1]
+      {
+        group_params: (instance : 0x05115E50) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x06115838) [1]
+        {
+          (array : 0x06116210) [1]
+          {
+            concept [10]
+            PlayerMoveOn [5]
+          }
+          (array : 0x06114B68) [-2147483643]
+          (array : 0x04BC0960) [1]
+          {
+            Who [6]
+            Mechanic [2]
+          }
+          (array : 0x06115658) [-2147483642]
+        }
+        name: PlayerMoveOnMechanic [2]
+        responses: (array : 0x06115EA0) [1]
+        {
+          (table : 0x05196970) [1]
+          {
+            scenename: scenes/Mechanic/MoveOn01.vcd [2]
+          }
+        }
+      }
+      (table : 0x051969A0) [1]
+      {
+        group_params: (instance : 0x05115C20) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x061147F8) [1]
+        {
+          (array : 0x061140A0) [1]
+          {
+            concept [10]
+            PlayerMoveOn [5]
+          }
+          (array : 0x06114B68) [-2147483643]
+          (array : 0x06114D70) [1]
+          {
+            Who [6]
+            Producer [2]
+          }
+          (array : 0x06115658) [-2147483642]
+        }
+        name: PlayerMoveOnProducer [2]
+        responses: (array : 0x0603B1B0) [1]
+        {
+          (table : 0x051969D0) [1]
+          {
+            scenename: scenes/Producer/MoveOn01.vcd [2]
+          }
+        }
+      }
+      (table : 0x05196A00) [1]
+      {
+        group_params: (instance : 0x05116300) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x040CC758) [1]
+        {
+          (array : 0x061160D0) [1]
+          {
+            concept [10]
+            Award [2]
+          }
+          (array : 0x04BC2468) [2]
+          {
+            awardname [2]
+            Protector [2]
+          }
+        }
+        name: PlayerAwardProtect [2]
+        responses: (array : 0x061153D8) [1]
+        {
+          (table : 0x05196A30) [1]
+          {
+            func: (function : 0x051966D0) [2]
+            {
+            }
+          }
+        }
+      }
+      (table : 0x05196A60) [1]
+      {
+        group_params: (instance : 0x05115D10) [1]
+        {
+          _class : (class : 0x060D02D0) [9]
+          true
+          false
+          false
+          false
+        }
+        criteria: (array : 0x061149B0) [1]
+        {
+          (array : 0x05FA3F98) [1]
+          {
+            concept [10]
+            PlayerFriendlyFire [2]
+          }
+          (array : 0x0624C118) [1]
+          {
+            (function : 0x05196700) [2]
+            {
+            }
+          }
+        }
+        name: ProtectedFriendlyFire [2]
+        responses: (array : 0x06849860) [1]
+        {
+          (table : 0x05196A90) [1]
+          {
+            func: (function : 0x051963A0) [-2147483645]
+          }
+        }
+      }
+    }
+    CriterionIsc6m3_port: (array : 0x06115658) [-2147483642]
+    SubjectAward: (function : 0x05196700) [-2147483646]
+    __vrefs: 1
+    ResponseSingle: (class : 0x060D0870) [1]
+    {
+      _members: 
+      {
+        cpp_visitor: (null : 0x00000000)
+        func: (null : 0x00000000)
+        rule: (null : 0x00000000)
+        constructor: (function : 0x062712C0) [2]
+        {
+          (null : 0x00000000)
+          (table : 0x05196160) [1]
+          {
+          }
+        }
+        target: (null : 0x00000000)
+        params: (null : 0x00000000)
+        Describe: (function : 0x05196190) [2]
+        {
+        }
+        kind: (null : 0x00000000)
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    PrintTable: (function : 0x051966A0) [1]
+    {
+    }
+    CriterionIsNotCoughing: (array : 0x06114B68) [-2147483643]
+    DemoScriptFollowupFunction: (function : 0x051963A0) [-2147483645]
+    rr_ProcessCriterion: (function : 0x051962B0) [1]
+    {
+    }
+    SetAwardSpeech: (function : 0x051966D0) [-2147483646]
+    RGroupParams: (class : 0x060D02D0) [8]
+    {
+      _members: 
+      {
+        norepeat: false
+        sequential: false
+        matchonce: false
+        permitrepeats: false
+        constructor: (function : 0x067AA5D8) [2]
+        {
+          (table : 0x051961F0) [1]
+          {
+          }
+        }
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    CriterionFunc: (class : 0x060D04B0) [1]
+    {
+      _members: 
+      {
+        constructor: (function : 0x05195FE0) [2]
+        {
+        }
+        func: (null : 0x00000000)
+        Describe: (function : 0x05196010) [2]
+        {
+        }
+        key: (null : 0x00000000)
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    rr_CharacterSpeak: (function : 0x05196370) [1]
+    {
+    }
+    __vname: g_rr [3]
+    rrPrintTable: (function : 0x0669CCE8) [1]
+    {
+      	 [4]
+    }
+    RThen: (class : 0x060D01E0) [2]
+    {
+      _members: 
+      {
+        constructor: (function : 0x05196250) [2]
+        {
+        }
+        func: (null : 0x00000000)
+        target: (null : 0x00000000)
+        execute: (function : 0x05196280) [2]
+        {
+        }
+        delay: (null : 0x00000000)
+        addcontexts: (null : 0x00000000)
+      }
+      _attributes: (null : 0x00000000)
+      _metamethods: 
+      {
+      }
+    }
+    CriterionIsAwardProtector: (array : 0x04BC2468) [-2147483646]
+  }
+  sqrt: (native function : 0x06259780) [1]
+  {
+  }
+  DebugDrawBox: (native function : 0x062DB918) [1]
+  {
+    (userdata : 0x052D52F0) [1]
+    {
+    }
+  }
+  DebugDrawLine: (native function : 0x062DB960) [1]
+  {
+    (userdata : 0x03A26EB0) [1]
+    {
+    }
+  }
+  Document: (function : 0x0625B500) [1]
+  {
+    (null : 0x00000000)
+    (null : 0x00000000)
+  }
+  DebugDrawCircle: (native function : 0x062DB9A8) [1]
+  {
+    (userdata : 0x052D49F0) [1]
+    {
+    }
+  }
+  _intsize_: 4
+  Say: (native function : 0x062DB7F8) [1]
+  {
+    (userdata : 0x052D46C0) [1]
+    {
+    }
+  }
+  collectgarbage: (native function : 0x06259700) [1]
+  {
+  }
+  UniqueString: (function : 0x0669E8B0) [1]
+  {
+     [28]
+  }
+  ScriptDebugAddWatches: (function : 0x05195410) [1]
+  {
+  }
+  ScriptDebugRemoveTextFilter: (function : 0x05195620) [1]
+  {
+  }
+  enabledebuginfo: (native function : 0x06259300) [1]
+  {
+  }
+  setdebughook: (native function : 0x062592C0) [1]
+  {
+  }
+  CommandABot: (native function : 0x06337DE0) [1]
+  {
+    (userdata : 0x052D60D0) [1]
+    {
+    }
+  }
+  GetInfectedStats: (native function : 0x062DB690) [1]
+  {
+    (userdata : 0x060BF570) [1]
+    {
+    }
+  }
+  ClearGameEventCallbacks: (function : 0x05195200) [1]
+  {
+  }
+  ScriptDebugRemoveWatch: (function : 0x05195440) [1]
+  {
+  }
+  SpawnEntityFromTable: (native function : 0x0635C9D8) [1]
+  {
+    (userdata : 0x06ACFEA0) [1]
+    {
+    }
+  }
+  srand: (native function : 0x06259B00) [1]
+  {
+  }
+  GetFunctionSignature: (native function : 0x06259FC0) [1]
+  {
+  }
+  AddThinkToEnt: (native function : 0x062DB6D8) [1]
+  {
+    (userdata : 0x060BD5F0) [1]
+    {
+    }
+  }
+  suspend: (native function : 0x062595C0) [1]
+  {
+  }
+  VSquirrel_OnCreateScope: (function : 0x03A25020) [2]
+  {
+  }
+  ScriptDebugWatches: (array : 0x06115720) [1]
+  {
+  }
+  _f00_worldspawn: (table : 0x05196FA0) [2]
+  {
+    _delegate : (table : 0x052D57A0) [-2147483643]
+    __vname: _f00_worldspawn [4]
+    __vrefs: 1
+    self: ([0] worldspawn) [2]
+    {
+      _class : (class : 0x060D03C0) [4]
+    }
+  }
+  CBaseEntity: (class : 0x060D03C0) [3]
+  {
+    _members: 
+    {
+      PrecacheScriptSound: (native function : 0x063349D8) [2]
+      {
+        (userdata : 0x052E92C0) [1]
+        {
+        }
+      }
+      SetVelocity: (native function : 0x063342D0) [2]
+      {
+        (userdata : 0x052E8C90) [1]
+        {
+        }
+      }
+      FirstMoveChild: (native function : 0x0631BAC8) [2]
+      {
+        (userdata : 0x052E8720) [1]
+        {
+        }
+      }
+      SetHealth: (native function : 0x06334B40) [2]
+      {
+        (userdata : 0x052E9230) [1]
+        {
+        }
+      }
+      DisconnectOutput: (native function : 0x06334AB0) [2]
+      {
+        (userdata : 0x052DC930) [1]
+        {
+        }
+      }
+      GetRootMoveParent: (native function : 0x0631BA38) [2]
+      {
+        (userdata : 0x052E87B0) [1]
+        {
+        }
+      }
+      __KeyValueFromString: (native function : 0x0631B8D0) [2]
+      {
+        (userdata : 0x052E8630) [1]
+        {
+        }
+      }
+      GetEntityIndex: (native function : 0x06334870) [2]
+      {
+        (userdata : 0x052E9290) [1]
+        {
+        }
+      }
+      GetLocalAngularVelocity: (native function : 0x06334090) [2]
+      {
+        (userdata : 0x052E8BA0) [1]
+        {
+        }
+      }
+      SetContext: (native function : 0x0631BCC0) [2]
+      {
+        (userdata : 0x052E8930) [1]
+        {
+        }
+      }
+      GetForwardVector: (native function : 0x06334510) [2]
+      {
+        (userdata : 0x052E8DB0) [1]
+        {
+        }
+      }
+      GetOwnerEntity: (native function : 0x0631BBA0) [2]
+      {
+        (userdata : 0x052E8660) [1]
+        {
+        }
+      }
+      NextMovePeer: (native function : 0x0631BB58) [2]
+      {
+        (userdata : 0x052E86C0) [1]
+        {
+        }
+      }
+      Kill: (native function : 0x06334990) [2]
+      {
+        (userdata : 0x052E8FF0) [1]
+        {
+        }
+      }
+      TakeDamage: (native function : 0x06334BD0) [2]
+      {
+        (userdata : 0x052E91D0) [1]
+        {
+        }
+      }
+      ApplyAbsVelocityImpulse: (native function : 0x06334120) [2]
+      {
+        (userdata : 0x052E8B70) [1]
+        {
+        }
+      }
+      GetHealth: (native function : 0x06334AF8) [2]
+      {
+        (userdata : 0x052E9200) [1]
+        {
+        }
+      }
+      GetContext: (native function : 0x0631BD50) [2]
+      {
+        (userdata : 0x052E8840) [1]
+        {
+        }
+      }
+      OverrideFriction: (native function : 0x06334000) [2]
+      {
+        (userdata : 0x052E8A20) [1]
+        {
+        }
+      }
+      GetScriptId: (native function : 0x0631B6D8) [2]
+      {
+        (userdata : 0x052E84E0) [1]
+        {
+        }
+      }
+      GetBaseVelocity: (native function : 0x063343A8) [2]
+      {
+        (userdata : 0x052E8BD0) [1]
+        {
+        }
+      }
+      GetVelocity: (native function : 0x06334240) [2]
+      {
+        (userdata : 0x052E8CF0) [1]
+        {
+        }
+      }
+      IsValid: (native function : 0x03A62000) [2]
+      {
+      }
+      SetAngles: (native function : 0x0631BC30) [2]
+      {
+        (userdata : 0x052E8960) [1]
+        {
+        }
+      }
+      GetScriptScope: (native function : 0x0631B648) [2]
+      {
+        (userdata : 0x052E8540) [1]
+        {
+        }
+      }
+      GetEntityHandle: (native function : 0x063347E0) [2]
+      {
+        (userdata : 0x052E8ED0) [1]
+        {
+        }
+      }
+      IsPlayer: (native function : 0x06334B88) [2]
+      {
+        (userdata : 0x03A77870) [1]
+        {
+        }
+      }
+      __KeyValueFromVector: (native function : 0x0631B960) [2]
+      {
+        (userdata : 0x052E85D0) [1]
+        {
+        }
+      }
+      __KeyValueFromInt: (native function : 0x0631B918) [2]
+      {
+        (userdata : 0x052E8600) [1]
+        {
+        }
+      }
+      GetMoveParent: (native function : 0x0631BDE0) [2]
+      {
+        (userdata : 0x052E87E0) [1]
+        {
+        }
+      }
+      SetContextNum: (native function : 0x0631BD08) [2]
+      {
+        (userdata : 0x052E88D0) [1]
+        {
+        }
+      }
+      PrecacheModel: (native function : 0x06334900) [2]
+      {
+        (userdata : 0x052E92F0) [1]
+        {
+        }
+      }
+      GetLocalVelocity: (native function : 0x06334360) [2]
+      {
+        (userdata : 0x052E8C30) [1]
+        {
+        }
+      }
+      GetOrigin: (native function : 0x06334438) [2]
+      {
+        (userdata : 0x052E8E70) [1]
+        {
+        }
+      }
+      GetPreTemplateName: (native function : 0x06334708) [2]
+      {
+        (userdata : 0x052E8F30) [1]
+        {
+        }
+      }
+      ValidateScriptScope: (native function : 0x0631B9F0) [2]
+      {
+        (userdata : 0x052E85A0) [1]
+        {
+        }
+      }
+      ApplyLocalAngularVelocityImpulse: (native function : 0x06334168) [2]
+      {
+        (userdata : 0x052E8B40) [1]
+        {
+        }
+      }
+      GetClassname: (native function : 0x06334630) [2]
+      {
+        (userdata : 0x052E8F90) [1]
+        {
+        }
+      }
+      GetAngles: (native function : 0x0631BF90) [2]
+      {
+        (userdata : 0x052E89C0) [1]
+        {
+        }
+      }
+      SetOrigin: (native function : 0x06334480) [2]
+      {
+        (userdata : 0x052E8E10) [1]
+        {
+        }
+      }
+      SetForwardVector: (native function : 0x063345A0) [2]
+      {
+        (userdata : 0x052E8D50) [1]
+        {
+        }
+      }
+      SetFriction: (native function : 0x063341B0) [2]
+      {
+        (userdata : 0x052E8AE0) [1]
+        {
+        }
+      }
+      ConnectOutput: (native function : 0x06334A68) [2]
+      {
+        (userdata : 0x052DC900) [1]
+        {
+        }
+      }
+      SetGravity: (native function : 0x0631BEB8) [2]
+      {
+        (userdata : 0x052E8A80) [1]
+        {
+        }
+      }
+      GetName: (native function : 0x063346C0) [2]
+      {
+        (userdata : 0x052E8F60) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x062AE200) [1]
+      {
+      }
+    }
+  }
+  regexp: (class : 0x060D10E0) [2]
+  {
+    _members: 
+    {
+      search: (native function : 0x06259C80) [2]
+      {
+      }
+      capture: (native function : 0x06259D00) [2]
+      {
+      }
+      subexpcount: (native function : 0x06259D40) [2]
+      {
+      }
+      constructor: (native function : 0x06259C00) [2]
+      {
+      }
+      match: (native function : 0x06259CC0) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _typeof: (native function : 0x06259C40) [1]
+      {
+      }
+    }
+  }
+  atan: (native function : 0x06259980) [1]
+  {
+  }
+  ScriptDebugTextFilters: (table : 0x05195320) [1]
+  {
+  }
+  ReloadMOTD: (native function : 0x06337D50) [1]
+  {
+    (userdata : 0x052D7360) [1]
+    {
+    }
+  }
+  EntFire: (function : 0x06335DD0) [1]
+  {
+    (null : 0x00000000)
+    0
+    (null : 0x00000000)
+  }
+  MakeNamespace: (native function : 0x0625A000) [1]
+  {
+  }
+  _versionnumber_: 304
+  CNavMesh: (class : 0x060D1680) [3]
+  {
+    _members: 
+    {
+      IsValid: (native function : 0x06270580) [2]
+      {
+      }
+      UnblockRescueVehicleNav: (native function : 0x063370A8) [2]
+      {
+        (userdata : 0x039698C0) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x06270540) [1]
+      {
+      }
+    }
+  }
+  log: (native function : 0x062598C0) [1]
+  {
+  }
+  floor: (native function : 0x06259A40) [1]
+  {
+  }
+  rand: (native function : 0x06259B40) [1]
+  {
+  }
+  RotatePosition: (native function : 0x062DBEB8) [1]
+  {
+    (userdata : 0x03A74F60) [1]
+    {
+    }
+  }
+  rr_CommitAIResponse: (native function : 0x0635C558) [1]
+  {
+    (userdata : 0x052D4C90) [1]
+    {
+    }
+  }
+  EndScriptDebug: (function : 0x051956E0) [1]
+  {
+  }
+  DebugDrawClear: (native function : 0x0635C7E0) [1]
+  {
+    (userdata : 0x03A3D6E0) [1]
+    {
+    }
+  }
+  ClearSavedTables: (native function : 0x0635C2D0) [1]
+  {
+    (userdata : 0x052D7180) [1]
+    {
+    }
+  }
+  ScriptDebugHook: (function : 0x05195650) [1]
+  {
+  }
+  CCallChainer: (class : 0x060D0E10) [1]
+  {
+    _members: 
+    {
+      constructor: (function : 0x0669F7C8) [2]
+      {
+        (null : 0x00000000)
+      }
+      scope: (null : 0x00000000)
+      prefix: (null : 0x00000000)
+      PostScriptExecute: (function : 0x052D5050) [2]
+      {
+      }
+      Call: (function : 0x052D4F00) [2]
+      {
+      }
+      chains: (null : 0x00000000)
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+    }
+  }
+  ScriptDebugDrawTextEnabled: true
+  rr_AddDecisionRule: (native function : 0x0635C870) [1]
+  {
+    (userdata : 0x052D4B10) [1]
+    {
+    }
+  }
+  getroottable: (native function : 0x06259380) [1]
+  {
+  }
+  array: (native function : 0x06259600) [1]
+  {
+  }
+  fabs: (native function : 0x06259B80) [1]
+  {
+  }
+  getconsttable: (native function : 0x06259400) [1]
+  {
+  }
+  DumpObject: (native function : 0x06259F80) [1]
+  {
+  }
+  Msg: (function : 0x052D6AC0) [1]
+  {
+  }
+  HUDSetLayout: (native function : 0x0635C168) [1]
+  {
+    (userdata : 0x052D72D0) [1]
+    {
+    }
+  }
+  RestoreTable: (native function : 0x0635C240) [1]
+  {
+    (userdata : 0x052D7240) [1]
+    {
+    }
+  }
+  printl: (function : 0x052D6B20) [1]
+  {
+  }
+  __ReplaceClosures: (function : 0x05194900) [1]
+  {
+  }
+  StopSoundOn: (native function : 0x062DB840) [1]
+  {
+    (userdata : 0x03A0A9D0) [1]
+    {
+    }
+  }
+  QAngle: (class : 0x060D0A50) [2]
+  {
+    _members: 
+    {
+      Yaw: (native function : 0x0625B2C0) [2]
+      {
+      }
+      Up: (native function : 0x0625B380) [2]
+      {
+      }
+      ToQuat: (native function : 0x0625B3C0) [2]
+      {
+      }
+      Left: (native function : 0x0625B340) [2]
+      {
+      }
+      Roll: (native function : 0x0625B300) [2]
+      {
+      }
+      constructor: (native function : 0x0625AFC0) [2]
+      {
+      }
+      Pitch: (native function : 0x0625B280) [2]
+      {
+      }
+      Forward: (native function : 0x0625B000) [2]
+      {
+      }
+      ToKVString: (native function : 0x0625B240) [2]
+      {
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _add: (native function : 0x0625B180) [1]
+      {
+      }
+      _sub: (native function : 0x0625B1C0) [1]
+      {
+      }
+      _mul: (native function : 0x0625B200) [1]
+      {
+      }
+      _set: (native function : 0x0625B080) [1]
+      {
+      }
+      _get: (native function : 0x0625B040) [1]
+      {
+      }
+      _typeof: (native function : 0x0625B100) [1]
+      {
+      }
+      _nexti: (native function : 0x0625B140) [1]
+      {
+      }
+      _tostring: (native function : 0x0625B0C0) [1]
+      {
+      }
+    }
+  }
+  EmitSoundOn: (native function : 0x062DBC78) [1]
+  {
+    (userdata : 0x060BD1D0) [1]
+    {
+    }
+  }
+  TraceLine: (native function : 0x06337D98) [1]
+  {
+    (userdata : 0x052D5C20) [1]
+    {
+    }
+  }
+  ReapplyInfectedFlags: (native function : 0x06337E28) [1]
+  {
+    (userdata : 0x052D60A0) [1]
+    {
+    }
+  }
+  ceil: (native function : 0x06259A80) [1]
+  {
+  }
+  rr_GetResponseTargets: (native function : 0x0635C5E8) [1]
+  {
+    (userdata : 0x03A52760) [1]
+    {
+    }
+  }
+  Entities: (instance : 0x06792C68) [2]
+  {
+    _class : (class : 0x060D0000) [-2147483644]
+  }
+  NetProps: (instance : 0x0669F8A8) [2]
+  {
+    _class : (class : 0x060D14A0) [-2147483644]
+  }
+  PickupObject: (native function : 0x06337F48) [1]
+  {
+    (userdata : 0x052D70C0) [1]
+    {
+    }
+  }
+  DoIncludeScript: (native function : 0x0635CC18) [1]
+  {
+    (userdata : 0x052DD0E0) [1]
+    {
+    }
+  }
+  DropSpit: (native function : 0x0635C000) [1]
+  {
+    (userdata : 0x052D7450) [1]
+    {
+    }
+  }
+  ScriptDebugDefaultWatchColor: (array : 0x06116080) [1]
+  {
+    0
+    192
+    0
+  }
+  ScriptDebugTextIndent: 0
+  GetPlayerFromUserID: (native function : 0x062DBB58) [1]
+  {
+    (userdata : 0x052D4C00) [1]
+    {
+    }
+  }
+  ScriptDebugClearTraces: (function : 0x05195590) [1]
+  {
+  }
+  ScriptDebugTextPrint: (function : 0x06271000) [1]
+  {
+    (array : 0x06114190) [1]
+    {
+      255
+      255
+      255
+    }
+    false
+  }
+  ScriptDebugAddTextFilter: (function : 0x051955F0) [1]
+  {
+  }
+  Decider: (class : 0x060D0F00) [2]
+  {
+    _members: 
+    {
+      constructor: (native function : 0x06336058) [2]
+      {
+        (userdata : 0x05194780) [1]
+        {
+        }
+      }
+      FindAllMatches: (native function : 0x06336130) [2]
+      {
+        (userdata : 0x051948A0) [1]
+        {
+        }
+      }
+      FindBestMatch: (native function : 0x063360E8) [2]
+      {
+        (userdata : 0x05194840) [1]
+        {
+        }
+      }
+      IsValid: (native function : 0x06270D00) [2]
+      {
+      }
+      AddRule: (native function : 0x063360A0) [2]
+      {
+        (userdata : 0x051947B0) [1]
+        {
+        }
+      }
+    }
+    _attributes: (null : 0x00000000)
+    _metamethods: 
+    {
+      _tostring: (native function : 0x06270CC0) [1]
+      {
+      }
+    }
+  }
+  EntIndexToHScript: (native function : 0x0635CBD0) [1]
+  {
+    (userdata : 0x03983000) [1]
+    {
+    }
+  }
+}
+temp_reg: (null : 0x00000000)
+_stack: 
+{
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+  (null : 0x00000000)
+}
+_registry: (table : 0x03994A80) [1]
+{
+}
+_consts: (table : 0x03A267C0) [1]
+{
+  ScriptDebugTextLines: 20
+  ScriptDebugWatchFistLine: 26
+  ResponseKind: (table : 0x05195800) [1]
+  {
+    response: 4
+    sentence: 2
+    none: 0
+    speak: 1
+    scene: 3
+    script: 6
+    print: 5
+  }
+  nCharsToStrip: 6
+  ScriptDebugTextTime: 10
+  NDEBUG_PERSIST_TILL_NEXT_SERVER: 0.01023
+  ScriptDebugFirstLine: 6
+}
+_metamethodsmap: (table : 0x03A753E0) [1]
+{
+  _sub: 1
+  _set: 6
+  _add: 0
+  _cmp: 10
+  _get: 7
+  _div: 3
+  _unm: 4
+  _modulo: 5
+  _inherited: 17
+  _typeof: 8
+  _nexti: 9
+  _call: 11
+  _newmember: 16
+  _tostring: 15
+  _delslot: 14
+  _newslot: 13
+  _cloned: 12
+  _mul: 2
+}
+_table_default_delegate: (table : 0x052DC780) [1]
+{
+  getdelegate: (native function : 0x06258000) [1]
+  {
+  }
+  rawset: (native function : 0x06247E40) [1]
+  {
+  }
+  clear: (native function : 0x06247F80) [1]
+  {
+  }
+  weakref: (native function : 0x06247F00) [1]
+  {
+  }
+  rawget: (native function : 0x062477C0) [1]
+  {
+  }
+  setdelegate: (native function : 0x06247FC0) [1]
+  {
+  }
+  rawin: (native function : 0x06247EC0) [1]
+  {
+  }
+  rawdelete: (native function : 0x06247E80) [1]
+  {
+  }
+  tostring: (native function : 0x06247F40) [1]
+  {
+  }
+  len: (native function : 0x06247800) [1]
+  {
+  }
+}
+_array_default_delegate: (table : 0x05DA13E0) [1]
+{
+  reverse: (native function : 0x06258280) [1]
+  {
+  }
+  resize: (native function : 0x06258240) [1]
+  {
+  }
+  insert: (native function : 0x062581C0) [1]
+  {
+  }
+  reduce: (native function : 0x06258480) [1]
+  {
+  }
+  slice: (native function : 0x06258300) [1]
+  {
+  }
+  extend: (native function : 0x062580C0) [1]
+  {
+  }
+  append: (native function : 0x06258080) [1]
+  {
+  }
+  map: (native function : 0x06258400) [1]
+  {
+  }
+  filter: (native function : 0x062584C0) [1]
+  {
+  }
+  remove: (native function : 0x06258200) [1]
+  {
+  }
+  find: (native function : 0x06258500) [1]
+  {
+  }
+  clear: (native function : 0x062583C0) [1]
+  {
+  }
+  pop: (native function : 0x06258140) [1]
+  {
+  }
+  push: (native function : 0x06258100) [1]
+  {
+  }
+  top: (native function : 0x06258180) [1]
+  {
+  }
+  apply: (native function : 0x06258440) [1]
+  {
+  }
+  sort: (native function : 0x062582C0) [1]
+  {
+  }
+  len: (native function : 0x06258040) [1]
+  {
+  }
+  tostring: (native function : 0x06258380) [1]
+  {
+  }
+  weakref: (native function : 0x06258340) [1]
+  {
+  }
+}
+_string_default_delegate: (table : 0x052D58F0) [1]
+{
+  tolower: (native function : 0x062586C0) [1]
+  {
+  }
+  slice: (native function : 0x06258640) [1]
+  {
+  }
+  weakref: (native function : 0x06258740) [1]
+  {
+  }
+  toupper: (native function : 0x06258700) [1]
+  {
+  }
+  find: (native function : 0x06258680) [1]
+  {
+  }
+  len: (native function : 0x06258540) [1]
+  {
+  }
+  tofloat: (native function : 0x062585C0) [1]
+  {
+  }
+  tostring: (native function : 0x06258600) [1]
+  {
+  }
+  tointeger: (native function : 0x06258580) [1]
+  {
+  }
+}
+_number_default_delegate: (table : 0x052D7810) [1]
+{
+  tointeger: (native function : 0x06258780) [1]
+  {
+  }
+  tofloat: (native function : 0x062587C0) [1]
+  {
+  }
+  tochar: (native function : 0x06258840) [1]
+  {
+  }
+  tostring: (native function : 0x06258800) [1]
+  {
+  }
+  weakref: (native function : 0x06258880) [1]
+  {
+  }
+}
+_handle_default_delegate: (table : 0x052D7750) [1]
+{
+  tointeger: (native function : 0x062588C0) [1]
+  {
+  }
+}
+_utlstringtoken_default_delegate: (table : 0x052D5830) [1]
+{
+  tointeger: (native function : 0x06258900) [1]
+  {
+  }
+}
+_generator_default_delegate: (table : 0x052D77E0) [1]
+{
+  getstatus: (native function : 0x06258B40) [1]
+  {
+  }
+  tostring: (native function : 0x06258BC0) [1]
+  {
+  }
+  weakref: (native function : 0x06258B80) [1]
+  {
+  }
+}
+_thread_default_delegate: (table : 0x052D7720) [1]
+{
+  wakeup: (native function : 0x06258C40) [1]
+  {
+  }
+  call: (native function : 0x06258C00) [1]
+  {
+  }
+  getstackinfos: (native function : 0x06258D00) [1]
+  {
+  }
+  getstatus: (native function : 0x06258C80) [1]
+  {
+  }
+  tostring: (native function : 0x06258D40) [1]
+  {
+  }
+  weakref: (native function : 0x06258CC0) [1]
+  {
+  }
+}
+_closure_default_delegate: (table : 0x052D57D0) [1]
+{
+  bindenv: (native function : 0x06258AC0) [1]
+  {
+  }
+  call: (native function : 0x06258940) [1]
+  {
+  }
+  getinfos: (native function : 0x06258B00) [1]
+  {
+  }
+  weakref: (native function : 0x06258A40) [1]
+  {
+  }
+  pcall: (native function : 0x06258980) [1]
+  {
+  }
+  pacall: (native function : 0x06258A00) [1]
+  {
+  }
+  tostring: (native function : 0x06258A80) [1]
+  {
+  }
+  acall: (native function : 0x062589C0) [1]
+  {
+  }
+}
+_class_default_delegate: (table : 0x052D7900) [1]
+{
+  rawset: (native function : 0x06258E40) [1]
+  {
+  }
+  setattributes: (native function : 0x06258DC0) [1]
+  {
+  }
+  weakref: (native function : 0x06258EC0) [1]
+  {
+  }
+  rawget: (native function : 0x06258E00) [1]
+  {
+  }
+  getbase: (native function : 0x06258F80) [1]
+  {
+  }
+  rawnewmember: (native function : 0x06259000) [1]
+  {
+  }
+  newmember: (native function : 0x06258FC0) [1]
+  {
+  }
+  rawin: (native function : 0x06258E80) [1]
+  {
+  }
+  instance: (native function : 0x06258F40) [1]
+  {
+  }
+  tostring: (native function : 0x06258F00) [1]
+  {
+  }
+  getattributes: (native function : 0x06258D80) [1]
+  {
+  }
+}
+_instance_default_delegate: (table : 0x052D7AB0) [1]
+{
+  rawget: (native function : 0x06259080) [1]
+  {
+  }
+  rawset: (native function : 0x062590C0) [1]
+  {
+  }
+  getclass: (native function : 0x06259040) [1]
+  {
+  }
+  rawin: (native function : 0x06259100) [1]
+  {
+  }
+  tostring: (native function : 0x06259180) [1]
+  {
+  }
+  weakref: (native function : 0x06259140) [1]
+  {
+  }
+}
+_weakref_default_delegate: (table : 0x052D7A50) [1]
+{
+  ref: (native function : 0x062591C0) [1]
+  {
+  }
+  tostring: (native function : 0x06259240) [1]
+  {
+  }
+  weakref: (native function : 0x06259200) [1]
+  {
+  }
+}

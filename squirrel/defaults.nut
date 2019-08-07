@@ -1,4 +1,8 @@
 // Squirrel functions found in crash .mdmp file
+// same can be found here:
+// https://github.com/stanriders/hl2-asw-port/blob/master/src/game/server/vscript_server.nut
+// https://github.com/stanriders/hl2-asw-port/blob/master/src/game/server/spawn_helper.nut
+// https://github.com/stanriders/hl2-asw-port/blob/master/src/game/server/point_template.cpp
 
 //========== Copyright © 2008, Valve Corporation, All rights reserved. ========
 //

@@ -1,6 +1,6 @@
 // Squirrel functions found in crash .mdmp file
 
-//===	======= Copyright © 2008, Valve Corporation, All rights reserved. ========
+//========== Copyright © 2008, Valve Corporation, All rights reserved. ========
 //
 // Purpose: Script initially run after squirrel VM is initialized
 //

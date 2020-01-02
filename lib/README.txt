@@ -29,7 +29,29 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
-Lib v2.0.0
+Lib v2.1.0 (02.01.2020)
+- Added entstr(ent) function in module_base for using in task keys
+- Added support for "ent" param in register_loop() and register_ticker()
+- Added NAN constant (float Not-a-Number)
+- loop_info.delta_time is now NAN on first call (to fix some strange squirrel bug (??))
+- Added attach(ent, attachment) function in module_entities
+- Added kapkan/lib/extras.nut
+- Added lists in HUD system: hud.show_list(), hud.hide_list()
+- report() function now also prints tasks
+- watch_netprops() now uses HUD system instead of conflicting with it
+- FIX: fixed crashes, ::root is now weakref to root table
+- FIX: fixed watch_netprops() function
+- FIX: fixed hud.show_message() function
+- FIX: fixed log_event() function
+- FIX: fixed on_player_team() and remove_on_player_team() functions
+- FIX: fixed on_key_action() function
+- FIX: fixed register_chat_command() function
+- FIX: fixed show_hud_hint_singleplayer() function
+- FIX: fixed disallow_dying_infected_bots() function
+- FIX: fixed remove_callback() function
+- FIX: fixed report() function
+
+Lib v2.0.0 (27.12.2019)
 - Library was split into modules that can be included independently
 - Library always includes itself in root table
 - New signature for delayed_call(), register_ticker(), register_loop(), register_callback() and other tasks

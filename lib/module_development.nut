@@ -37,15 +37,24 @@ this = ::root
 
 log("[lib] including module_development")
 
+__watch_netprops_show <- function() {
+	//HUDSetLayout(::__watch_netprops)
+	local lines = []
+	for (local slot = 1;;slot++) {
+		if (slot in ::__watch_netprops.Fields) {
+			lines.append(::__watch_netprops.Fields[slot].dataval)
+		} else break
+	}
+	hud.show_list("watch_netprops", lines, 0.05, 0.55 - 0.06*::__watch_netprops.up_shift, 1, 0.1, -0.04)
+}
+
 watch_netprops <- function(ent, ...) {
 	if (!ent) {
-		HUDSetLayout({
-			Fields = {}
-		});
-		remove_loop("__watch_netprops");
+		hud.hide_list("watch_netprops")
+		remove_ticker("watch_netprops")
 		for (local i = 0; i < 9; i++)
-			SendToConsole(format("bind %d slot%d", i, i));
-		SendToConsole("unbind alt");
+			SendToConsole(format("bind %d slot%d", i, i))
+		SendToConsole("unbind alt")
 		return;
 	}
 	::__watch_netprops.ent <- ent
@@ -53,19 +62,19 @@ watch_netprops <- function(ent, ...) {
 	local netprops = vargv
 	::__watch_netprops.Fields <- {}
 	local size = netprops.len()
-	local up_shift = (size > 4) ? size - 4 : 0
+	::__watch_netprops.up_shift <- (size > 4) ? size - 4 : 0
 	foreach(index, netprop in netprops) {
 		local slot = index + 1
-		HUDPlace(slot, 0.05, 0.55 + 0.06*(index - up_shift), 1, 0.1)
-		local type = NetProps.GetPropType((::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent), netprop)
+		//HUDPlace(slot, 0.05, 0.55 + 0.06*(index - ::__watch_netprops.up_shift), 1, 0.1)
+		local type = NetProps.GetPropType(
+			(::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent), netprop)
 		::__watch_netprops.Fields[slot] <- {
-			name = netprop,
-			type = type,
-			slot = slot,
-			flags = HUD_FLAG_ALIGN_LEFT | HUD_FLAG_NOBG
+			name = netprop
+			type = type
+			slot = slot
 		}
 	}
-	register_loop("__watch_netprops", function() {
+	register_ticker("watch_netprops", function() {
 		local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent
 		foreach(slot, table in ::__watch_netprops.Fields) {
 			local str = format("[%d] %s: ", slot, table.name)
@@ -98,8 +107,8 @@ watch_netprops <- function(ent, ...) {
 			}
 			table.dataval <- str;
 		}
-		HUDSetLayout(::__watch_netprops);
-	}, 0);
+		__watch_netprops_show()
+	});
 	local slot_count = ::__watch_netprops.Fields.len();
 	::__watch_netprops.binds_save <- "";
 	::__watch_netprops.binds_restore <- "";
@@ -114,55 +123,55 @@ watch_netprops <- function(ent, ...) {
 }
 
 watch_netprops_save <- function (slot) {
-	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent;
-	local table = ::__watch_netprops.Fields[slot];
+	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent
+	local table = ::__watch_netprops.Fields[slot]
 	switch (table.type) {
-		case "integer": table.saved <- NetProps.GetPropInt(ent, table.name); break;
-		case "string": table.saved <- NetProps.GetPropString(ent, table.name); break;
-		case "float": table.saved <- NetProps.GetPropFloat(ent, table.name); break;
-		case "Vector": table.saved <- NetProps.GetPropVector(ent, table.name); break;
-		case null: default: say_chat("can't save netprop of unsupported prop type"); return;
+		case "integer": table.saved <- NetProps.GetPropInt(ent, table.name); break
+		case "string": table.saved <- NetProps.GetPropString(ent, table.name); break
+		case "float": table.saved <- NetProps.GetPropFloat(ent, table.name); break
+		case "Vector": table.saved <- NetProps.GetPropVector(ent, table.name); break
+		case null: default: say_chat("can't save netprop of unsupported prop type"); return
 	}
-	logf("saved value %s of netprop %s", table.saved.tostring(), table.name);
-	table.dataval = "<save> " + table.dataval;
-	HUDSetLayout(::__watch_netprops);
-	loop_add_to_timer("__watch_netprops", 0.1);
+	logf("saved value %s of netprop %s", table.saved.tostring(), table.name)
+	table.dataval = "<save> " + table.dataval
+	__watch_netprops_show()
+	loop_add_to_timer("__watch_netprops", 0.1)
 }
 
 watch_netprops_restore <- function (slot) {
-	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent;
-	local table = ::__watch_netprops.Fields[slot];
+	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent
+	local table = ::__watch_netprops.Fields[slot]
 	if (!("saved" in table)) {
-		say_chat("save value before restoring");
+		say_chat("save value before restoring")
 		return;
 	}
-	local saved = table.saved;
+	local saved = table.saved
 	switch (table.type) {
-		case "integer": NetProps.SetPropInt(ent, table.name, saved); break;
-		case "string": NetProps.SetPropString(ent, table.name, saved); break;
-		case "float": NetProps.SetPropFloat(ent, table.name, saved); break;
-		case "Vector": NetProps.SetPropVector(ent, table.name, saved); break;
+		case "integer": NetProps.SetPropInt(ent, table.name, saved); break
+		case "string": NetProps.SetPropString(ent, table.name, saved); break
+		case "float": NetProps.SetPropFloat(ent, table.name, saved); break
+		case "Vector": NetProps.SetPropVector(ent, table.name, saved); break
 	}
-	logf("restored value %s of netprop %s", saved.tostring(), table.name);
-	table.dataval = "<set> " + table.dataval;
-	HUDSetLayout(::__watch_netprops);
-	loop_add_to_timer("__watch_netprops", 0.1);
+	logf("restored value %s of netprop %s", saved.tostring(), table.name)
+	table.dataval = "<set> " + table.dataval
+	__watch_netprops_show()
+	loop_add_to_timer("__watch_netprops", 0.1)
 }
 
-watch_netprops_save_binds <- @() SendToConsole(::__watch_netprops.binds_save);
-watch_netprops_restore_binds <- @() SendToConsole(::__watch_netprops.binds_restore);
+watch_netprops_save_binds <- @() SendToConsole(::__watch_netprops.binds_save)
+watch_netprops_restore_binds <- @() SendToConsole(::__watch_netprops.binds_restore)
 
 local buttons_bits = ["IN_ATTACK", "IN_JUMP", "IN_DUCK", "IN_FORWARD", "IN_BACK", "IN_USE", "IN_CANCEL", "IN_LEFT", "IN_RIGHT", "IN_MOVELEFT", "IN_MOVERIGHT", "IN_ATTACK2", "IN_RUN", "IN_RELOAD", "IN_ALT1", "IN_ALT2", "IN_SCORE", "IN_SPEED", "IN_WALK", "IN_ZOOM", "IN_WEAPON1", "IN_WEAPON2", "IN_BULLRUSH", "IN_GRENADE1", "IN_GRENADE2"]
 
 __netprops_bitmaps <- {
-	m_fFlags = ["FL_ONGROUND", "FL_DUCKING", "FL_WATERJUMP", "FL_ONTRAIN", "FL_INRAIN", "FL_FROZEN", "FL_ATCONTROLS", "FL_CLIENT", "FL_FAKECLIENT", "FL_INWATER", "FL_FLY", "FL_SWIM", "FL_CONVEYOR", "FL_NPC", "FL_GODMODE", "FL_NOTARGET", "FL_AIMTARGET", "FL_PARTIALGROUND", "FL_STATICPROP", "FL_GRAPHED", "FL_GRENADE", "FL_STEPMOVEMENT", "FL_DONTTOUCH", "FL_BASEVELOCITY", "FL_WORLDBRUSH", "FL_OBJECT", "FL_KILLME", "FL_ONFIRE", "FL_DISSOLVING", "FL_TRANSRAGDOLL", "FL_UNBLOCKABLE_BY_PLAYER", "FL_FREEZING"],
-	m_nButtons = buttons_bits,
-	m_nOldButtons = buttons_bits,
-	m_afButtonLast = buttons_bits,
-	m_afButtonPressed = buttons_bits,
-	m_afButtonReleased = buttons_bits,
-	m_afButtonDisabled = buttons_bits,
-	m_afButtonForced = buttons_bits,
+	m_fFlags = ["FL_ONGROUND", "FL_DUCKING", "FL_WATERJUMP", "FL_ONTRAIN", "FL_INRAIN", "FL_FROZEN", "FL_ATCONTROLS", "FL_CLIENT", "FL_FAKECLIENT", "FL_INWATER", "FL_FLY", "FL_SWIM", "FL_CONVEYOR", "FL_NPC", "FL_GODMODE", "FL_NOTARGET", "FL_AIMTARGET", "FL_PARTIALGROUND", "FL_STATICPROP", "FL_GRAPHED", "FL_GRENADE", "FL_STEPMOVEMENT", "FL_DONTTOUCH", "FL_BASEVELOCITY", "FL_WORLDBRUSH", "FL_OBJECT", "FL_KILLME", "FL_ONFIRE", "FL_DISSOLVING", "FL_TRANSRAGDOLL", "FL_UNBLOCKABLE_BY_PLAYER", "FL_FREEZING"]
+	m_nButtons = buttons_bits
+	m_nOldButtons = buttons_bits
+	m_afButtonLast = buttons_bits
+	m_afButtonPressed = buttons_bits
+	m_afButtonReleased = buttons_bits
+	m_afButtonDisabled = buttons_bits
+	m_afButtonForced = buttons_bits
 }
 
 if (!("__watch_netprops" in getroottable())) ::__watch_netprops <- {}
@@ -193,8 +202,8 @@ mark <- function(vec, duration, color = Vector(255, 0, 255), radius = 4) {
 }
 
 log_event <- function(event, enabled = true) {
-	if (enabled) register_callback(event, "__log_event_table", log_table);
-	else remove_callback(event, "__log_event_table");
+	if (enabled) register_callback("__log_event_table", event, log_table);
+	else remove_callback("__log_event_table", event);
 }
 
 log_events <- function(enabled = true) {

@@ -394,6 +394,7 @@ constants.CSAddon_Holster <- (1 << 8)
 //look https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/const.h for other constants
 
 constants.INF <- 10e100000000
+constants.NAN <- 10e100000000 / 10e100000000
 
 constants.RAD_TO_DEG <- 57.2957795
 

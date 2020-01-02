@@ -5,10 +5,10 @@ SHARED FUNCTIONS FOR OTHER LIB PARTS
 Basic functions and variables, many of them are required by other library parts. Needs to be incuded first. This file also adds a lot of constants to const table and then inject const table to root table. Constants are from kapkan/lib/constants.nut, this file also defines a lot of sourcemod and vslib constants.
 ------------------------------------
 lib_version
-	Version of library, i. e. "2.0.0"
+	Version of library.
 ------------------------------------
 root
-	Root table, same as getroottable().
+	Root table, same as getroottable().weakref().
 ------------------------------------
 log(...)
 	Prints to console. If called with multiple arguments, prints their string representations separated with a whitespace, like print() function in Python. Ends with linebreak.
@@ -73,6 +73,9 @@ scope(ent)
 invalid(ent)
 	Returns true if this is not a valid entity, for example deleted one. Has an alias "deleted_ent(ent)".
 ------------------------------------
+entstr(ent)
+	Returns ent.GetEntityHandle().tointeger().tostring(), which is entity string representation, for example for using in task names
+------------------------------------
 ent_fire(entity, action, value = null, delay = 0)
 	Performs DoEntFire("!self", action, value, delay, null, entity).
 ------------------------------------
@@ -120,10 +123,10 @@ reporter(name, func)
  
 //---------- CODE ----------
 
-::root <- getroottable()
+::root <- getroottable().weakref()
 this = ::root
 
-lib_version <- "2.0.0"
+lib_version <- "2.1.0"
 
 if(typeof log == "native function") ln <- log
 
@@ -295,6 +298,10 @@ invalid <- function(ent) {
 	return !ent.IsValid();
 }
 
+entstr <- function(ent) {
+	return ent.GetEntityHandle().tointeger().tostring()
+}
+
 deleted_ent <- invalid //legacy
 
 ent_fire <- function(ent, action, value = "", delay = 0) {
@@ -373,8 +380,11 @@ reporter <- function(name, func) {
 }
 
 report <- function() {
+	log("----------------------------------")
+	log("lib version: " + lib_version)
 	foreach(_reporter in __reporters) {
-		log(_reporter.name)
+		log(_reporter.name + ":")
 		if (_reporter.func) _reporter.func()
 	}
+	log("----------------------------------")
 }

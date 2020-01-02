@@ -287,7 +287,7 @@ if (!("__playsound_precached" in this)) __playsound_precached <- {}
 //auto removing infected bots that are in dying state
 disallow_dying_infected_bots <- function(enabled = true) {
 	if (enabled) {
-		register_callback("player_death", "__no_death_cams", function(__params) {
+		register_callback("__no_death_cams", "player_death", function(__params) {
 			local player = GetPlayerFromUserID(__params.userid);
 			if (!player.IsSurvivor() && IsPlayerABot(player)) player.Kill();
 		});
@@ -318,7 +318,7 @@ disable_death_cam <- function(teams) {
 	if (!for_surv && !for_inf) throw "use disable_death_cam for Teams.SURVIVORS and/or Teams.INFECTED!"
 	if (for_surv) __deathcam_survivors <- false
 	if (for_inf) __deathcam_infected <- false
-	register_callback("player_death", "__skip_deathcam", function(__params) {
+	register_callback("__skip_deathcam", "player_death", function(__params) {
 		local player = __params.player
 		if (get_team(player) & Teams.INFECTED) {
 			if (!__deathcam_infected) skip_deathcam(player)
@@ -335,7 +335,7 @@ enable_death_cam <- function(teams) {
 	if (for_surv) __deathcam_survivors <- true
 	if (for_inf) __deathcam_infected <- true
 	if (__deathcam_survivors && __deathcam_infected) {
-		remove_callback("player_death", "__skip_deathcam")
+		remove_callback("__skip_deathcam", "player_death")
 	}
 }
 

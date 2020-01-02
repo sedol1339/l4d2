@@ -156,6 +156,9 @@ class BidirectionalMap {
 			_dict2[pair[1]] <- pair[0]
 		}
 	}
+	function _typeof() {
+		return "BidirectionalMap"
+	}
 	function hasStraight(key) {
 		return (key in _dict1)
 	}
@@ -189,6 +192,9 @@ class Constraint {
 		this.func = func
 		this._description = _description
 	}
+	function _typeof() {
+		return "Constraint"
+	}
 	function description() {
 		if (_description) return _description
 		return "No description"
@@ -204,6 +210,9 @@ class IntClosedInterval extends Constraint {
 	constructor(min, max) {
 		if (min != null) this.min = min.tointeger()
 		if (max != null) this.max = max.tointeger()
+	}
+	function _typeof() {
+		return "Constraint (IntClosedInterval)"
 	}
 	function description() {
 		if (min != null && max != null) 
@@ -227,6 +236,9 @@ class FloatClosedInterval extends Constraint {
 	constructor(min, max) {
 		if (min != null) this.min = min.tofloat()
 		if (max != null) this.max = max.tofloat()
+	}
+	function _typeof() {
+		return "Constraint (FloatClosedInterval)"
 	}
 	function description() {
 		if (min != null && max != null) 
@@ -255,6 +267,9 @@ class BelongsToSet extends Constraint {
 			set[value] <- true
 		}
 		this._description = _description
+	}
+	function _typeof() {
+		return "Constraint (BelongsToSet)"
 	}
 	function description() {
 		if (_description) return _description

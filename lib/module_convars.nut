@@ -99,9 +99,10 @@ cvars_restore_all <- function() {
 	__cvars_list <- {};
 }
 
-reporter("saved cvars", function() {
+reporter("Saved cvars", function() {
+	if (__cvars_list.len() == 0) return
 	local arr = []
 	foreach(_cvar, table in __cvars_list)
-		arr.append(format("%s = %s (def. %s)", _cvar, table.value.tostring(), table.default_value.tostring()))
-	log("\t" + arr.concat(", "))
+		arr.append(format("%s = %s (default %s)", _cvar, table.value.tostring(), table.default_value.tostring()))
+	log("\t" + concat(arr, ", "))
 })

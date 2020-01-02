@@ -120,6 +120,10 @@ replace_primary_weapon(player, weapon, laser = false)
 create_particles(effect_name, origin_or_parent, duration = -1, attachment = null)
 	Creates particles for given duration (default -1 is infinite). Pass origin vector or parent entity as second param. Optionally you can specify attachment point for attaching particles to parent entity. Returns particles entity.
 	Example: create_particles("achieved", jockey.GetOrigin(), 6)
+------------------------------------
+attach(ent, attachment)
+	Attaches info_target to specified attachment point of entity and returns it.
+	Example: local lfoot = attach(hunter, "lfoot")
  */
 
 //---------- CODE ----------
@@ -307,25 +311,21 @@ enable_fast_rotation <- function(enabled = true) {
 }
 
 get_entity_flag <- function(ent, flag) {
-	assert(ent);
-	return (propint(ent,"m_fFlags") & flag) ? true : false;
+	return (propint(ent,"m_fFlags") & flag) ? true : false
 }
 
 set_entity_flag <- function(ent, flag, value) {
-	assert(ent);
-	local flags = propint(ent,"m_fFlags");
-	flags = value ? (flags | flag) : (flags & ~flag);
-	propint(ent, "m_fFlags", flags);
+	local flags = propint(ent,"m_fFlags")
+	flags = value ? (flags | flag) : (flags & ~flag)
+	propint(ent, "m_fFlags", flags)
 }
 
 get_player_button <- function(player, button) {
-	assert(player);
-	return (player.GetButtonMask() & button) ? true : false;
+	return (player.GetButtonMask() & button) ? true : false
 }
 
 force_player_button <- function(player, button, press = true) {
-	assert(player);
-	local buttons = propint(player, "m_afButtonForced");
+	local buttons = propint(player, "m_afButtonForced")
 	if (press)
 		propint(player, "m_afButtonForced", buttons | button)
 	else
@@ -333,35 +333,35 @@ force_player_button <- function(player, button, press = true) {
 }
 
 kill_player <- function(player, attacker = null, set_revive_count = true) {
-	if (set_revive_count) player.SetReviveCount(100);
-	player.TakeDamage(10e6, 0, attacker);
-	log("killed " + player);
+	if (set_revive_count) player.SetReviveCount(100)
+	player.TakeDamage(10e6, 0, attacker)
+	log("killed " + player)
 }
 
 client_command <- function(player, command) {
-	local ent = SpawnEntityFromTable("point_clientcommand", {});
-	DoEntFire("!self", "Command", command, 0, player, ent);
-	DoEntFire("!self", "Kill", "", 0, null, ent);
+	local ent = SpawnEntityFromTable("point_clientcommand", {})
+	DoEntFire("!self", "Command", command, 0, player, ent)
+	DoEntFire("!self", "Kill", "", 0, null, ent)
 }
 
 switch_to_infected <- function(player, zombie_class) {
-	propint(player, "m_iTeamNum", 3);
-	propint(player, "m_lifeState", 2);
-	propint(player, "CTerrorPlayer.m_iVersusTeam", 2);
-	propint(player, "m_iPlayerState", 6);
-	spawn_infected(zombie_class, player.GetOrigin());
+	propint(player, "m_iTeamNum", 3)
+	propint(player, "m_lifeState", 2)
+	propint(player, "CTerrorPlayer.m_iVersusTeam", 2)
+	propint(player, "m_iPlayerState", 6)
+	spawn_infected(zombie_class, player.GetOrigin())
 }
 
 targetname_to_entity <- function(targetname) {
-	local ent = Entities.FindByName(null, targetname);
+	local ent = Entities.FindByName(null, targetname)
 	if (!ent) {
-		log("WARNING! entity with targetname " + targetname + " does not exist");
-		return null;
+		log("WARNING! entity with targetname " + targetname + " does not exist")
+		return null
 	}
 	if (Entities.FindByName(ent, targetname)) {
-		log("WARNING! multiple entities with targetname " + targetname + " exist");
+		log("WARNING! multiple entities with targetname " + targetname + " exist")
 	}
-	return ent;
+	return ent
 }
 
 find_entities <- function(classname) {
@@ -373,15 +373,15 @@ find_entities <- function(classname) {
 }
 
 replace_primary_weapon <- function(player, weapon, laser_sight = false) {
-	local inv_table = {};
-	GetInvTable(player, inv_table);
+	local inv_table = {}
+	GetInvTable(player, inv_table)
 	if ("slot0" in inv_table)
-		inv_table.slot0.Kill();
+		inv_table.slot0.Kill()
 	run_this_tick(function() {
-		player.GiveItem(weapon_name);
+		player.GiveItem(weapon_name)
 		if (laser_sight)
-			player.GiveUpgrade(UPGRADE_LASER_SIGHT);
-	});
+			player.GiveUpgrade(UPGRADE_LASER_SIGHT)
+	})
 }
 
 create_particles <- function(effect_name, origin_or_parent, duration = -1, attachment = null) {
@@ -392,8 +392,8 @@ create_particles <- function(effect_name, origin_or_parent, duration = -1, attac
 	else
 		parent = origin_or_parent
 	local effect = SpawnEntityFromTable("info_particle_system", {
-		effect_name = effect_name,
-		origin = origin ? origin : parent.GetOrigin(),
+		effect_name = effect_name
+		origin = origin ? origin : parent.GetOrigin()
 		start_active = 1
 	});
 	if (parent) DoEntFire("!self", "SetParent", "!activator", 0, parent, effect)
@@ -405,4 +405,11 @@ create_particles <- function(effect_name, origin_or_parent, duration = -1, attac
 			DoEntFire("!self", "SetParentAttachment", attachment, 0.01, null, target)
 	}
 	return effect
+}
+
+attach <- function(entity, attachment) {
+	local target = SpawnEntityFromTable("info_target", {origin = entity.GetOrigin()})
+	DoEntFire("!self", "SetParent", "!activator", 0, entity, target)
+	DoEntFire("!self", "SetParentAttachment", attachment, 0, entity, target)
+	return target
 }

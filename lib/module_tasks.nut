@@ -7,8 +7,8 @@ Delayer calls, tickers (OnGameFrame functions), loops, callbacks for events, tas
 ------------------------------------
 delayed_call(...)
 	Calls function after a given time. Usage:
-	delayed_call(delay, function)
-	delayed_call(entity, delay, function)
+	delayed_call(delay, func)
+	delayed_call(entity, delay, func)
 	delayed_call(group_key, delay, func)
 	delayed_call(group_key, entity, delay, func)
 	Function params:
@@ -16,7 +16,7 @@ delayed_call(...)
 	"delay" - delay in seconds
 	"entity" (optional) - instance of CBaseEntity class; if entity becomes invalid, function will not be called
 	"group_key" (optional) - any string, see below
-	Function does not fully check argument types for performance reasons, so be careful. Function returns a string key, that can be used in remove_delayed_call(key). Group key may be used to remove multiple delayed calls at once: remove_delayed_call_group(group_key)
+	Function does not fully check argument types, so be careful. Function returns a string key, that can be used in remove_delayed_call(key). Group key may be used to remove multiple delayed calls at once: remove_delayed_call_group(group_key)
 	Delay behaviour:
 	delay == 0: function always runs THIS tick, runs immediately even if game is paused
 	delay <= 0.0333: function always runs THIS tick, immediately after game is unpaused; nested delayed calls even with non-zero delay will be executed not earlier than next tick
@@ -63,13 +63,18 @@ register_ticker(...)
 	Loop is a function that will be called cyclically with specified delay between calls. Ticker is a function that is called every tick (a loop with zero delay). The function will NOT be called more than once every tick, even if you set delay to 0.001 or -1. Usage:
 	register_loop(delay, func)
 	register_loop(key, delay, func)
+	register_loop(ent, delay, func)
+	register_loop(key, ent, delay, func)
 	register_ticker(func) //same as register_loop(0, func)
 	register_ticker(key, func) //same as register_loop(key, 0, func)
+	register_ticker(ent, func)
+	register_ticker(key, ent, func)
 	Function params:
 	"func" - function that accepts zero arguments. First loop function call will be performed as soon as possible, in this tick. If func returns false (exactly false, not null), loop or ticker will be removed.
 	"delay" (for loops) - delay between calls in seconds
 	"key" (optional) - key that can be used to remove this loop or ticker in future. Try to choose a unique key. Calling register_loop() or register_ticker() twice with the same key will override function, and also will override a delay and reset elspsed time for loops. Note that ticker cannot have the same key as loop, or one of them will override the other.
-	Function does not fully check argument types for performance reasons, so be careful.
+	"ent" - if this entity becomes invalid, loop or ticker will be removed
+	Function does not fully check argument types, so be careful.
 	Execution scope: when register_loop() or register_ticker() is being called, it binds function to "this" scope (this action saves weakref to "this").
 	Round transition behaviour: all tickers and loops calls are performed by logic_timer entity, which is created while first loop or ticker is registered. If this entity gets removed, all registered tickers and loops are removed (list of them is stored inside logic_timer's scope, this table is erased from memory). So all tickers and loops are removed between rounds.
 	Exception handling: if ticker or loop throws an exception, stack trace will appear in console, but this will not prevent other tickers and loops from running.
@@ -87,7 +92,7 @@ remove_ticker(key)
 remove_loop(key)
 	Removes loop using it's key. Tickers and loops use shared set of keys, so it's absolutely the same as remove_ticker(key).
 loop_get_next_call_time(key)
-	Returns a time when loop will be called. If next delay was explicitely set by loop_run_after(), returns time specified in loop_run_after(), otherwise
+	Returns a time when loop will be called. If next delay was explicitely set by loop_run_after(), returns time specified in loop_run_after(), otherwise returns next sheduled call.
 loop_run_after(key, delay)
 	Sets a delay before next loop call. Current loop or ticker will be called next time after "delay" seconds.
 	Example: loop_run_after("my_ticker", 1) //ticker will be paused for 1 second and then again will be called every tick.
@@ -110,7 +115,7 @@ register_callback(...)
 	If function returns false (exactly false, not null), callback will be removed.
 	Function does not fully check argument types for performance reasons, so be careful.
 	Execution scope: when register_callback() is being called, it binds function to "this" scope, like tickers and loops do.
-	Exception handling: if callback throws an exception, this will not prevent other tickers and loops from running, but stack trace will not appear in console, only exception title will be printed.
+	Exception handling: if callback throws an exception, this will not prevent other callbacks from running, but stack trace will not appear in console, only exception title will be printed.
 remove_callback(key, event)
 	Removes a callback.
 ------------------------------------
@@ -228,6 +233,7 @@ remove_delayed_call <- function (key) {
 }
 
 remove_delayed_call_group <- function (group_key) {
+	if (group_key == null) throw "group key is null"
 	if (!("__delayed_calls" in DirectorScript)) return
 	local keys_to_delete = []
 	foreach (key, table in DirectorScript.__delayed_calls) {
@@ -276,41 +282,55 @@ __clock_init <- function() {
 }
 
 register_ticker <- function(...) {
-	local func, key = null
+	local func, key, ent = null
 	switch (vargv.len()) {
 		case 1:
 			func = vargv[0]
 			break
 		case 2:
-			key = vargv[0]
+			if (typeof vargv[0] == "string") key = vargv[0]
+			else if (typeof vargv[0] == "instance") ent = vargv[0]
 			func = vargv[1]
 			break
+		case 3:
+			key = vargv[0]
+			ent = vargv[1]
+			func = vargv[2]
+			break
 	}
-	__register_loop_internal(key, 0, func)
+	__register_loop_internal(key, ent, 0, func)
 }
 
 register_loop <- function(...) {
-	local func, delay, key = null
+	local func, delay, key, ent = null
 	switch (vargv.len()) {
 		case 2:
 			delay = vargv[0]
 			func = vargv[1]
 			break
 		case 3:
-			key = vargv[0]
+			if (typeof vargv[0] == "string") key = vargv[0]
+			else if (typeof vargv[0] == "instance") ent = vargv[0]
 			delay = vargv[1]
 			func = vargv[2]
 			break
+		case 4:
+			key = vargv[0]
+			ent = vargv[1]
+			delay = vargv[2]
+			func = vargv[3]
+			break
 	}
-	__register_loop_internal(key, delay, func)
+	__register_loop_internal(key, ent, delay, func)
 }
 
 //fixed arguments
-__register_loop_internal <- function(key, delay, func) {
+__register_loop_internal <- function(key, ent, delay, func) {
 	if (!key) key = UniqueString()
 	__clock_init()
 	__loops[key] <- {
 		func = func.bindenv(this)
+		ent = ent
 		delay = delay
 		last_call = -INF
 		start_time = Time()
@@ -353,7 +373,7 @@ __queue_keys <- []
 
 loop_info <- {
 	start_time = null, //time when current loop started
-	//delta_time = null,	//time elapsed since last function call
+	delta_time = null,	//time elapsed since last function call
 	total_calls = null,	//total calls (1 for first call)
 	first_call = null,	//equivalent to "loop_info.ticks == 0"
 }
@@ -366,12 +386,16 @@ scope(worldspawn).InputFireUser3 <- function() {
 		local key = __queue_keys.remove(0)
 		if (!(key in __loops)) return //loop was removed
 		local table = __loops[key]
+		if (table.ent != null && invalid(table.ent)) {
+			delete __loops[key]
+			return
+		}
 		if (table.next_call_time_override != null) return
 		loop_info.start_time = table.start_time
 		if (table.last_delta != INF) {
-			loop_info.delta_time <- table.last_delta
+			loop_info.delta_time = table.last_delta
 		} else {
-			if ("delta_time" in loop_info) delete loop_info.delta_time
+			loop_info.delta_time = NAN
 		}
 		loop_info.total_calls = table.total_calls
 		loop_info.first_call = (table.total_calls == 1)
@@ -409,7 +433,7 @@ loop_set_delay <- function(key, delay) {
 //----------------------------------
 
 register_callback <- function(...) {
-if (!("__callbacks" in DirectorScript)) DirectorScript.__callbacks <- {}
+	if (!("__callbacks" in DirectorScript)) DirectorScript.__callbacks <- {}
 	//we need to put callbacks table in some scope that is getting cleared between rounds, because callbacks should be removed between rounds
 	local func, event, ent = null, key = null
 	switch (vargv.len()) {
@@ -465,7 +489,7 @@ if (!("__callbacks" in DirectorScript)) DirectorScript.__callbacks <- {}
 }
 
 remove_callback <- function(key, event) {
-	if (!(__callbacks in DirectorScript)) return
+	if (!("__callbacks" in DirectorScript)) return
 	if (!(event in DirectorScript.__callbacks)) return
 	local event_table = DirectorScript.__callbacks[event]
 	if (!(key in event_table)) return
@@ -575,3 +599,48 @@ remove_task_on_shutdown <- function(key) {
 	if (key in __on_shutdown) delete __on_shutdown[key]
 	if (key in __on_shutdown_after_all) delete __on_shutdown_after_all[key]
 }
+
+reporter("Tasks", function() {
+	log("\tClock initialized: " + (__clock_ent ? "true" : "false"))
+	if (__clock_ent) {
+		log("\tTickers and loops:")
+		foreach(key, loop in __loops) {
+			logf(
+				"\t\t%s [delay = %g%s%s]",
+				key, loop.delay,
+				loop.ent ? format(", ent = %s", var_to_str(loop.ent)) : "",
+				loop.next_call_time_override ? format(", next call override = %g", next_call_time_override) : ""
+			)
+		}
+	}
+	log("\tCallbacks:")
+	if ("__callbacks" in DirectorScript) {
+		foreach(event, callbacks in DirectorScript.__callbacks) {
+			local listeners = []
+			foreach(key, callback in callbacks)
+				listeners.push(key)
+			if (listeners.len() != 0)
+				log("\t\t" + event + ": " + (listeners.len() > 0 ? concat(listeners, ", ") : "[none]"))
+		}
+	}
+	log("\tDelayed calls:")
+	if ("__delayed_calls" in DirectorScript) {
+		logf("\t\t<current time: %g>", Time())
+		foreach(key, delayed_call in DirectorScript.__delayed_calls) {
+			logf(
+				"\t\t%s [time = %g%s%s]",
+				var_to_str(delayed_call.func),
+				delayed_call.time,
+				(delayed_call.ent ? format(", ent = %s", var_to_str(delayed_call.ent)) : ""),
+				(delayed_call.group_key ? format(", group_key = %g", delayed_call.group_key) : "")
+			)
+		}
+	}
+	log("\tTasks on shutdown:")
+	if ("__on_shutdown" in root) {
+		foreach(key, task in __on_shutdown)
+			logf("\t\t%s: %s", key, var_to_str(task))
+		foreach(key, task in __on_shutdown_after_all)
+			logf("\t\t%s: %s", key, var_to_str(task))
+	}
+})

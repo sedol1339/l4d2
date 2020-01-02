@@ -112,7 +112,8 @@ __hud_data_init <- function() { //if we include library first time
 		initialized = false,
 		disabled = false,
 		timers = {},
-		timer_callbacks = {}
+		timer_callbacks = {},
+		lists = {}
 	}
 	for (local i = 1; i <= 14; i++) {
 		//14 slots (1-14)
@@ -628,33 +629,126 @@ hud <- {
 				hud.set_position("__show_message", slot_name, x, y - dY(clock.sec() - start_time), w, h)
 				hud.__refresh()
 			})
-		delayed_call(function() {
+		delayed_call(duration, function() {
 			hud.release_slot("__show_message", slot_name)
 			if (float_up)
 				remove_ticker("__show_message" + slot_name)
-		}, duration)
+		})
 		
 		hud.__refresh()
+	},
+	
+	show_list = function(key, lines, x0 = 0.1, y0 = 0.25, w = 0.3, h = 0.05, dh = 0, background = false) {
+		__check_init()
+		
+		checktype(key, STRING)
+		checktype(lines, "array")
+		checktype(x0, NUMBER)
+		checktype(y0, NUMBER)
+		checktype(w, NUMBER)
+		checktype(h, NUMBER)
+		checktype(dh, NUMBER)
+		checktype(background, BOOL)
+		
+		local lists = ::__hud_data.lists
+		if (!(key in lists)) {
+			lists[key] <- {
+				slots = []
+			}
+		}
+		local list = lists[key]
+		list.x0 <- x0
+		list.y0 <- y0
+		list.w <- w
+		list.h <- h
+		list.dh <- dh
+		list.background <- background
+		list.desired_size <- lines.len()
+		
+		if (!__list_resize(list, lines.len())) {
+			log("warning! no free slots for list: " + key)
+		}
+		local len = list.slots.len()
+		if (len == 0) {
+			log("warning! empty list: " + key)
+		}
+		for(local i = 0; i < len; i++) {
+			local key = list.slots[i].key
+			hud.set_text("__lists", key, lines[i])
+		}
+	},
+	
+	//may not add enough slots if there are no free slots, then returns false
+	__list_resize = function(list, new_size) {
+		local slots = list.slots
+		local current_len = slots.len()
+		local not_enough_slots = false
+		if (new_size > current_len) {
+			for (local i = current_len; i < new_size; i++) {
+				local new_key = UniqueString()
+				if (!hud.possess_slot("__lists", new_key)) {
+					not_enough_slots = true
+					break
+				}
+				slots.append({
+					key = new_key
+				})
+				hud.flags_set("__lists", new_key, HUD_FLAG_ALIGN_LEFT | (list.background ? 0 : HUD_FLAG_NOBG))
+			}
+		} else if (new_size < current_len) {
+			for (local i = new_size; i < current_len; i++) {
+				hud.release_slot("__lists", slots[i].key)
+			}
+			for (local i = new_size; i < current_len; i++) {
+				slots.pop()
+			}
+		}
+		local x1 = list.x0
+		local w = list.w
+		local h = list.h
+		for(local i = 0; i < slots.len(); i++) {
+			local y1 = list.y0 + (list.h + list.dh) * i
+			hud.set_position("__lists", slots[i].key, x1, y1, w, h)
+		}
+		return !not_enough_slots
+	}
+	
+	hide_list = function(key) {
+		__check_init()
+		
+		checktype(key, STRING)
+		
+		local lists = ::__hud_data.lists
+		if (!(key in lists)) throw "no such list: " + key
+		
+		__list_resize(lists[key].slots, 0)
+		delete lists[key]
 	}
 }
 
 reporter("HUD system", function() {
-	log("\tInitialized: " + __hud_data.initialized ? "true" : "false")
+	log("\tInitialized: " + (__hud_data.initialized ? "true" : "false"))
 	if (!__hud_data.initialized) return
-	log("\tDisabled: " + __hud_data.disabled ? "true" : "false")
+	log("\tTurned on: " + (!__hud_data.disabled ? "true" : "false"))
 	log("\tPossessed slots (internal):")
 	foreach(index, slot in __hud_data.internal_slots) {
 		if (!slot.possessor) continue
-		logf("\t%d: %s::%s", index, slot.possessor, slot.name)
+		logf("\t\t%d: %s::%s", index, slot.possessor, slot.name)
 	}
 	log("\tPossessed timers (internal):")
 	foreach(index, timer in __hud_data.timers) {
 		if (!timer.possessor) continue
-		logf("\t%d: %s::%s, state = %d", index, timer.possessor, timer.name, timer.state)
+		logf("\t\t%d: %s::%s, state = %d", index, timer.possessor, timer.name, timer.state)
 	}
 	log("\tTimer callbacks:")
 	foreach(table in __hud_data.timer_callbacks) {
-		logf("\t%s::%s at %g %scalls %s", table.possessor, table.timer_name,
+		logf("\t\t%s::%s at %g %scalls %s", table.possessor, table.timer_name,
 			table.value, (table.stop_timer ? "stops and " : ""), var_to_string(table.func))
+	}
+	log("\tLists:")
+	foreach(key, list in __hud_data.lists) {
+		local mismatch = list.desired_size != list.slots.len()
+		logf("\t\t%s: %d slot(s)%s", key, list.slots.len(),
+			mismatch ? format(" (%d desired slots)", list.desired_size) : "")
 	}
 })

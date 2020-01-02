@@ -52,7 +52,7 @@ log("[lib] including module_advanced")
 
 on_player_team <- function(teams, isbot, func) {
 	//it's ok to be registered multiple times
-	register_callback("player_team", "__on_player_team", function(params) {
+	register_callback("__on_player_team", "player_team", function(params) {
 		local func = __on_player_team[params.team][params.isbot ? 1 : 0];
 		if (func) func(params)
 	});
@@ -67,7 +67,7 @@ on_player_team <- function(teams, isbot, func) {
 }
 
 remove_on_player_team <- function() {
-	remove_callback("player_team", "__on_player_team");
+	remove_callback("__on_player_team", "player_team");
 	for (local team = 0; team <= 3; team++)
 		for (local isbot = 0; isbot <= 1; isbot++)
 			__on_player_team[team][isbot] = null;
@@ -82,10 +82,14 @@ if (!("__on_player_team" in this)) __on_player_team <- [
 
 reporter("on_player_team listeners", function() {
 	local t = __on_player_team
-	if (t[0][0] || t[0][1]) logf("\tTeams.UNASSIGNED: HUMAN %s, BOT %s", var_to_str(t[0][0]), var_to_str(t[0][1]))
-	if (t[1][0] || t[1][1]) logf("\tTeams.SPECTATORS: HUMAN %s, BOT %s", var_to_str(t[1][0]), var_to_str(t[1][1]))
-	if (t[2][0] || t[2][1]) logf("\tTeams.SURVIVORS: HUMAN %s, BOT %s", var_to_str(t[2][0]), var_to_str(t[2][1]))
-	if (t[3][0] || t[3][1]) logf("\tTeams.INFECTED: HUMAN %s, BOT %s", var_to_str(t[3][0]), var_to_str(t[3][1]))
+	if (t[0][0] || t[0][1])
+		logf("\tTeams.UNASSIGNED & HUMAN: %s, \n\tTeams.UNASSIGNED & BOT: %s", var_to_str(t[0][0]), var_to_str(t[0][1]))
+	if (t[1][0] || t[1][1])
+		logf("\tTeams.SPECTATORS & HUMAN: %s, \n\tTeams.SPECTATORS & BOT: %s", var_to_str(t[1][0]), var_to_str(t[1][1]))
+	if (t[2][0] || t[2][1])
+		logf("\tTeams.SURVIVORS & HUMAN: %s, \n\tTeams.SURVIVORS & BOT: %s", var_to_str(t[2][0]), var_to_str(t[2][1]))
+	if (t[3][0] || t[3][1])
+		logf("\tTeams.SURVIVORS & HUMAN: %s, \n\tTeams.SURVIVORS & BOT: %s", var_to_str(t[3][0]), var_to_str(t[3][1]))
 })
 
 on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, on_released = null, on_hold = null) {
@@ -100,7 +104,7 @@ on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, 
 	} else {
 		player = player_or_team
 	}
-	register_loop("__key_action_" + key, function() {
+	register_loop("__key_action_" + key, delay, function() {
 		local function do_key_check(player) {
 			local player_scope = scope(player)
 			local name_in_scope = "__last_buttons_" + key
@@ -124,7 +128,7 @@ on_key_action <- function(key, player_or_team, keyboard_key, delay, on_pressed, 
 					do_key_check(player)
 			})
 		}
-	}, delay)
+	})
 }
 
 on_key_action_remove <- function(key) {
@@ -158,7 +162,7 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 			errmsg = errmsg
 		}
 	}
-	register_callback("player_say", "__chat_cmds", function(params) {
+	register_callback("__chat_cmds", "player_say", function(params) {
 		local cmd_markers = ["!", "/"]
 		local text = lstrip(params.text)
 		local is_command = false
@@ -259,8 +263,9 @@ print_all_chat_commands <- function() {
 	logt(__chat_cmds)
 }
 
-reporter("chat commands", function() {
-	cmds = []
+reporter("Chat commands", function() {
+	local cmds = []
+	if (__chat_cmds.len() == 0) return
 	foreach(cmd, table in __chat_cmds) {
 		cmds.append(cmd.slice(4, cmd.len()))
 	}
@@ -282,16 +287,16 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 	} else {
 		hint.__KeyValueFromString("hint_icon_onscreen", icon);
 	}
-	delayed_call(function() {
+	delayed_call(0.1, function() {
 		DoEntFire("!self", "ShowHint", "", 0, null, hint);
 		__current_hints[hint] <- true;
-	}, 0.1);
-	delayed_call(function() {
+	})
+	delayed_call(time, function() {
 		hint.Kill();
 		delete __current_hints[hint];
 		if (__current_hints.len() != 0) return; //check if there are other simultaneously displayed hints
 		cvar("gameinstructor_enable", 0);
-	}, time);
+	})
 }
 
 if (!("__current_hints" in this)) __current_hints <- {}

@@ -131,12 +131,13 @@ lib_version <- "2.1.0"
 if(typeof log == "native function") ln <- log
 
 log <- function(...) {
-	local str = ""
+	local first = true
 	foreach(arg in vargv) {
-		if (str.len() != 0) str += " "
-		str += arg.tostring()
+		if (!first) print(" ")
+		first = false
+		print(arg)
 	}
-	printl(str)
+	print("\n")
 }
 
 log("[lib] version", lib_version)

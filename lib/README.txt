@@ -29,16 +29,27 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
+Lib v2.2.0 (03.01.2020)
+- CHANGE: in make_playground() params field "remove_specials_limit" renamed to "increase_specials_limit"
+- CHANGE: set_max_specials(amount) replaced by increase_specials_limit() and improved
+- CHANGE: fixed mapname() and now it works only in scripted mode
+- NEW: spawn_infected() now supports angle
+- NEW: function is_scripted_mode() in module_gamelogic
+- IMPROVE: spawn_infected() has better debug console output
+- FIX: log() now print null values correctly
+
+Lib v2.1.1 (02.01.2020)
+- FIX: hud.release_slot() now works for unexisting possessors and slots as intended
+
 Lib v2.1.0 (02.01.2020)
-- Added entstr(ent) function in module_base for using in task keys
-- Added support for "ent" param in register_loop() and register_ticker()
-- Added NAN constant (float Not-a-Number)
-- loop_info.delta_time is now NAN on first call (to fix some strange squirrel bug (??))
-- Added attach(ent, attachment) function in module_entities
-- Added kapkan/lib/extras.nut
-- Added lists in HUD system: hud.show_list(), hud.hide_list()
-- report() function now also prints tasks
-- watch_netprops() now uses HUD system instead of conflicting with it
+- CHANGE: loop_info.delta_time is now NAN on first call (to fix some strange squirrel bug (??))
+- NEW: entstr(ent) function in module_base for using in task keys
+- NEW: Support for "ent" param in register_loop() and register_ticker()
+- NEW: NAN constant (float Not-a-Number)
+- NEW: attach(ent, attachment) function in module_entities
+- NEW: lists in HUD system: hud.show_list(), hud.hide_list()
+- IMPROVE: report() function now also prints tasks
+- FIX: watch_netprops() now uses HUD system instead of conflicting with it
 - FIX: fixed crashes, ::root is now weakref to root table
 - FIX: fixed watch_netprops() function
 - FIX: fixed hud.show_message() function
@@ -50,6 +61,7 @@ Lib v2.1.0 (02.01.2020)
 - FIX: fixed disallow_dying_infected_bots() function
 - FIX: fixed remove_callback() function
 - FIX: fixed report() function
+- Added kapkan/lib/extras.nut
 
 Lib v2.0.0 (27.12.2019)
 - Library was split into modules that can be included independently

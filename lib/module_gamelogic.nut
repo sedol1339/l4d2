@@ -8,7 +8,7 @@ FUNCTIONS FOR CONTROLLING GAME LOGIC
 ! requires lib/module_tasks !
 ------------------------------------
 mapname()
-	Returns current map name (takes it from host_map cvar, removes .bsp).
+	Returns current map name. Works only in scripted mode.
 ------------------------------------
 modename()
 	Returns current mode name (including mutations, takes it from convar mp_gamemode).
@@ -25,8 +25,11 @@ stop_director()
 stop_director_forced()
 	Runs stop_director() and director_stop console command (requires sv_cheats 1).
 ------------------------------------
-set_max_specials(amount)
-	Sets g_ModeScript.DirectorOptions.MaxSpecials = amount. Max value supported by game seems to be 16 (or 32?).
+is_scripted_mode()
+	Is scripted mode enabled? Internally function checks that ::SessionState exists.
+------------------------------------
+increase_specials_limit()
+	Sets MaxSpecials = 32 in different tables, that allows spawning 6+ specials simultaneously. If scripted mode is not active, this seems to work only in coop mode. Made with help of Rayman's admin system.
 ------------------------------------
 make_playground(params = {})
 	Turns the game into sandbox for scripted scenarios. Performs the following operations:
@@ -39,11 +42,11 @@ make_playground(params = {})
 	- "disallow_tanks" - any spawned tanks, except ones spawned with spawn_infected(), will be immediately removed (bots) or killed (human players)
 	- "no_death_check" - sets director_no_death_check=1
 	- "skip_intro" - also skips intro
-	- "remove_specials_limit" - runs set_max_specials(32)
 	- "disallow_dying_infected_bots" - runs function disallow_dying_infected_bots(), this will automatically remove infected bots with death cam
 	- "clear_effects" - removes adrenaline effect, vomit from all survivors, removes all flying projectiles
 	- "finish_anim" - finish animation for all survivors (for example, getting up from charge)
 	False by default:
+	- "increase_specials_limit" - runs increase_specials_limit()
 	- "remove_items" - remove all weapon, items (also from player inventories) and wepon/item spawns
 	- "resurrect" - revive survivors if dead or incapacirated and give them full health
 	- "teleport_to_start" - teleport survivors to start positions
@@ -76,17 +79,35 @@ this = ::root
 
 log("[lib] including module_gamelogic")
 
-mapname <- function() {
+/*mapname <- function() {
 	//return SessionState.MapName
 	local str = cvarstr("host_map")
 	if (str.slice(str.len() - 4, str.len()) == ".bsp")
 		str = str.slice(0, str.len() - 4)
 	return str
+}*/
+
+mapname <- function() {
+	if (!is_scripted_mode()) throw "mapname() works only in scripted mode"
+	return SessionState.MapName
 }
 
 modename <- function() {
 	return cvarstr("mp_gamemode")
 }
+
+/*basemodename <- function() {
+	::_1_ <- @()log(1)
+	::_2_ <- @()log(2)
+	::_3_ <- @()log(3)
+	::_4_ <- @()log(4)
+	local _vsl_info_gamemode = SpawnEntityFromTable("info_gamemode", {});
+	_vsl_info_gamemode.ConnectOutput( "OnCoop", "_1_" );
+	_vsl_info_gamemode.ConnectOutput( "OnCoopPostIO", "_1_" );
+	_vsl_info_gamemode.ConnectOutput( "OnVersusPostIO", "_2_" );
+	_vsl_info_gamemode.ConnectOutput( "OnSurvivalPostIO", "_3_") ;
+	_vsl_info_gamemode.ConnectOutput( "OnScavengePostIO", "_4_" );
+}*/
 
 skip_intro <- function() {
 	IncludeScript("kapkan/lib/skipintro")
@@ -116,8 +137,36 @@ stop_director <- function() {
 	cvar("z_background_limit", 0)
 }
 
-set_max_specials <- function(amount) {
-	g_ModeScript.DirectorOptions.MaxSpecials <- amount
+is_scripted_mode <- function() {
+	local answer = ("SessionState" in root)
+	log("is_scripted_mode(): " + (answer ? "TRUE" : "FALSE"))
+	return answer
+}
+
+/*
+ * made with help of admin system
+ */
+increase_specials_limit <- function() {
+	g_ModeScript.DirectorOptions.MaxSpecials <- 32
+	if (is_scripted_mode()) {
+		SessionOptions.MaxSpecials <- 32
+		SessionOptions.cm_MaxSpecials <- 32
+		SessionOptions.cm_DominatorLimit <- 32
+		SessionOptions.SmokerLimit <- 32
+		SessionOptions.BoomerLimit <- 32
+		SessionOptions.HunterLimit <- 32
+		SessionOptions.SpitterLimit <- 32
+		SessionOptions.JockeyLimit <- 32
+		SessionOptions.ChargerLimit <- 32
+		SessionOptions.WitchLimit <- 32
+		SessionOptions.cm_WitchLimit <- 32
+		SessionOptions.TankLimit <- 32
+		SessionOptions.cm_TankLimit <- 32
+		if ("MutationOptions" in g_ModeScript) g_ModeScript.MutationOptions.MaxSpecials <- 32
+		if ("MapOptions" in g_ModeScript) g_ModeScript.MapOptions.MaxSpecials <- 32
+	} else {
+		log("increase_specials_limit(): not a scripted mode, result is not guaranteed")
+	}
 }
 
 make_playground <- function(input_params_table = {}) {
@@ -132,7 +181,7 @@ make_playground <- function(input_params_table = {}) {
 		disallow_dying_infected_bots = true
 		god_mode = false
 		infinite_ammo = false
-		remove_specials_limit = true
+		increase_specials_limit = true
 		no_discard = false
 		versus = false
 		coop = false
@@ -156,7 +205,6 @@ make_playground <- function(input_params_table = {}) {
 	if (params.infinite_ammo) cvar("sv_infinite_ammo", 1)
 	if (params.versus) cvar("mp_gamemode", "versus")
 	if (params.coop) cvar("mp_gamemode", "coop")
-	if (params.remove_specials_limit) set_max_specials(32)
 	if (params.skip_intro) skip_intro()
 	if (params.disallow_dying_infected_bots) disallow_dying_infected_bots()
 	if (params.host_lerp != null) {
@@ -241,6 +289,7 @@ make_playground <- function(input_params_table = {}) {
 	}
 	if (params.teleport_to_start)
 		teleport_survivors_to_start_points()
+	if (params.increase_specials_limit) increase_specials_limit()
 }
 
 stop_director_forced <- function() {

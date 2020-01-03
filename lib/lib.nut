@@ -12,3 +12,5 @@ IncludeScript("kapkan/lib/module_gamelogic") //requires module_tasks, module_ent
 IncludeScript("kapkan/lib/module_advanced") //requires module_tasks, module_entities, module_strings
 IncludeScript("kapkan/lib/module_development") //requires module_tasks, module_strings
 lib_included <- true
+//"lib_included" is not used in the library itself
+//this can only be used to check if library has been already included

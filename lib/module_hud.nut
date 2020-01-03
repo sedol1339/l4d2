@@ -117,14 +117,14 @@ __hud_data_init <- function() { //if we include library first time
 	}
 	for (local i = 1; i <= 14; i++) {
 		//14 slots (1-14)
-		::__hud_data.internal_slots[i] <- {
+		__hud_data.internal_slots[i] <- {
 			possessor = null,
 			name = null
 		}
 	}
 	for (local i = 0; i < 4; i++) {
 		//4 timers (0-3)
-		::__hud_data.timers[i] <- {
+		__hud_data.timers[i] <- {
 			possessor = null,
 			name = null,
 			state = TIMER_DISABLE,
@@ -137,21 +137,17 @@ if (!("__hud_data" in root))
 
 hud <- {
 	__check_init = function() {
-		if (!::__hud_data.initialized)
+		if (!__hud_data.initialized)
 			//throw "HUD is not initialized"
 			hud.init()
 	},
 	
 	__refresh = function() {
-		if (::__hud_data.disabled) {
-			HUDSetLayout(::__hud_data.layout_dummy)
-		} else {
-			HUDSetLayout(::__hud_data.layout)
-		}
+		HUDSetLayout(__hud_data.disabled ? __hud_data.layout_dummy : __hud_data.layout)
 	},
 	
 	__find_free_slot = function() { //returns slot internal index or -1 if no free slots
-		foreach(index, slot in ::__hud_data.internal_slots)
+		foreach(index, slot in __hud_data.internal_slots)
 			if (!slot.possessor)
 				return index
 		return -1
@@ -162,9 +158,9 @@ hud <- {
 		checktype(possessor, STRING)
 		checktype(name, ["string", "integer"])
 		
-		if (!(possessor in ::__hud_data.possessors))
+		if (!(possessor in __hud_data.possessors))
 			throw format("Possessor %s not found", possessor.tostring())
-		local possessor_table = ::__hud_data.possessors[possessor]
+		local possessor_table = __hud_data.possessors[possessor]
 		if (!(name in possessor_table))
 			throw format("Name %s not found for possessor %s", name.tostring(), possessor)
 		return possessor_table[name]
@@ -178,7 +174,7 @@ hud <- {
 	},
 	
 	__find_free_timer = function()  { //returns timer index (0-3) or -1 if no free timers
-		foreach (id, timer in ::__hud_data.timers)
+		foreach (id, timer in __hud_data.timers)
 			if (!timer.possessor)
 				return id
 		return -1
@@ -189,7 +185,7 @@ hud <- {
 		checktype(possessor, STRING)
 		checktype(name, STRING)
 		
-		foreach (id, timer in ::__hud_data.timers)
+		foreach (id, timer in __hud_data.timers)
 			if (timer.possessor == possessor && timer.name == name)
 				return id
 		if (dont_throw) return -1
@@ -197,9 +193,9 @@ hud <- {
 	},
 	
 	init = function() {
-		if (::__hud_data.initialized)
+		if (__hud_data.initialized)
 			return
-		::__hud_data.initialized = true
+		__hud_data.initialized = true
 		log("HUD was initialized")
 		
 		hud.__refresh()
@@ -216,9 +212,9 @@ hud <- {
 			log("cannot find free HUD slots")
 			return false
 		}
-		if (!(possessor in ::__hud_data.possessors))
-			::__hud_data.possessors[possessor] <- {}
-		local possessor_table = ::__hud_data.possessors[possessor]
+		if (!(possessor in __hud_data.possessors))
+			__hud_data.possessors[possessor] <- {}
+		local possessor_table = __hud_data.possessors[possessor]
 		if (name in possessor_table)
 			throw format("name %s is already registered for possessor %s", name.tostring(), possessor)
 		
@@ -226,11 +222,11 @@ hud <- {
 		possessor_table[name] <- slot_to_possess
 		
 		//second action: edit possessor in internal_slots
-		::__hud_data.internal_slots[slot_to_possess].possessor = possessor
-		::__hud_data.internal_slots[slot_to_possess].name = name
+		__hud_data.internal_slots[slot_to_possess].possessor = possessor
+		__hud_data.internal_slots[slot_to_possess].name = name
 		
 		//third action: add slot to layout
-		::__hud_data.layout.Fields[slot_to_possess] <- {
+		__hud_data.layout.Fields[slot_to_possess] <- {
 			slot = slot_to_possess,
 			dataval = "",
 			flags = 0
@@ -244,16 +240,27 @@ hud <- {
 	release_slot = function(possessor, name) {
 		__check_init()
 		
+		checktype(possessor, STRING)
+		checktype(name, ["string", "integer"])
+		
 		//first action: remove slot from possessors table
-		local possessor_table = ::__hud_data.possessors[possessor]
+		if (!(possessor in __hud_data.possessors)) {
+			log("hud.release_slot(): no possessor with name " + possessor)
+			return
+		}
+		local possessor_table = __hud_data.possessors[possessor]
+		if (!(name in possessor_table)) {
+			log("hud.release_slot(): no slot with name " + possessor + ":" + name.tostring())
+			return
+		}
 		local slot_to_delete = __get_internal_index(possessor, name)
 		delete possessor_table[name]
 		
 		//second action: edit possessor in internal_slots
-		::__hud_data.internal_slots[slot_to_delete].possessor = null
+		__hud_data.internal_slots[slot_to_delete].possessor = null
 		
 		//third action: remove slot from layout
-		delete ::__hud_data.layout.Fields[slot_to_delete]
+		delete __hud_data.layout.Fields[slot_to_delete]
 		
 		hud.__refresh()
 	},
@@ -261,8 +268,8 @@ hud <- {
 	get_all_slots = function(possessor) {
 		__check_init()
 		
-		if (!(possessor in ::__hud_data.possessors)) return []
-		local possessor_table = ::__hud_data.possessors[possessor]
+		if (!(possessor in __hud_data.possessors)) return []
+		local possessor_table = __hud_data.possessors[possessor]
 		local arr = []
 		foreach(name in possessor_table) arr.append(name)
 		return arr
@@ -271,9 +278,9 @@ hud <- {
 	release_all_slots = function(possessor) {
 		__check_init()
 		
-		local possessed = ::__hud_data.get_all_slots(possessor)
+		local possessed = __hud_data.get_all_slots(possessor)
 		foreach(name in possessed)
-			::__hud_data.release_slot(possessor, _name)
+			__hud_data.release_slot(possessor, _name)
 	},
 	
 	possess_multiple_slots = function(possessor, names) {
@@ -285,13 +292,13 @@ hud <- {
 		foreach(name in names) {
 			local success
 			try {
-				success = ::__hud_data.possess_slot(possessor, name)
+				success = __hud_data.possess_slot(possessor, name)
 			} catch (exception) {
 				success = false
 			}
 			if (!success) {
 				foreach(_name in possessed)
-					::__hud_data.release_slot(possessor, _name)
+					__hud_data.release_slot(possessor, _name)
 				return false
 			} else {
 				possessed.append(name)
@@ -320,7 +327,7 @@ hud <- {
 		checktype(visible, BOOL)
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		__set_flags(slot_table, HUD_FLAG_NOTVISIBLE, is_visible)
 		
 		hud.__refresh()
@@ -332,7 +339,7 @@ hud <- {
 		checktype(text, ["string", "integer", "float"])
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		if ("datafunc" in slot_table) delete slot_table.datafunc
 		if ("special" in slot_table) delete slot_table.special
 		if ("staticstring" in slot_table) delete slot_table.staticstring
@@ -347,7 +354,7 @@ hud <- {
 		checktype(func, FUNC)
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		if ("dataval" in slot_table) delete slot_table.dataval
 		if ("special" in slot_table) delete slot_table.special
 		if ("staticstring" in slot_table) delete slot_table.staticstring
@@ -374,7 +381,7 @@ hud <- {
 			value = __get_timer_id(possessor, value) //now it's integer
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		if ("dataval" in slot_table) delete slot_table.dataval
 		if ("datafunc" in slot_table) delete slot_table.datafunc
 		slot_table.special <- value
@@ -395,7 +402,7 @@ hud <- {
 		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		slot_table.flags = flags
 		
 		hud.__refresh()
@@ -407,7 +414,7 @@ hud <- {
 		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		__set_flags(slot_table, flags, true)
 		
 		hud.__refresh()
@@ -419,7 +426,7 @@ hud <- {
 		checktype(flags, "integer")
 		
 		local slot = __get_internal_index(possessor, name)
-		local slot_table = ::__hud_data.layout.Fields[slot]
+		local slot_table = __hud_data.layout.Fields[slot]
 		__set_flags(slot_table, flags, false)
 		
 		hud.__refresh()
@@ -439,8 +446,8 @@ hud <- {
 		if (__get_timer_id(possessor, timer_name, true) != -1)
 			throw format("timer name %s is already registered for possessor %s", timer_name.tostring(), possessor)
 		
-		::__hud_data.timers[timer_to_possess].possessor = possessor
-		::__hud_data.timers[timer_to_possess].name = timer_name
+		__hud_data.timers[timer_to_possess].possessor = possessor
+		__hud_data.timers[timer_to_possess].name = timer_name
 		
 		return true
 	},
@@ -449,10 +456,10 @@ hud <- {
 		__check_init()
 		
 		local timer_to_release = __get_timer_id(possessor, timer_name)
-		::__hud_data.timers[timer_to_release].possessor = null
-		::__hud_data.timers[timer_to_release].name = null
+		__hud_data.timers[timer_to_release].possessor = null
+		__hud_data.timers[timer_to_release].name = null
 		HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
-		::__hud_data.timers[timer_index].state == TIMER_DISABLE
+		__hud_data.timers[timer_index].state == TIMER_DISABLE
 	},
 	
 	disable_timer = function(possessor, timer_name) {
@@ -463,7 +470,7 @@ hud <- {
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
 		HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
-		::__hud_data.timers[timer_index].state == TIMER_DISABLE
+		__hud_data.timers[timer_index].state == TIMER_DISABLE
 	},
 	
 	set_timer = function(possessor, timer_name, value) {
@@ -473,14 +480,14 @@ hud <- {
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
 		HUDManageTimers(timer_index, TIMER_STOP, 0)
-		local old_state = ::__hud_data.timers[timer_index].state
+		local old_state = __hud_data.timers[timer_index].state
 		HUDManageTimers(timer_index, TIMER_SET, value)
 		if (old_state == TIMER_COUNTDOWN) {
 			HUDManageTimers(timer_index, TIMER_COUNTDOWN, value)
 		} else if (old_state == TIMER_COUNTUP) {
 			HUDManageTimers(timer_index, TIMER_COUNTUP, value)
 		} else {
-			::__hud_data.timers[timer_index].state = TIMER_STOP
+			__hud_data.timers[timer_index].state = TIMER_STOP
 		}
 	},
 	
@@ -488,20 +495,20 @@ hud <- {
 		__check_init()
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
-		local old_state = ::__hud_data.timers[timer_index].state
+		local old_state = __hud_data.timers[timer_index].state
 		local value = HUDReadTimer(timer_index) //even for disabled
 		HUDManageTimers(timer_index, TIMER_COUNTUP, value)
-		::__hud_data.timers[timer_index].state = TIMER_COUNTUP
+		__hud_data.timers[timer_index].state = TIMER_COUNTUP
 	},
 	
 	start_timer_countdown = function(possessor, timer_name) {
 		__check_init()
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
-		local old_state = ::__hud_data.timers[timer_index].state
+		local old_state = __hud_data.timers[timer_index].state
 		local value = HUDReadTimer(timer_index) //even for disabled
 		HUDManageTimers(timer_index, TIMER_COUNTDOWN, value)
-		::__hud_data.timers[timer_index].state = TIMER_COUNTDOWN
+		__hud_data.timers[timer_index].state = TIMER_COUNTDOWN
 	},
 	
 	pause_timer = function(possessor, timer_name) {
@@ -511,7 +518,7 @@ hud <- {
 		local value = HUDReadTimer(timer_index) //even for disabled
 		HUDManageTimers(timer_index, TIMER_STOP, 0)
 		HUDManageTimers(timer_index, TIMER_SET, value)
-		::__hud_data.timers[timer_index].state = TIMER_STOP
+		__hud_data.timers[timer_index].state = TIMER_STOP
 	},
 	
 	get_timer = function(possessor, timer_name) {
@@ -529,13 +536,13 @@ hud <- {
 		checktype(stop_timer, BOOL)
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
-		if(::__hud_data.timer_callbacks.len() == 0) {
+		if(__hud_data.timer_callbacks.len() == 0) {
 			register_ticker("__hud_callbacks", function() {
-				foreach(key, callback in ::__hud_data.timer_callbacks) {
+				foreach(key, callback in __hud_data.timer_callbacks) {
 					local timer_index = callback.timer_index
-					local state = ::__hud_data.timers[timer_index].state
+					local state = __hud_data.timers[timer_index].state
 					if (state == TIMER_DISABLE) {
-						delete ::__hud_data.timer_callbacks[key]
+						delete __hud_data.timer_callbacks[key]
 						continue
 					}
 					local current_value = HUDReadTimer(timer_index)
@@ -548,18 +555,18 @@ hud <- {
 							hud.set_timer(callback.possessor, callback.name, value)
 							//HUDManageTimers(timer_index, TIMER_STOP, 0)
 							//HUDManageTimers(timer_index, TIMER_SET, value)
-							//::__hud_data.timers[timer_index].state = TIMER_STOP
+							//__hud_data.timers[timer_index].state = TIMER_STOP
 						}
-						delete ::__hud_data.timer_callbacks[key]
+						delete __hud_data.timer_callbacks[key]
 						if (callback.func)
 							callback.func()
 					}
 				}
-				if (::__hud_data.timer_callbacks.len() == 0)
+				if (__hud_data.timer_callbacks.len() == 0)
 					remove_ticker("__hud_callbacks")
 			})
 		}
-		::__hud_data.timer_callbacks[UniqueString()] <- {
+		__hud_data.timer_callbacks[UniqueString()] <- {
 			possessor = possessor,
 			name = timer_name,
 			value = value,
@@ -573,22 +580,22 @@ hud <- {
 		__check_init()
 		
 		local timer_index = __get_timer_id(possessor, timer_name)
-		foreach(key, callback in ::__hud_data.timer_callbacks)
+		foreach(key, callback in __hud_data.timer_callbacks)
 			if (callback.possessor == possessor && callback.name = timer_name)
-				delete ::__hud_data.timer_callbacks[key]
-		if (::__hud_data.timer_callbacks.len() == 0)
+				delete __hud_data.timer_callbacks[key]
+		if (__hud_data.timer_callbacks.len() == 0)
 			remove_ticker("__hud_callbacks")
 	},
 	
 	global_off = function() {
 		__check_init()
-		::__hud_data.disabled = true
+		__hud_data.disabled = true
 		hud.__refresh()
 	},
 	
 	global_on = function() {
 		__check_init()
-		::__hud_data.disabled = false
+		__hud_data.disabled = false
 		hud.__refresh()
 	},
 	
@@ -650,7 +657,7 @@ hud <- {
 		checktype(dh, NUMBER)
 		checktype(background, BOOL)
 		
-		local lists = ::__hud_data.lists
+		local lists = __hud_data.lists
 		if (!(key in lists)) {
 			lists[key] <- {
 				slots = []
@@ -718,7 +725,7 @@ hud <- {
 		
 		checktype(key, STRING)
 		
-		local lists = ::__hud_data.lists
+		local lists = __hud_data.lists
 		if (!(key in lists)) throw "no such list: " + key
 		
 		__list_resize(lists[key].slots, 0)

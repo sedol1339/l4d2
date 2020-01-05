@@ -57,6 +57,8 @@ clock.ticks()
 	Returns tick count. Tick counter needs to be initialized first. It can be done by registering any ticker or loop or running clock.tick_counter_init().
 clock.tick_counter_init()
 	Initializes tick counter.
+clock.tick_time
+	Time between this and last tick (1.0 / tickrate), usually 0.03333. It is always 0.0333 for first tick after clock initializing.
 ------------------------------------
 register_loop(...)
 register_ticker(...)
@@ -80,7 +82,7 @@ register_ticker(...)
 	Exception handling: if ticker or loop throws an exception, stack trace will appear in console, but this will not prevent other tickers and loops from running.
 	Table ::loop_info contains some information about the current loop (use it only from loop or ticker function!):
 	loop_info.start_time: time when current loop was registered
-	loop_info.delta_time: time delta between this and previous calls (around 0.033 for tickers); this key does NOT exist at first call.
+	loop_info.delta_time: delay between this and previous calls; this key is NAN at first call. See also: clock.tick_time.
 	loop_info.total_calls: total function calls (1 for first call, 2 for next, ...)
 	loop_info.first_call: is it a first call after loop was registered? (same as loop_info.total_calls == 1)
 	Table loop_info is read-only: it is filled right before function call and is not read back, so changes in it have no effect.
@@ -255,12 +257,15 @@ if (!("__clock_ent" in this)) {
 __clock_init <- function() {
 	if (__clock_ent) return
 	if (clock.__ticks == -1) clock.__ticks = 0
+	clock.__last_tick_time = NAN
 	local __clock = SpawnEntityFromTable("logic_timer", { RefireTime = 0 })
 	__clock.ConnectOutput("OnTimer", "func")
 	scope(__clock).loops <- {}
 	scope(__clock).func <- function() {
 		clock.__ticks++
 		local time = Time()
+		if (clock.__last_tick_time != NAN) clock.tick_time = time - clock.__last_tick_time
+		clock.__last_tick_time = time
 		foreach(key, loop_table in loops) {
 			local next_call = loop_table.last_call + loop_table.delay
 			local next_call_override = loop_table.next_call_time_override
@@ -508,6 +513,10 @@ if (!("clock" in this)) clock <- {
 	
 	__ticks = -1
 	
+	__last_tick_time = NAN
+	
+	tick_time = 1.0 / 30
+	
 	ticks = function() {
 		if (__ticks == -1) throw "use clock.tick_counter_init() first"
 		return __ticks
@@ -607,7 +616,7 @@ reporter("Tasks", function() {
 		foreach(key, loop in __loops) {
 			logf(
 				"\t\t%s [delay = %g%s%s]",
-				key, loop.delay,
+				key.tostring(), loop.delay,
 				loop.ent ? format(", ent = %s", var_to_str(loop.ent)) : "",
 				loop.next_call_time_override ? format(", next call override = %g", next_call_time_override) : ""
 			)
@@ -618,7 +627,7 @@ reporter("Tasks", function() {
 		foreach(event, callbacks in DirectorScript.__callbacks) {
 			local listeners = []
 			foreach(key, callback in callbacks)
-				listeners.push(key)
+				listeners.push(key.tostring())
 			if (listeners.len() != 0)
 				log("\t\t" + event + ": " + (listeners.len() > 0 ? concat(listeners, ", ") : "[none]"))
 		}
@@ -628,8 +637,9 @@ reporter("Tasks", function() {
 		logf("\t\t<current time: %g>", Time())
 		foreach(key, delayed_call in DirectorScript.__delayed_calls) {
 			logf(
-				"\t\t%s [time = %g%s%s]",
+				"\t\t%s [key = %s, time = %g%s%s]",
 				var_to_str(delayed_call.func),
+				key.tostring(),
 				delayed_call.time,
 				(delayed_call.ent ? format(", ent = %s", var_to_str(delayed_call.ent)) : ""),
 				(delayed_call.group_key ? format(", group_key = %g", delayed_call.group_key) : "")
@@ -639,8 +649,8 @@ reporter("Tasks", function() {
 	log("\tTasks on shutdown:")
 	if ("__on_shutdown" in root) {
 		foreach(key, task in __on_shutdown)
-			logf("\t\t%s: %s", key, var_to_str(task))
+			logf("\t\t%s: %s", key.tostring(), var_to_str(task))
 		foreach(key, task in __on_shutdown_after_all)
-			logf("\t\t%s: %s", key, var_to_str(task))
+			logf("\t\t%s: %s", key.tostring(), var_to_str(task))
 	}
 })

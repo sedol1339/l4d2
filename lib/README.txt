@@ -23,11 +23,28 @@ There are some conventions that I used when writing code for this library.
 - Grouping: all lines of code that refer to the same action are placed in one module and one place if possible.
 - Simplicity: classes should only be used where they are really needed.
 - I finally unlearned to put a semicolon at the end of line.
-- Version number uses semantic versioning convention.
 
 -------------------------------
 ---------- Changelog ----------
 -------------------------------
+
+Lib v2.3.0 (04.01.2020)
+- New module: lib/module_scenarios
+- CHANGE: make_playground() and disallow_dying_infected_bots() moved from module_gamelogic to module_scenarios
+- module_gamelogic does not require module_tasks anymore
+- CHANGE: heal_survivor() renamed to heal_player()
+- CHANGE/FIX: spawn_infected() does not force origin anymore; use optional param "precise_origin" to force origin
+- NEW: function set_max_health() in module_entities
+- NEW: optional "remove_secondary" param for replace_primary_weapon()
+- NEW: function velocity_impulse() in module_entities
+- NEW: clock.tick_time field in module_tasks
+- IMPROVE: Better client_command() description
+- IMPROVE: Better spawn_infected() description
+- IMPROVE: report() function now prints keys of delayed calls
+- FIX: fixed replace_primary_weapon() function
+- FIX: report() function now can print non-string task keys using .tostring()
+- FIX: fixed logf() description
+- FIX: fixed description of loop_info.delta_time
 
 Lib v2.2.0 (03.01.2020)
 - CHANGE: in make_playground() params field "remove_specials_limit" renamed to "increase_specials_limit"
@@ -43,9 +60,9 @@ Lib v2.1.1 (02.01.2020)
 
 Lib v2.1.0 (02.01.2020)
 - CHANGE: loop_info.delta_time is now NAN on first call (to fix some strange squirrel bug (??))
+- NEW: NAN constant (float Not-a-Number)
 - NEW: entstr(ent) function in module_base for using in task keys
 - NEW: Support for "ent" param in register_loop() and register_ticker()
-- NEW: NAN constant (float Not-a-Number)
 - NEW: attach(ent, attachment) function in module_entities
 - NEW: lists in HUD system: hud.show_list(), hud.hide_list()
 - IMPROVE: report() function now also prints tasks

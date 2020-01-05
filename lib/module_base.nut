@@ -55,7 +55,7 @@ logv(var)
 	Shortcut for (log(var_to_str(var)).
 ------------------------------------
 logf(str, ...)
-	Shortcut for log(format(str, ...)). Bug: printf prints "%%" instead of "%".
+	Shortcut for log(format(str, ...)).
 ------------------------------------
 concat(array, sep)
 	Connects string array using separator. Has alias "connect_strings()".
@@ -126,7 +126,7 @@ reporter(name, func)
 ::root <- getroottable().weakref()
 this = ::root
 
-lib_version <- "2.1.0"
+lib_version <- "2.3.0"
 
 if(typeof log == "native function") ln <- log
 

@@ -60,8 +60,8 @@ set_ability_cooldown(player, cooldown)
 remove_dying_infected()
 	Removes all infected bots that were killed and are in "dying" state (death cam). See also no_SI_with_death_cams() in lib/module_advanced (this requires lib/module_tasks).
 ------------------------------------
-spawn_infected(type, pos, ang = null)
-	Spawn special infected and returns it, returns null if can't spawn. Also validates script scope of spawned entity.
+spawn_infected(type, position, angle = null, precise_origin = false)
+	Spawn special infected and returns it, returns null if can't spawn. Also validates script scope of spawned entity. This function uses ZSpawn() internally, that tries to spawn zombie on ground. So position can be slightly corrected. If you want precise position, use optional parameter precise_origin = true. Function spawn_infected sets entity angle correctly, use enable_fast_rotation() to to make zombie's body instantly turn in the right direction.
 ------------------------------------
 teleport_entity(ent, pos, ang)
 	Teleports entity. pos == null means don't change pos, ang == null means don't change ang.
@@ -69,8 +69,14 @@ teleport_entity(ent, pos, ang)
 defib_dead_survivor(player)
 	Defibs dead survivor and skips animation.
 ------------------------------------
-heal_survivor(player)
-	Heals survivor and revives him from incap. Performs .GiveItem("health") and .SetHealthBuffer(0).
+set_max_health(player, max_health)
+	Sets max health for player.
+------------------------------------
+heal_player(player)
+	Heals player and revives him from incap. Performs .GiveItem("health") and .SetHealthBuffer(0).
+------------------------------------
+velocity_impulse(entity, impulse_vec)
+	Apples a velocity impulse. Internally adds impulse_vec to m_vecBaseVelocity.
 ------------------------------------
 teleport_survivors_to_start_points()
 	Teleports all survivors to start points. Sends ForceSurvivorPositions and ReleaseSurvivorPositions to info_director entity.
@@ -103,7 +109,7 @@ kill_player(player, attacker = null, set_revive_count = true)
 	Kills player by increasing revive count to 100 and calling TakeDamage(). For survivor works only if god=0. Optionally pass attacker as additional param to specify in TakeDamage() function. Set last optional arg to false if you don't want to increase revive count before dealing damage.
 ------------------------------------
 client_command(player, cmd)
-	Send command from player using point_clientcommand.
+	Send command from player using point_clientcommand. Command should have "server_can_execute" flag, for example "slot1".
 ------------------------------------
 switch_to_infected(player, class)
 	Switches player to infected team and spaws as zombie class. Under the hood it sets m_iTeamNum=3, m_lifeState=2, CTerrorPlayer.m_iVersusTeam=2, m_iPlayerState=6 and performs spawn_infected() function. May have side effects. Reverse transition (from infected to survivors) seems impossible.
@@ -241,7 +247,7 @@ remove_dying_infected <- function() {
 }
 
 /* returns spawned player or null */
-spawn_infected <- function(param_type, param_pos, param_ang = null) {
+spawn_infected <- function(param_type, param_pos, param_ang = null, precise_origin = false) {
 	local names = ["ZOMBIE_NORMAL", "ZOMBIE_SMOKER", "ZOMBIE_BOOMER", "ZOMBIE_HUNTER", "ZOMBIE_SPITTER", "ZOMBIE_JOCKEY", "ZOMBIE_CHARGER", "ZOMBIE_WITCH", "ZOMBIE_TANK", "Z_SURVIVOR", "ZSPAWN_MOB", "ZSPAWN_WITCHBRIDE", "ZSPAWN_MUDMEN"]
 	if (typeof param_type != "integer" || param_type < 1 || param_type > 8) return null; //survivor spawning is not working
 	local player = null;
@@ -260,7 +266,7 @@ spawn_infected <- function(param_type, param_pos, param_ang = null) {
 	}
 	log("spawn_infected(): spawning " + names[param_type] + ": " + player_to_str(player));
 	scope(player).spawned_manually <- true; //see make_playground() in lib/module_gamelogic for usage
-	teleport_entity(player, param_pos, param_ang)
+	teleport_entity(player, precise_origin ? param_pos : null, param_ang)
 	return player;
 }
 
@@ -301,9 +307,17 @@ defib_dead_survivor <- function(player) {
 	propint(player, "m_iCurrentUseAction", 0)
 }
 
-heal_survivor <- function(player) {
+set_max_health <- function(player, max_health) {
+	propint(player, "m_iMaxHealth", max_health)
+}
+
+heal_player <- function(player) {
 	player.GiveItem("health")
 	player.SetHealthBuffer(0)
+}
+
+velocity_impulse <- function(ent, impulse_vec) {
+	propvec(ent, "m_vecBaseVelocity", propvec(ent, "m_vecBaseVelocity") + impulse_vec)
 }
 
 teleport_survivors_to_start_points <- function() {
@@ -380,13 +394,15 @@ find_entities <- function(classname) {
 	return arr
 }
 
-replace_primary_weapon <- function(player, weapon, laser_sight = false) {
+replace_primary_weapon <- function(player, weapon, laser_sight = false, remove_secondary = false) {
 	local inv_table = {}
 	GetInvTable(player, inv_table)
 	if ("slot0" in inv_table)
 		inv_table.slot0.Kill()
+	if (remove_secondary && "slot1" in inv_table)
+		inv_table.slot1.Kill()
 	run_this_tick(function() {
-		player.GiveItem(weapon_name)
+		player.GiveItem(weapon)
 		if (laser_sight)
 			player.GiveUpgrade(UPGRADE_LASER_SIGHT)
 	})

@@ -26,7 +26,10 @@ log("[lib] including module_files")
 
 file_read <- FileToString; //gets filename, returns string
 
-file_write <- StringToFile; //gets filename and string
+file_write <- function(file, str) {
+	if (str == null) throw "trying to write null to file"
+	StringToFile(file, str)
+}
 
 file_to_func <- function(filename) {
 	local str = FileToString(filename);

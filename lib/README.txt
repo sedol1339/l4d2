@@ -28,10 +28,25 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
+Lib v2.4.0 (07.01.2020)
+- CHANGE: make_playground() and disallow_dying_infected_bots() moved back to module_gamelogic
+- CHANGE: module_gamelogic again requires module_tasks
+- CHANGE: module_scenarios renamed to module_botcontrol
+- NEW: custom_airstrafe.* functions in module_botcontrol
+- NEW: mousemove() function in module_botcontrol
+- NEW: autofire_start() and autofire_stop() functions in module_botcontrol
+- NEW: duck() and duck_off() functions in module_botcontrol
+- NEW: motion_capture.* functions in module_botcontrol
+- NEW: file_write() now checks that string is not null, preventing game crash
+- FIX: module_botcontrol (previous module_scenarios) now also prints it's name to console when included
+- FIX: get_datetime() now doesn't catch exceptions in on_get
+- FIX: read_console_output(), get_datetime(), register_chat_command() now bind functions to "this"
+- FIX: register_chat_command() now throws exception when gets command name that contains spaces
+
 Lib v2.3.0 (04.01.2020)
 - New module: lib/module_scenarios
 - CHANGE: make_playground() and disallow_dying_infected_bots() moved from module_gamelogic to module_scenarios
-- module_gamelogic does not require module_tasks anymore
+- CHANGE: module_gamelogic does not require module_tasks anymore
 - CHANGE: heal_survivor() renamed to heal_player()
 - CHANGE/FIX: spawn_infected() does not force origin anymore; use optional param "precise_origin" to force origin
 - NEW: function set_max_health() in module_entities

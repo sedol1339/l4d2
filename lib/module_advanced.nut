@@ -151,12 +151,13 @@ register_chat_command <- function(names, func, argmin = null, argmax = null, err
 		throw "name should be string or array of strings"
 	}
 	foreach (name in names) {
+		if (names.find(" ") != null) throw "chat command name cannot contain spaces"
 		name = tolower(name)
 		local cmd = "cmd_" + name
 		if (cmd in __chat_cmds)
 			logf("WARNING! chat command %s was already registered, overriding...", name)
 		__chat_cmds[cmd] <- {
-			func = func,
+			func = func.bindenv(this),
 			argmin = argmin,
 			argmax = argmax,
 			errmsg = errmsg

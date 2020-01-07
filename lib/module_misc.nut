@@ -88,6 +88,7 @@ this = ::root
 log("[lib] including module_misc")
 
 read_console_output <- function(command, on_read) {
+	on_read = on_read.bindenv(this)
 	if ("_console_called" in root && _console_called)
 		throw "console reading is in progress"
 	local filename = "console"
@@ -113,14 +114,16 @@ read_console_output <- function(command, on_read) {
 }
 
 get_datetime <- function(on_get) {
+	on_get = on_get.bindenv(this)
 	Convars.SetValue("con_timestamp", 1)
 	read_console_output("echo", function(file_contents) {
+		local table
 		Convars.SetValue("con_timestamp", 0)
 		try {
 			local lines = split(file_contents, "\n")
 			local last_line = lines[lines.len() - 1]
 			local tokens = split(last_line, "/ -:")
-			local table = {
+			table = {
 				month = tokens[0].tointeger()
 				day = tokens[1].tointeger()
 				year = tokens[2].tointeger()
@@ -134,12 +137,12 @@ get_datetime <- function(on_get) {
 				+ 86400*(table.day - 1)
 				+ 86400*32*(table.month - 1)
 				+ 86400*32*12*(table.year - 2000)
-			on_get(table)
 		} catch (exception) {
 			log("Exception while getting datetime: " + exception)
 			log("..file contents:")
 			log(file_contents)
 		}
+		on_get(table)
 	})
 }
 

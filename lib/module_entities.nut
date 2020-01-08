@@ -105,6 +105,16 @@ get_player_button(player, button)
 force_player_button(player, button, force = true)
 	Forces button for player using m_afButtonForced. Pass false as additional param to release button.
 ------------------------------------
+duck(player, instant = true)
+	Forces human player or bor to duck. If instant == true, skips ducking animation.
+duck_off(player)
+	Stops forcing player to duck.
+------------------------------------
+blind(infected)
+	Sets all sense flags for infected, so that it cannot see survivors anymore.
+blind_off(infected)
+	Infected can see survivors again.
+------------------------------------
 kill_player(player, attacker = null, set_revive_count = true)
 	Kills player by increasing revive count to 100 and calling TakeDamage(). For survivor works only if god=0. Optionally pass attacker as additional param to specify in TakeDamage() function. Set last optional arg to false if you don't want to increase revive count before dealing damage.
 ------------------------------------
@@ -436,4 +446,24 @@ attach <- function(entity, attachment) {
 	DoEntFire("!self", "SetParent", "!activator", 0, entity, target)
 	DoEntFire("!self", "SetParentAttachment", attachment, 0, entity, target)
 	return target
+}
+
+blind <- function(infected) {
+	infected.SetSenseFlags(-1) //all flags
+}
+
+blind_off <- function(infected) {
+	infected.SetSenseFlags(0)
+}
+
+duck <- function(player, instant = true) {
+	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | IN_DUCK)
+	if (instant) {
+		propint(player, "m_Local.m_bDucking", 1)
+		propint(player, "m_Local.m_bDucked", 1)
+	}
+}
+
+duck_off <- function(player) {
+	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") & ~IN_DUCK)
 }

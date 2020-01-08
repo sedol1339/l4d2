@@ -126,7 +126,7 @@ reporter(name, func)
 ::root <- getroottable().weakref()
 this = ::root
 
-lib_version <- "2.4.0"
+lib_version <- "2.5.0"
 
 if(typeof log == "native function") ln <- log
 

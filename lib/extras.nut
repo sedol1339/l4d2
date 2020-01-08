@@ -8,7 +8,7 @@
 /////////////////
 
 
-move_croshair <- function(player, desired_angles, total_frames, fixed_fraction = 0, angle_tolerance = 0, on_finish = null) {
+move_crosshair <- function(player, desired_angles, total_frames, fixed_fraction = 0, angle_tolerance = 0, on_finish = null) {
 	if (on_finish) on_finish = on_finish.bindenv(this)
 	register_ticker(entstr(player) + "__move_croshair", player, function() {
 		if (player.IsDying() || player.IsDead()) return false
@@ -39,7 +39,7 @@ move_croshair <- function(player, desired_angles, total_frames, fixed_fraction =
 
 shoot_player <- function(attacker, victim, delay_in_frames, angle_tolerance = 0, headshot = true) {
 	if (invalid(victim)) return
-	move_croshair(
+	move_crosshair(
 		attacker,
 		function() {
 			if (invalid(victim)) return false

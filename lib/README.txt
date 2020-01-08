@@ -28,6 +28,19 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
+TODO: bhop(player, enabled=true), bhop_instructor(player, enabled=true), PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr - aimtr, upgrades
+
+Lib v2.5.0 (09.01.2020)
+- CHANGE: functions duck() and duck_off() moved from module_botcontrol to module_entities
+- NEW: 2 methods of autobhop: functions autobhop.set() and autobhop.method() in module_advanced
+- NEW: functions blind() and blind_off() in module_entities
+- FIX: algorithm corrections in motion_capture and custom_airstrafe, still not 100% accurate
+- FIX: register_ticker() and register_loop() now fully supports non-string keys, but key should not be instance
+- FIX: re-including library now doesn't reset custom_airstrafe parameters and doesn't break motion_capture recordings
+- FIX: file_append() now checks that string is not null, preventing game crash
+- FIX: fixed description for mark() function in module_development
+- some changes in lib/extras.nut: renamed move_croshair() to move_crosshair()
+
 Lib v2.4.0 (07.01.2020)
 - CHANGE: make_playground() and disallow_dying_infected_bots() moved back to module_gamelogic
 - CHANGE: module_gamelogic again requires module_tasks

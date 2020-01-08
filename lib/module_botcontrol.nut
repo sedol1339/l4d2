@@ -29,11 +29,6 @@ autofire_start(player)
 autofire_stop(player)
 	Starts and stops spamming attack button. This works for human players and bots.
 ------------------------------------
-duck(player, instant = true)
-	Forces human player or bor to duck. If instant == true, skips ducking animation.
-duck_off(player)
-	Stops forcing player to duck.
-------------------------------------
 motion_capture.start_recording(player)
 	Start recording player movement. Continuously prints recorded motion to console.
 motion_capture.stop_recording(player)
@@ -84,7 +79,7 @@ Example of using functions from this module to control hunter bot (map c8m3_sewe
 
 log("[lib] including module_botcontrol")
 
-custom_airstrafe <- {
+if (!("custom_airstrafe" in this)) custom_airstrafe <- {
 	
 	sv_airaccelerate = cvarf("sv_airaccelerate")
 	fsmove_max = 450.0
@@ -158,9 +153,10 @@ custom_airstrafe <- {
 		
 		if (addspeed <= 0) return
 		local dt = clock.tick_time
-		local velocity_to_analyze = ("old_velocity" in player_scope) ? player_scope.old_velocity : velocity
+		//local velocity_to_analyze = ("old_velocity" in player_scope) ? player_scope.old_velocity : velocity
+		local velocity_to_analyze = velocity
 		local accelspeed
-		if (velocity_to_analyze.z > 0 && velocity_to_analyze.z < 100) {
+		if (velocity_to_analyze.z > -12 && velocity_to_analyze.z < 128) {
 			accelspeed = min(addspeed, sv_airaccelerate * wishspeed * dt * accel_multiplier / 4)
 			//log("dividing by 4, result is " + accelspeed)
 		} else {
@@ -194,37 +190,7 @@ mousemove <- function(player, angle_delta, duration){
 	})
 }
 
-autofire_start <- function(player) {
-	register_ticker(entstr(player) + "_autofire", player, function() {
-		if (propint(player, "m_afButtonDisabled") & IN_ATTACK) {
-			propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
-			propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | IN_ATTACK)
-		} else {
-			propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") | IN_ATTACK)
-			propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
-		}
-	})
-}
-
-autofire_stop <- function(player) {
-	remove_ticker(entstr(player) + "_autofire")
-	propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
-	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
-}
-
-duck <- function(player, instant = true) {
-	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | IN_DUCK)
-	if (instant) {
-		propint(player, "m_Local.m_bDucking", 1)
-		propint(player, "m_Local.m_bDucked", 1)
-	}
-}
-
-duck_off <- function(player) {
-	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") & ~IN_DUCK)
-}
-
-motion_capture <- {
+if (!("motion_capture" in this)) motion_capture <- {
 
 	__current_recordings = {}
 
@@ -294,12 +260,14 @@ motion_capture <- {
 				if (new_index >= total_frames) { cancel(); return false }
 				if (frames[new_index][0] > time + time_tolerance) break
 			}
+			index = new_index
 			if (new_index == 0) return
 			local frame_to_apply = frames[new_index - 1]
 			local next_frame = (new_index > 1) ? frames[new_index] : frames[new_index - 1]
+			if (new_index + 1 < total_frames) next_frame = frames[new_index + 1]
 			local buttons = frame_to_apply[1]
 			local strafe_buttons = next_frame[1]
-			local prev_buttons = custom_airstrafe.get_keys(player)
+			local prev_buttons = 0 //custom_airstrafe.get_keys(player)
 			custom_airstrafe.set_keys(player, strafe_buttons)
 			foreach(button in buttons_to_process) {
 				local pressed_prev = prev_buttons & button
@@ -320,4 +288,22 @@ motion_capture <- {
 		})
 	}
 	
+}
+
+autofire_start <- function(player) {
+	register_ticker(entstr(player) + "_autofire", player, function() {
+		if (propint(player, "m_afButtonDisabled") & IN_ATTACK) {
+			propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
+			propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | IN_ATTACK)
+		} else {
+			propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") | IN_ATTACK)
+			propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
+		}
+	})
+}
+
+autofire_stop <- function(player) {
+	remove_ticker(entstr(player) + "_autofire")
+	propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
+	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
 }

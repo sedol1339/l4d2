@@ -27,7 +27,7 @@ log_events(enabled = true)
 draw_collision_box(ent, dur, color)
 	Draws collision box for entity for duration. It is drawing not all lines probably due to some engine problems. For correct drawing your lines should not be outside your field of view. Also this function may not work when you paused the game and have your console opened.
 ------------------------------------
-mark(vec, duration, color)
+mark(vec, duration, color = Vector(255, 0, 255), radius = 4)
 	Marks point, drawing a box for specified duration.
  */
 

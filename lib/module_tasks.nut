@@ -293,8 +293,8 @@ register_ticker <- function(...) {
 			func = vargv[0]
 			break
 		case 2:
-			if (typeof vargv[0] == "string") key = vargv[0]
-			else if (typeof vargv[0] == "instance") ent = vargv[0]
+			if (typeof vargv[0] == "instance") ent = vargv[0]
+			else key = vargv[0]
 			func = vargv[1]
 			break
 		case 3:
@@ -314,8 +314,8 @@ register_loop <- function(...) {
 			func = vargv[1]
 			break
 		case 3:
-			if (typeof vargv[0] == "string") key = vargv[0]
-			else if (typeof vargv[0] == "instance") ent = vargv[0]
+			if (typeof vargv[0] == "instance") ent = vargv[0]
+			else key = vargv[0]
 			delay = vargv[1]
 			func = vargv[2]
 			break

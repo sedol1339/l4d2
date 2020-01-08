@@ -38,6 +38,7 @@ file_to_func <- function(filename) {
 }
 
 file_append <- function(filename, str) {
+	if (str == null) throw "trying to write null to file"
 	local str_from_file = FileToString(filename);
 	StringToFile(filename, str_from_file ? str_from_file + str : str);
 }

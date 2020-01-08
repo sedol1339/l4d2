@@ -40,6 +40,15 @@ show_hud_hint_singleplayer(text, color, icon, binding, time)
 	Shows hud hint to player.
 	Example: show_hud_hint_singleplayer("Use reload or leave field to cancel.", Vector(255,255,255), null, "+reload", 2)
 	Example: show_hud_hint_singleplayer("Use reload or leave field to cancel.", Vector(255,255,255), "icon_info", null, 2)
+------------------------------------
+autobhop.set(player_or_team, state)
+	Enables or disables auto bunnyhop for player of whole team(s). State can be autobhop.ENABLED or autobhop.DISABLED for team and autobhop.ENABLED, autobhop.DISABLED or autobhop.UNDEFINED for player. Settings for players override team settings.
+	Examples:
+	autobhop.set(Team.ANY, autobhop.ENABLED) //enables bhop for all players
+	autobhop.set(Ent(2), autobhop.DISABLED) //disables bhop for player with index 2, it overrides team bhop state
+	autobhop.set(Ent(2), autobhop.UNDEFINED) //now player with index 2 will autobhop only if his whole team has bhop enabled
+autobhop.method(method)
+	Pass autobhop.PRECISE (default) or autobhop.SMOOTH as parameter. Smooth method use baseVelocity correction instead of simulating jump button press, it seems smoother even on local server, but may be not 100% accurate in some cases (TODO find this cases).
  */
 
 //---------- CODE ----------
@@ -301,3 +310,178 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 }
 
 if (!("__current_hints" in this)) __current_hints <- {}
+
+if (!("autobhop" in this)) autobhop <- {
+
+	/* this values are used in logical expressions and shouldn't be changed */
+	ENABLED = 1
+	DISABLED = 0
+	UNDEFINED = -1
+	
+	PRECISE = 10
+	SMOOTH = 11
+	__method = 10
+	
+	__code_running = false
+	__players = {}
+	__survivors = false
+	__infected = false
+	__teams = 0
+	
+	method = function(new_method) {
+		if (new_method != autobhop.PRECISE && new_method != autobhop.SMOOTH)
+			throw "autobhop.method(): method should be autobhop.PRECISE or autobhop.SMOOTH"
+		if (__method != new_method) {
+			foreach(player in players()) __onDisable(player)
+			__method = new_method
+		}
+		log("auto bunnyhop method set to: autobhop." + ((new_method == PRECISE) ? "PRECISE" : "SMOOTH"))
+	}
+	
+	__onTick = function(player) {
+		if (__method == PRECISE) __onTickPrecise(player)
+		else __onTickSmooth(player)
+	}
+	
+	__onDisable = function(player) {
+		if (__method == PRECISE) __onDisablePrecise(player)
+		else __onDisableSmooth(player)
+	}
+	
+	// method 1: m_afButtonDisabled
+	
+	__onTickPrecise = function(player) {
+		//using NetProps for performance
+		if (
+			NetProps.GetPropEntity(player, "m_hGroundEntity") == null
+			&& NetProps.GetPropInt(player, "movetype") == 2
+		) {
+			NetProps.SetPropInt(player, "m_afButtonDisabled", NetProps.GetPropInt(player, "m_afButtonDisabled") | 2)
+		} else {
+			NetProps.SetPropInt(player, "m_afButtonDisabled", NetProps.GetPropInt(player, "m_afButtonDisabled") & ~2)
+		}
+	}
+	
+	__onDisablePrecise = function(player) {
+		propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") & ~2)
+	}
+	
+	//method 2: m_vecBaseVelocity
+	
+	__onTickSmooth = function(player) {
+		local check_jump_possibility = function() { //may not work for custom models
+			if (NetProps.GetPropInt(player, "m_iCurrentUseAction") != 0) return false
+			if (NetProps.GetPropInt(player, "m_isIncapacitated") == 1) return false
+			local model = NetProps.GetPropString(player, "m_ModelName")
+			local sequence = NetProps.GetPropInt(player, "m_nSequence")
+			if (player.IsSurvivor()) {
+				local sequence_after_punch = {
+					"models/survivors/survivor_gambler.mdl": 630
+					"models/survivors/survivor_producer.mdl": 638
+					"models/survivors/survivor_coach.mdl": 630
+					"models/survivors/survivor_mechanic.mdl": 635
+					"models/survivors/survivor_namvet.mdl": 538
+					"models/survivors/survivor_teenangst.mdl": 547
+					"models/survivors/survivor_manager.mdl": 538
+					"models/survivors/survivor_biker.mdl": 541
+				}
+				if (NetProps.GetPropEntity(player, "m_reviveTarget") != null) return false
+				if (NetProps.GetPropEntity(player, "m_pounceAttacker") != null) return false
+				if (NetProps.GetPropEntity(player, "m_carryAttacker") != null) return false
+				if (NetProps.GetPropEntity(player, "m_pummelAttacker") != null) return false
+				if (NetProps.GetPropEntity(player, "m_jockeyAttacker") != null) return false
+				if (NetProps.GetPropEntity(player, "m_tongueOwner") != null) return false
+				if (model in sequence_after_punch && sequence_after_punch[model] == sequence) return false
+				if (NetProps.GetPropInt(player, "m_isHangingFromLedge") == 1) return false //do we need this?
+				return true //true?
+			} else {
+				if (NetProps.GetPropEntity(player, "m_pounceVictim") != null) return false
+				if (NetProps.GetPropEntity(player, "m_carryVictim") != null) return false
+				if (NetProps.GetPropEntity(player, "m_pummelVictim") != null) return false
+				if (NetProps.GetPropEntity(player, "m_jockeyVictim") != null) return false
+				if (NetProps.GetPropEntity(player, "m_tongueVictim") != null) return false
+				if (model == "models/infected/charger.mdl" && sequence == 5) return false //charging
+				if (NetProps.GetPropInt(player, "m_flStamina") == 3000) return false //throwing rock or vomiting
+				return true
+			}
+		}
+		if (
+			NetProps.GetPropEntity(player, "m_hGroundEntity") != null
+			&& (NetProps.GetPropInt(player, "m_nButtons") & 2)
+			&& NetProps.GetPropInt(player, "movetype") == 2
+			&& check_jump_possibility()
+		) {
+			local ducked = NetProps.GetPropInt(player, "m_Local.m_bDucked")
+			local velocity = Vector(0, 0, ducked ? 297.043 : 245.705)
+			//no need to use m_nDuckTimeMsecs here, it's always 0 in flight
+			NetProps.SetPropVector(player, "m_vecBaseVelocity", NetProps.GetPropVector(player, "m_vecBaseVelocity") + velocity)
+			NetProps.SetPropEntity(player, "m_hGroundEntity", null)
+		}
+	}
+	
+	__onDisableSmooth = function(player) {
+		//nothing
+	}
+	
+	__is_any_bhoppers = function() {
+		if (__survivors || __infected) return true
+		foreach(player, state in __players)
+			if (state == autobhop.ENABLED)
+				return true
+		return false
+	}
+	
+	set = function(player_or_team, state) {
+		if (typeof player_or_team == "integer") {
+			local team = player_or_team
+			local _state
+			if (state == autobhop.DISABLED) _state = false
+			else if (state == autobhop.ENABLED) _state = true
+			else throw "autobhop.set(): state for team should be autobhop.DISABLED or autobhop.ENABLED"
+			if (team & Teams.INFECTED) __infected = _state
+			if (team & Teams.SURVIVORS) __survivors = _state
+			__teams = (__infected ? Teams.INFECTED : 0) | (__survivors ? Teams.SURVIVORS : 0)
+			if (!_state)
+				foreach(player in players(team))
+					if (!(player in __players) || __players[player] != state.ENABLED)
+						__onDisable(player)
+		} else {
+			local player = player_or_team
+			__players[player] <- state
+			if (
+				state == autobhop.DISABLED
+				|| (state == autobhop.UNDEFINED && !(__teams & get_team(player)))
+			) {
+				__onDisable(player)
+			}
+		}
+		if (__code_running) {
+			//checking if we should disable it
+			if (!__is_any_bhoppers()) {
+				__code_running = false
+				remove_ticker("__autobhop")
+			}
+		} else {
+			//checking if we should enable it
+			if (__is_any_bhoppers()) {
+				__code_running = true
+				register_ticker("__autobhop", function() {
+					if (!__survivors && !__infected) {
+						foreach(player, state in __players) {
+							if (state == autobhop.ENABLED) __onTick(player)
+						}
+					} else {
+						foreach(player in players()) {
+							local enabled = __teams & get_team(player)
+							if (player in __players) {
+								local state = __players[player]
+								if (state != autobhop.UNDEFINED) enabled = state
+							}
+							if (enabled) __onTick(player)
+						}
+					}
+				})
+			}
+		}
+	}
+}

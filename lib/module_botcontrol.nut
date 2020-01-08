@@ -267,7 +267,7 @@ if (!("motion_capture" in this)) motion_capture <- {
 			if (new_index + 1 < total_frames) next_frame = frames[new_index + 1]
 			local buttons = frame_to_apply[1]
 			local strafe_buttons = next_frame[1]
-			local prev_buttons = 0 //custom_airstrafe.get_keys(player)
+			local prev_buttons = custom_airstrafe.get_keys(player)
 			custom_airstrafe.set_keys(player, strafe_buttons)
 			foreach(button in buttons_to_process) {
 				local pressed_prev = prev_buttons & button

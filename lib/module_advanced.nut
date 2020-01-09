@@ -49,6 +49,33 @@ autobhop.set(player_or_team, state)
 	autobhop.set(Ent(2), autobhop.UNDEFINED) //now player with index 2 will autobhop only if his whole team has bhop enabled
 autobhop.method(method)
 	Pass autobhop.PRECISE (default) or autobhop.SMOOTH as parameter. Smooth method use baseVelocity correction instead of simulating jump button press, it seems smoother even on local server, but may be not 100% accurate in some cases (TODO find this cases).
+------------------------------------
+bhop_instructor.set(player_or_team, state)
+	Enables or disables auto bunnyhop instructor for player of whole team(s). Works just like autobhop.set().
+bhop_instructor.onSuccessDefault(enabled)
+	Here you can disable or enable default bhop_instructor behaviour on jump success (printing to chat). Default = enabled.
+bhop_instructor.onFailDefault(enabled)
+	Here you can disable or enable default bhop_instructor behaviour on jump fail (printing to chat). Default = enabled.
+bhop_instructor.onSuccess(key, func)
+	Here you can set custom handle function for bhop success. Key is required. Pass null to remove.
+	Signature: function(player, bhops_in_a_row, max_speed)
+	"bhops_in_a_row": total bhops in a row including this
+	"max_speed": max speed of current bhop streak.
+bhop_instructor.onFail(key, func)
+	Here you can set custom handle function for bhop fail. Key is required. Pass null to remove.
+	Signature: (player, prev_bhops_in_a_row, max_speed, delta)
+	"prev_bhops_in_a_row": total bhops in a row, if last jump was a bhop
+	"max_speed": max speed of previous bhop streak, if last jump was a bhop
+	"delta": delta ticks between ideal bhop jump and this jump. If delta > 0, jump was too late, otherwise too early. If delta == NAN, this means that this was not a jump, just a landing after bhop streak.
+	----------
+	Example:
+	bhop_instructor.set(Teams.ANY, bhop_instructor.ENABLED) //enable instructor for all players
+	bhop_instructor.onFailDefault(false) //disabling default logging
+	bhop_instructor.onSuccessDefault(false) //disabling default logging
+	bhop_instructor.onFail("skillDetect", function(player, prev_bhops_in_a_row, max_speed, delta) {
+		if (prev_bhops_in_a_row < 3) return
+		say_chat(player.GetName() + " made " + prev_bhops_in_a_row + " bhops in a row (max speed: " + max_speed + ")")
+	}) //setting custom listener for bhop streak finish
  */
 
 //---------- CODE ----------
@@ -311,6 +338,35 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 
 if (!("__current_hints" in this)) __current_hints <- {}
 
+__check_jump_possibility <- function(player) { //may not work for custom models
+	if (NetProps.GetPropInt(player, "movetype") != 2) return false
+	if (NetProps.GetPropInt(player, "m_iCurrentUseAction") != 0) return false
+	if (NetProps.GetPropInt(player, "m_isIncapacitated") == 1) return false
+	if (player.IsSurvivor()) {
+		if (NetProps.GetPropEntity(player, "m_reviveTarget") != null) return false
+		if (NetProps.GetPropEntity(player, "m_pounceAttacker") != null) return false
+		if (NetProps.GetPropEntity(player, "m_carryAttacker") != null) return false
+		if (NetProps.GetPropEntity(player, "m_pummelAttacker") != null) return false
+		if (NetProps.GetPropEntity(player, "m_jockeyAttacker") != null) return false
+		if (NetProps.GetPropEntity(player, "m_tongueOwner") != null) return false
+		local model = NetProps.GetPropString(player, "m_ModelName")
+		local sequence = NetProps.GetPropInt(player, "m_nSequence")
+		if (model in __sequence_after_punch && __sequence_after_punch[model] == sequence) return false
+		if (NetProps.GetPropInt(player, "m_isHangingFromLedge") == 1) return false //do we need this?
+		return true //true?
+	} else {
+		if (NetProps.GetPropEntity(player, "m_pounceVictim") != null) return false
+		if (NetProps.GetPropEntity(player, "m_carryVictim") != null) return false
+		if (NetProps.GetPropEntity(player, "m_pummelVictim") != null) return false
+		if (NetProps.GetPropEntity(player, "m_jockeyVictim") != null) return false
+		if (NetProps.GetPropEntity(player, "m_tongueVictim") != null) return false
+		local sequence = NetProps.GetPropInt(player, "m_nSequence")
+		if (player.GetZombieType() == 6 && sequence == 5) return false //charging
+		if (NetProps.GetPropInt(player, "m_flStamina") == 3000) return false //throwing rock or vomiting
+		return true
+	}
+}
+
 if (!("autobhop" in this)) autobhop <- {
 
 	/* this values are used in logical expressions and shouldn't be changed */
@@ -353,7 +409,7 @@ if (!("autobhop" in this)) autobhop <- {
 	__onTickPrecise = function(player) {
 		//using NetProps for performance
 		if (
-			NetProps.GetPropEntity(player, "m_hGroundEntity") == null
+			NetProps.GetPropInt(player, "m_hGroundEntity") == -1
 			&& NetProps.GetPropInt(player, "movetype") == 2
 		) {
 			NetProps.SetPropInt(player, "m_afButtonDisabled", NetProps.GetPropInt(player, "m_afButtonDisabled") | 2)
@@ -368,48 +424,23 @@ if (!("autobhop" in this)) autobhop <- {
 	
 	//method 2: m_vecBaseVelocity
 	
+	__sequence_after_punch = {
+		"models/survivors/survivor_gambler.mdl": 630
+		"models/survivors/survivor_producer.mdl": 638
+		"models/survivors/survivor_coach.mdl": 630
+		"models/survivors/survivor_mechanic.mdl": 635
+		"models/survivors/survivor_namvet.mdl": 538
+		"models/survivors/survivor_teenangst.mdl": 547
+		"models/survivors/survivor_manager.mdl": 538
+		"models/survivors/survivor_biker.mdl": 541
+	}
+	
 	__onTickSmooth = function(player) {
-		local check_jump_possibility = function() { //may not work for custom models
-			if (NetProps.GetPropInt(player, "m_iCurrentUseAction") != 0) return false
-			if (NetProps.GetPropInt(player, "m_isIncapacitated") == 1) return false
-			local model = NetProps.GetPropString(player, "m_ModelName")
-			local sequence = NetProps.GetPropInt(player, "m_nSequence")
-			if (player.IsSurvivor()) {
-				local sequence_after_punch = {
-					"models/survivors/survivor_gambler.mdl": 630
-					"models/survivors/survivor_producer.mdl": 638
-					"models/survivors/survivor_coach.mdl": 630
-					"models/survivors/survivor_mechanic.mdl": 635
-					"models/survivors/survivor_namvet.mdl": 538
-					"models/survivors/survivor_teenangst.mdl": 547
-					"models/survivors/survivor_manager.mdl": 538
-					"models/survivors/survivor_biker.mdl": 541
-				}
-				if (NetProps.GetPropEntity(player, "m_reviveTarget") != null) return false
-				if (NetProps.GetPropEntity(player, "m_pounceAttacker") != null) return false
-				if (NetProps.GetPropEntity(player, "m_carryAttacker") != null) return false
-				if (NetProps.GetPropEntity(player, "m_pummelAttacker") != null) return false
-				if (NetProps.GetPropEntity(player, "m_jockeyAttacker") != null) return false
-				if (NetProps.GetPropEntity(player, "m_tongueOwner") != null) return false
-				if (model in sequence_after_punch && sequence_after_punch[model] == sequence) return false
-				if (NetProps.GetPropInt(player, "m_isHangingFromLedge") == 1) return false //do we need this?
-				return true //true?
-			} else {
-				if (NetProps.GetPropEntity(player, "m_pounceVictim") != null) return false
-				if (NetProps.GetPropEntity(player, "m_carryVictim") != null) return false
-				if (NetProps.GetPropEntity(player, "m_pummelVictim") != null) return false
-				if (NetProps.GetPropEntity(player, "m_jockeyVictim") != null) return false
-				if (NetProps.GetPropEntity(player, "m_tongueVictim") != null) return false
-				if (model == "models/infected/charger.mdl" && sequence == 5) return false //charging
-				if (NetProps.GetPropInt(player, "m_flStamina") == 3000) return false //throwing rock or vomiting
-				return true
-			}
-		}
 		if (
-			NetProps.GetPropEntity(player, "m_hGroundEntity") != null
+			NetProps.GetPropInt(player, "m_hGroundEntity") != -1
 			&& (NetProps.GetPropInt(player, "m_nButtons") & 2)
 			&& NetProps.GetPropInt(player, "movetype") == 2
-			&& check_jump_possibility()
+			&& __check_jump_possibility(player)
 		) {
 			local ducked = NetProps.GetPropInt(player, "m_Local.m_bDucked")
 			local velocity = Vector(0, 0, ducked ? 297.043 : 245.705)
@@ -443,11 +474,15 @@ if (!("autobhop" in this)) autobhop <- {
 			__teams = (__infected ? Teams.INFECTED : 0) | (__survivors ? Teams.SURVIVORS : 0)
 			if (!_state)
 				foreach(player in players(team))
-					if (!(player in __players) || __players[player] != state.ENABLED)
+					if (!(player in __players) || __players[player] != autobhop.ENABLED)
 						__onDisable(player)
 		} else {
 			local player = player_or_team
-			__players[player] <- state
+			if (state != autobhop.UNDEFINED) {
+				__players[player] <- state
+			} else {
+				if (player in __players) delete __players[player]
+			}
 			if (
 				state == autobhop.DISABLED
 				|| (state == autobhop.UNDEFINED && !(__teams & get_team(player)))
@@ -485,3 +520,227 @@ if (!("autobhop" in this)) autobhop <- {
 		}
 	}
 }
+
+reporter("Autobhop", function() {
+	log("\tmethod: " + autobhop.__method + ", code_running: " + autobhop.__code_running
+		+ ", is_any_bhoppers: " + autobhop.__is_any_bhoppers())
+	log("\tsurvivors: " + autobhop.__survivors + ", infected: " + autobhop.__infected)
+	local players_str_lines = []
+	foreach(player, state in autobhop.__players) {
+		local state_str
+		if (state == autobhop.UNDEFINED) state_str = "UNDEFINED"
+		else if (state == autobhop.ENABLED) state_str = "ENABLED"
+		else if (state == autobhop.DISABLED) state_str = "DISABLED"
+		else state_str = (state == null) ? "null" : state.tostring()
+		players_str_lines.append(player_to_str(player) + ": " + state_str)
+	}
+	local players_str = (players_str_lines.len() > 0) ? concat(players_str_lines, ", ") : "empty"
+	log("\tplayers: " + players_str)
+})
+
+if (!("bhop_instructor" in this)) bhop_instructor <- {
+
+	/* this values are used in logical expressions and shouldn't be changed */
+	ENABLED = 1
+	DISABLED = 0
+	UNDEFINED = -1
+	
+	__code_running = false
+	__players = {}
+	__survivors = false
+	__infected = false
+	__teams = 0
+	
+	__onSuccessDefault = function(player, bhops_in_a_row, max_speed) {
+		say_chat("nice! " + bhops_in_a_row + " bhops in a row")
+	}
+	
+	__onFailDefault = function(player, prev_bhops_in_a_row, max_speed, delta) {
+		if (prev_bhops_in_a_row > 0)
+			say_chat("done " + prev_bhops_in_a_row + " bhops in a row (max speed " + max_speed + ")")
+		if (delta != NAN) { //NAN == NAN in squirrel
+			if (delta > 0)
+				say_chat("jump " + delta + " ticks earlier")
+			else
+				say_chat("jump " + -delta + " ticks later")
+		}
+	}
+	
+	__onSuccessDefaultEnabled = true
+	__onFailDefaultEnabled = true
+	
+	__onSuccessCustom = {}
+	__onFailCustom = {}
+	
+	__onSuccess = function(player, bhops_in_a_row, max_speed) {
+		if (__onSuccessDefaultEnabled) __onSuccessDefault(player, bhops_in_a_row, max_speed)
+		foreach(key, func in __onSuccessCustom) func(player, bhops_in_a_row, max_speed)
+	}
+	
+	__onFail = function(player, prev_bhops_in_a_row, max_speed, delta) {
+		if (__onFailDefaultEnabled) __onFailDefault(player, prev_bhops_in_a_row, max_speed, delta)
+		foreach(key, func in __onFailCustom) func(player, prev_bhops_in_a_row, max_speed, delta)
+	}
+	
+	onSuccessDefault = function(enabled) {
+		__onSuccessDefaultEnabled = enabled
+	}
+	
+	onFailDefault = function(enabled) {
+		__onFailDefaultEnabled = enabled
+	}
+	
+	onSuccess = function(key, func) {
+		if (func) __onSuccessCustom[key] <- func
+		else if (key in __onSuccessCustom) delete __onSuccessCustom[key]
+	}
+	
+	onFail = function(key, func) {
+		if (func) __onFailCustom[key] <- func
+		else if (key in __onFailCustom) delete __onFailCustom[key]
+	}
+	
+	__onTick = function(player) {
+		local history_size = 3 //should be more than 0
+		local player_scope = scope(player)
+		local onGround = (NetProps.GetPropInt(player, "m_hGroundEntity") != -1)
+		local inJump = (NetProps.GetPropInt(player, "m_nButtons") & 2)
+		if (!("bhop_instructor" in player_scope)) {
+			player_scope.bhop_instructor <- {
+				bhops_done = 0
+				max_speed = 0
+				inJump_history = array(history_size * 2 + 3, false)
+				onGround_history = array(history_size * 2 + 3, onGround)
+			}
+		}
+		local bhop_instructor = player_scope.bhop_instructor
+		local inJump_history = bhop_instructor.inJump_history
+		local onGround_history = bhop_instructor.onGround_history
+		inJump_history.pop()
+		inJump_history.insert(0, inJump)
+		onGround_history.pop()
+		onGround_history.insert(0, onGround)
+		local jump_delta = -1
+		local wasJumpPressed = function(delta) {
+			return (inJump_history[delta + jump_delta] && !inJump_history[delta + jump_delta + 1])
+		}
+		if (onGround_history[history_size + 1] && !onGround_history[history_size + 2]) {
+			local current_speed = player.GetVelocity().Length2D()
+			//landing history_delta ticks ago
+			if (wasJumpPressed(history_size + 1)) {
+				if (__check_jump_possibility(player)) {
+					bhop_instructor.bhops_done++
+					bhop_instructor.max_speed = max(bhop_instructor.max_speed, current_speed)
+					__onSuccess(player, bhop_instructor.bhops_done, bhop_instructor.max_speed)
+				} else {
+					__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, NAN)
+				}
+			} else {
+				if (bhop_instructor.bhops_done > 0)
+					bhop_instructor.max_speed = max(bhop_instructor.max_speed, current_speed)
+				local i
+				for(i = 1; i <= history_size; i++) {
+					if (wasJumpPressed(history_size + 1 + i)) {
+						__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, -i)
+						break
+					} else if (wasJumpPressed(history_size + 1 - i)) {
+						__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, i)
+						break
+					}
+				}
+				if (i > history_size)
+					__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, NAN)
+				bhop_instructor.bhops_done = 0
+				bhop_instructor.max_speed = 0
+			}
+		}
+	}
+	
+	__onDisable = function(player) {
+		delete scope(player).bhop_instructor
+	}
+	
+	__is_any_bhoppers = function() {
+		if (__survivors || __infected) return true
+		foreach(player, state in __players)
+			if (state == bhop_instructor.ENABLED)
+				return true
+		return false
+	}
+	
+	set = function(player_or_team, state) {
+		if (typeof player_or_team == "integer") {
+			local team = player_or_team
+			local _state
+			if (state == bhop_instructor.DISABLED) _state = false
+			else if (state == bhop_instructor.ENABLED) _state = true
+			else throw "bhop_instructor.set(): state for team should be bhop_instructor.DISABLED or bhop_instructor.ENABLED"
+			if (team & Teams.INFECTED) __infected = _state
+			if (team & Teams.SURVIVORS) __survivors = _state
+			__teams = (__infected ? Teams.INFECTED : 0) | (__survivors ? Teams.SURVIVORS : 0)
+			if (!_state)
+				foreach(player in players(team))
+					if (!(player in __players) || __players[player] != bhop_instructor.ENABLED)
+						__onDisable(player)
+		} else {
+			local player = player_or_team
+			if (state != bhop_instructor.UNDEFINED) {
+				__players[player] <- state
+			} else {
+				if (player in __players) delete __players[player]
+			}
+			if (
+				state == bhop_instructor.DISABLED
+				|| (state == bhop_instructor.UNDEFINED && !(__teams & get_team(player)))
+			) {
+				__onDisable(player)
+			}
+		}
+		if (__code_running) {
+			//checking if we should disable it
+			if (!__is_any_bhoppers()) {
+				__code_running = false
+				remove_ticker("__bhop_instructor")
+			}
+		} else {
+			//checking if we should enable it
+			if (__is_any_bhoppers()) {
+				__code_running = true
+				register_ticker("__bhop_instructor", function() {
+					if (!__survivors && !__infected) {
+						foreach(player, state in __players) {
+							if (state == bhop_instructor.ENABLED) __onTick(player)
+						}
+					} else {
+						foreach(player in players()) {
+							local enabled = __teams & get_team(player)
+							if (player in __players) {
+								local state = __players[player]
+								if (state != bhop_instructor.UNDEFINED) enabled = state
+							}
+							if (enabled) __onTick(player)
+						}
+					}
+				})
+			}
+		}
+	}
+}
+
+reporter("Bhop instructor", function() {
+	log("\tcode_running: " + bhop_instructor.__code_running
+		+ ", is_any_bhoppers: " + bhop_instructor.__is_any_bhoppers())
+	log("\tsurvivors: " + bhop_instructor.__survivors + ", infected: " + bhop_instructor.__infected)
+	local players_str_lines = []
+	foreach(player, state in bhop_instructor.__players) {
+		local state_str
+		if (state == bhop_instructor.UNDEFINED) state_str = "UNDEFINED"
+		else if (state == bhop_instructor.ENABLED) state_str = "ENABLED"
+		else if (state == bhop_instructor.DISABLED) state_str = "DISABLED"
+		else state_str = (state == null) ? "null" : state.tostring()
+		players_str_lines.append(player_to_str(player) + ": " + state_str)
+	}
+	local players_str = (players_str_lines.len() > 0) ? concat(players_str_lines, ", ") : "empty"
+	log("\tplayers: " + players_str)
+	//TODO listeners, default listener
+})

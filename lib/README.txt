@@ -28,7 +28,11 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
-TODO: bhop(player, enabled=true), bhop_instructor(player, enabled=true), PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr - aimtr, upgrades
+TODO: bhop_instructor(player, enabled=true), PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr
+
+Lib v2.6.0 (09.01.2020)
+- NEW: bhop_instructor.* functions
+- NEW: report() now shows detailed autobhop and bhop_instructor state
 
 Lib v2.5.0 (09.01.2020)
 - CHANGE: functions duck() and duck_off() moved from module_botcontrol to module_entities

@@ -118,7 +118,7 @@ report()
 	Prints current library state to chat. Calls all functions that were added with reporter() function by library modules or other scripts.
 ------------------------------------
 reporter(name, func)
-	Adds new function that will be called on report() call. If this name was already added, owerwrites function. Name should be a human-readable string that will be printed to chat before func() call. Different library modules uses this function.
+	Adds new function that will be called on report() call. If this name was already added, owerwrites function. Name should be a human-readable string that will be printed to chat before func() call. Different library modules use this function.
  */
  
 //---------- CODE ----------
@@ -126,7 +126,7 @@ reporter(name, func)
 ::root <- getroottable().weakref()
 this = ::root
 
-lib_version <- "2.6.0"
+lib_version <- "2.7.0"
 
 if(typeof log == "native function") ln <- log
 

@@ -28,7 +28,19 @@ There are some conventions that I used when writing code for this library.
 ---------- Changelog ----------
 -------------------------------
 
-TODO: bhop_instructor(player, enabled=true), PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr
+TODO: force_cvar, PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr, sequences
+
+Lib v2.7.0 (11.01.2020)
+- CHANGE: bhop_instructor renamed to bhop_callback
+- CHANGE: custom_airstrafe.fsmove_max renamed to custom_airstrafe.speed_max
+- NEW: function custom_airstrafe.override_params()
+- NEW: position can be null in function spawn_infected(), this means spawn somewhere in the world
+- FIX: fixed custom_airstrafe.press_key() and custom_airstrafe.release_key() functions
+- FIX: autobhop smooth method now correctly sets FL_ONGROUND flag and play correct animation
+- FIX: fixed hud.hide_list() function
+- FIX: fixed watch_netprops() function, when called with null argument
+- FIX: when using autobhop SMOOTH method, player will not jump while standing up from infected attacks
+- FIX: fixed skip_intro() function in module_gamelogic, now it doesn't use wrong host_map cvar
 
 Lib v2.6.0 (09.01.2020)
 - NEW: bhop_instructor.* functions

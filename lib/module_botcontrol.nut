@@ -18,6 +18,12 @@ custom_airstrafe.press_key(player, key)
 custom_airstrafe.release_key(player, key)
 custom_airstrafe.set_keys(player, keys)
 	These functions set fake keys for player. Should be used between custom_airstrafe.start() and custom_airstrafe.stop().
+custom_airstrafe.override_params(player, params)
+	Override air-strafe params for a pleyer. Table should contain these fields:
+	"sv_airaccelerate" (default 10)
+	"speed_max" (default450.0)
+	"AirSpeedCap" (default 30.0)
+	"accel_multiplier" (default 7.3)
 ------------------------------------
 mousemove(player, angle_delta, duration)
 	Move mouse for a given duration. Example: send QAngle(0, -90, 0) to turn player or bot 90 degrees right.
@@ -82,16 +88,16 @@ log("[lib] including module_botcontrol")
 if (!("custom_airstrafe" in this)) custom_airstrafe <- {
 	
 	sv_airaccelerate = cvarf("sv_airaccelerate")
-	fsmove_max = 450.0
+	speed_max = 450.0
 	AirSpeedCap = 30.0
 	accel_multiplier = 7.3
 	
 	press_key = function(player, key) {
-		scope(player).fake_buttons = player_scope.fake_buttons | key
+		scope(player).fake_buttons = scope(player).fake_buttons | key
 	}
 	
 	release_key = function(player, key) {
-		scope(player).fake_buttons = player_scope.fake_buttons & ~key
+		scope(player).fake_buttons = scope(player).fake_buttons & ~key
 	}
 	
 	set_keys = function(player, keys) {
@@ -102,9 +108,14 @@ if (!("custom_airstrafe" in this)) custom_airstrafe <- {
 		return scope(player).fake_buttons
 	}
 	
+	override_params = function(player, params) {
+		scope(player).airstrafe_params = params
+	}
+	
 	start = function(player) {
 		local player_scope = scope(player)
 		player_scope.fake_buttons <- 0
+		player_scope.airstrafe_params <- null
 		register_ticker(entstr(player) + "_airstrafe", player, function() {
 			custom_airstrafe.__do_airmove(player_scope)
 		})
@@ -114,10 +125,16 @@ if (!("custom_airstrafe" in this)) custom_airstrafe <- {
 	stop = function(player) {
 		local player_scope = scope(player)
 		if ("fake_buttons" in player_scope) delete player_scope.fake_buttons
+		if ("airstrafe_params" in player_scope) delete player_scope.airstrafe_params
 		remove_ticker(entstr(player) + "_airstrafe")
 	}
 	
 	__do_airmove = function(player_scope) {
+		local override = player_scope.airstrafe_params
+		local sv_airaccelerate = override ? override.sv_airaccelerate : custom_airstrafe.sv_airaccelerate
+		local speed_max = override ? override.speed_max : custom_airstrafe.speed_max
+		local AirSpeedCap = override ? override.AirSpeedCap : custom_airstrafe.AirSpeedCap
+		local accel_multiplier = override ? override.accel_multiplier : custom_airstrafe.accel_multiplier
 		local strafe_ent = player_scope.self
 		//logf("doing airmove for %s, pos = %s, fake_buttons = %d", 
 		//	var_to_str(strafe_ent), var_to_str(strafe_ent.GetOrigin()), player_scope.fake_buttons)
@@ -129,10 +146,10 @@ if (!("custom_airstrafe" in this)) custom_airstrafe <- {
 		local d = buttons & IN_MOVERIGHT
 		local fmove = 0.0
 		local smove = 0.0
-		if (w && !s) fmove = fsmove_max
-		if (s && !w) fmove = -fsmove_max
-		if (d && !a) smove = -fsmove_max
-		if (a && !d) smove = fsmove_max
+		if (w && !s) fmove = speed_max
+		if (s && !w) fmove = -speed_max
+		if (d && !a) smove = -speed_max
+		if (a && !d) smove = speed_max
 		if (fmove == 0.0 && smove == 0.0) return
 		
 		//local viewangles = strafe_ent.EyeAngles()
@@ -265,10 +282,9 @@ if (!("motion_capture" in this)) motion_capture <- {
 			local frame_to_apply = frames[new_index - 1]
 			local next_frame = (new_index > 1) ? frames[new_index] : frames[new_index - 1]
 			if (new_index + 1 < total_frames) next_frame = frames[new_index + 1]
-			local buttons = frame_to_apply[1]
-			local strafe_buttons = next_frame[1]
+			local buttons = next_frame[1]
 			local prev_buttons = custom_airstrafe.get_keys(player)
-			custom_airstrafe.set_keys(player, strafe_buttons)
+			custom_airstrafe.set_keys(player, buttons)
 			foreach(button in buttons_to_process) {
 				local pressed_prev = prev_buttons & button
 				local pressed = buttons & button
@@ -284,7 +300,7 @@ if (!("motion_capture" in this)) motion_capture <- {
 			}
 			player.SetForwardVector(frame_to_apply[2])
 			scope(player).future_viewangles <- vector_to_angle(next_frame[2])
-			//log(player.GetOrigin() + " forward: " + player.GetForwardVector() + " buttons: " + buttons)
+			//log(player.GetOrigin() + " forward: " + player.EyeAngles().Forward() + " buttons: " + buttons)
 		})
 	}
 	

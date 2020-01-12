@@ -60,7 +60,7 @@ set_ability_cooldown(player, cooldown)
 remove_dying_infected()
 	Removes all infected bots that were killed and are in "dying" state (death cam). See also no_SI_with_death_cams() in lib/module_advanced (this requires lib/module_tasks).
 ------------------------------------
-spawn_infected(type, position, angle = null, precise_origin = false)
+spawn_infected(type, position = null, angle = null, precise_origin = false)
 	Spawn special infected and returns it, returns null if can't spawn. Also validates script scope of spawned entity. This function uses ZSpawn() internally, that tries to spawn zombie on ground. So position can be slightly corrected. If you want precise position, use optional parameter precise_origin = true. Function spawn_infected sets entity angle correctly, use enable_fast_rotation() to to make zombie's body instantly turn in the right direction.
 ------------------------------------
 teleport_entity(ent, pos, ang)
@@ -257,24 +257,26 @@ remove_dying_infected <- function() {
 }
 
 /* returns spawned player or null */
-spawn_infected <- function(param_type, param_pos, param_ang = null, precise_origin = false) {
+spawn_infected <- function(param_type, param_pos = null, param_ang = null, precise_origin = false, __supress_output = false) {
 	local names = ["ZOMBIE_NORMAL", "ZOMBIE_SMOKER", "ZOMBIE_BOOMER", "ZOMBIE_HUNTER", "ZOMBIE_SPITTER", "ZOMBIE_JOCKEY", "ZOMBIE_CHARGER", "ZOMBIE_WITCH", "ZOMBIE_TANK", "Z_SURVIVOR", "ZSPAWN_MOB", "ZSPAWN_WITCHBRIDE", "ZSPAWN_MUDMEN"]
 	if (typeof param_type != "integer" || param_type < 1 || param_type > 8) return null; //survivor spawning is not working
 	local player = null;
 	local tmp_last_player = null;
 	while(player = Entities.FindByClassname(player, "player"))
 		tmp_last_player = player;
-	ZSpawn({ type = param_type, pos = param_pos });
+	local table = { type = param_type }
+	if (param_pos) table.pos <- param_pos
+	ZSpawn(table)
 	player = Entities.FindByClassname(tmp_last_player, "player");
 	if (!player) {
-		logf("spawn_infected(): ERROR! cannot find spawned %s, returning null", names[param_type])
+		if (!__supress_output) logf("spawn_infected(): ERROR! cannot find spawned %s, returning null", names[param_type])
 		return null
 	}
 	if(player.GetZombieType() == 9) {
-		logf("spawn_infected(): ERROR! zombieType of %s is 9, returning null", names[param_type])
+		if (!__supress_output) logf("spawn_infected(): ERROR! zombieType of %s is 9, returning null", names[param_type])
 		return null; //if an extra infected bot appears, it becomes a survivor and is then removed
 	}
-	log("spawn_infected(): spawning " + names[param_type] + ": " + player_to_str(player));
+	if (!__supress_output) log("spawn_infected(): spawning " + names[param_type] + ": " + player_to_str(player));
 	scope(player).spawned_manually <- true; //see make_playground() in lib/module_gamelogic for usage
 	teleport_entity(player, precise_origin ? param_pos : null, param_ang)
 	return player;

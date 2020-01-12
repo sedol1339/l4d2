@@ -50,18 +50,18 @@ autobhop.set(player_or_team, state)
 autobhop.method(method)
 	Pass autobhop.PRECISE (default) or autobhop.SMOOTH as parameter. Smooth method use baseVelocity correction instead of simulating jump button press, it seems smoother even on local server, but may be not 100% accurate in some cases (TODO find this cases).
 ------------------------------------
-bhop_instructor.set(player_or_team, state)
-	Enables or disables auto bunnyhop instructor for player of whole team(s). Works just like autobhop.set().
-bhop_instructor.onSuccessDefault(enabled)
-	Here you can disable or enable default bhop_instructor behaviour on jump success (printing to chat). Default = enabled.
-bhop_instructor.onFailDefault(enabled)
-	Here you can disable or enable default bhop_instructor behaviour on jump fail (printing to chat). Default = enabled.
-bhop_instructor.onSuccess(key, func)
+bhop_callback.set(player_or_team, state)
+	Enables or disables auto bunnyhop callback/instructor for player of whole team(s). Works just like autobhop.set().
+bhop_callback.onSuccessDefault(enabled)
+	Here you can disable or enable default bhop_callback behaviour on jump success (printing to chat). Default = enabled.
+bhop_callback.onFailDefault(enabled)
+	Here you can disable or enable default bhop_callback behaviour on jump fail (printing to chat). Default = enabled.
+bhop_callback.onSuccess(key, func)
 	Here you can set custom handle function for bhop success. Key is required. Pass null to remove.
 	Signature: function(player, bhops_in_a_row, max_speed)
 	"bhops_in_a_row": total bhops in a row including this
 	"max_speed": max speed of current bhop streak.
-bhop_instructor.onFail(key, func)
+bhop_callback.onFail(key, func)
 	Here you can set custom handle function for bhop fail. Key is required. Pass null to remove.
 	Signature: (player, prev_bhops_in_a_row, max_speed, delta)
 	"prev_bhops_in_a_row": total bhops in a row, if last jump was a bhop
@@ -69,10 +69,10 @@ bhop_instructor.onFail(key, func)
 	"delta": delta ticks between ideal bhop jump and this jump. If delta > 0, jump was too late, otherwise too early. If delta == NAN, this means that this was not a jump, just a landing after bhop streak.
 	----------
 	Example:
-	bhop_instructor.set(Teams.ANY, bhop_instructor.ENABLED) //enable instructor for all players
-	bhop_instructor.onFailDefault(false) //disabling default logging
-	bhop_instructor.onSuccessDefault(false) //disabling default logging
-	bhop_instructor.onFail("skillDetect", function(player, prev_bhops_in_a_row, max_speed, delta) {
+	bhop_callback.set(Teams.ANY, bhop_callback.ENABLED) //enable instructor for all players
+	bhop_callback.onFailDefault(false) //disabling default logging
+	bhop_callback.onSuccessDefault(false) //disabling default logging
+	bhop_callback.onFail("skillDetect", function(player, prev_bhops_in_a_row, max_speed, delta) {
 		if (prev_bhops_in_a_row < 3) return
 		say_chat(player.GetName() + " made " + prev_bhops_in_a_row + " bhops in a row (max speed: " + max_speed + ")")
 	}) //setting custom listener for bhop streak finish
@@ -339,6 +339,46 @@ show_hud_hint_singleplayer <- function(text, color, icon, binding, time) {
 if (!("__current_hints" in this)) __current_hints <- {}
 
 __check_jump_possibility <- function(player) { //may not work for custom models
+	local GetUpFrom_TankPunch = {
+		"models/survivors/survivor_gambler.mdl": 630
+		"models/survivors/survivor_producer.mdl": 638
+		"models/survivors/survivor_coach.mdl": 630
+		"models/survivors/survivor_mechanic.mdl": 635
+		"models/survivors/survivor_namvet.mdl": 538
+		"models/survivors/survivor_teenangst.mdl": 547
+		"models/survivors/survivor_manager.mdl": 538
+		"models/survivors/survivor_biker.mdl": 541
+	}
+	local GetUpFrom_Charger = {
+		"models/survivors/survivor_gambler.mdl": 667
+		"models/survivors/survivor_producer.mdl": 674
+		"models/survivors/survivor_coach.mdl": 656
+		"models/survivors/survivor_mechanic.mdl": 671
+		"models/survivors/survivor_namvet.mdl": 759
+		"models/survivors/survivor_teenangst.mdl": 819
+		"models/survivors/survivor_manager.mdl": 759
+		"models/survivors/survivor_biker.mdl": 762
+	}
+	local GetUpFrom_Pounced = {
+		"models/survivors/survivor_gambler.mdl": 620
+		"models/survivors/survivor_producer.mdl": 629
+		"models/survivors/survivor_coach.mdl": 621
+		"models/survivors/survivor_mechanic.mdl": 625
+		"models/survivors/survivor_namvet.mdl": 528
+		"models/survivors/survivor_teenangst.mdl": 537
+		"models/survivors/survivor_manager.mdl": 528
+		"models/survivors/survivor_biker.mdl": 531
+	}
+	local Charger_Slammed_Wall = {
+		"models/survivors/survivor_gambler.mdl": 671
+		"models/survivors/survivor_producer.mdl": 678
+		"models/survivors/survivor_coach.mdl": 660
+		"models/survivors/survivor_mechanic.mdl": 675
+		"models/survivors/survivor_namvet.mdl": 763
+		"models/survivors/survivor_teenangst.mdl": 823
+		"models/survivors/survivor_manager.mdl": 763
+		"models/survivors/survivor_biker.mdl": 766
+	}
 	if (NetProps.GetPropInt(player, "movetype") != 2) return false
 	if (NetProps.GetPropInt(player, "m_iCurrentUseAction") != 0) return false
 	if (NetProps.GetPropInt(player, "m_isIncapacitated") == 1) return false
@@ -351,8 +391,16 @@ __check_jump_possibility <- function(player) { //may not work for custom models
 		if (NetProps.GetPropEntity(player, "m_tongueOwner") != null) return false
 		local model = NetProps.GetPropString(player, "m_ModelName")
 		local sequence = NetProps.GetPropInt(player, "m_nSequence")
-		if (model in __sequence_after_punch && __sequence_after_punch[model] == sequence) return false
-		if (NetProps.GetPropInt(player, "m_isHangingFromLedge") == 1) return false //do we need this?
+		if (model in GetUpFrom_TankPunch) {
+			//standart model
+			if (GetUpFrom_TankPunch[model] == sequence) return false
+			if (GetUpFrom_Charger[model] == sequence) return false
+			if (GetUpFrom_Pounced[model] == sequence) return false
+			if (Charger_Slammed_Wall[model] == sequence) return false
+		}
+		if (NetProps.GetPropInt(player, "m_isHangingFromLedge") == 1) return false
+		if (NetProps.GetPropInt(player, "m_isFallingFromLedge") == 1) return false
+		if (NetProps.GetPropFloat(player, "m_jumpSupressedUntil") > Time()) return false
 		return true //true?
 	} else {
 		if (NetProps.GetPropEntity(player, "m_pounceVictim") != null) return false
@@ -424,17 +472,6 @@ if (!("autobhop" in this)) autobhop <- {
 	
 	//method 2: m_vecBaseVelocity
 	
-	__sequence_after_punch = {
-		"models/survivors/survivor_gambler.mdl": 630
-		"models/survivors/survivor_producer.mdl": 638
-		"models/survivors/survivor_coach.mdl": 630
-		"models/survivors/survivor_mechanic.mdl": 635
-		"models/survivors/survivor_namvet.mdl": 538
-		"models/survivors/survivor_teenangst.mdl": 547
-		"models/survivors/survivor_manager.mdl": 538
-		"models/survivors/survivor_biker.mdl": 541
-	}
-	
 	__onTickSmooth = function(player) {
 		if (
 			NetProps.GetPropInt(player, "m_hGroundEntity") != -1
@@ -447,6 +484,7 @@ if (!("autobhop" in this)) autobhop <- {
 			//no need to use m_nDuckTimeMsecs here, it's always 0 in flight
 			NetProps.SetPropVector(player, "m_vecBaseVelocity", NetProps.GetPropVector(player, "m_vecBaseVelocity") + velocity)
 			NetProps.SetPropEntity(player, "m_hGroundEntity", null)
+			NetProps.SetPropInt(player, "m_fFlags", NetProps.GetPropInt(player, "m_fFlags") & ~FL_ONGROUND)
 		}
 	}
 	
@@ -522,7 +560,8 @@ if (!("autobhop" in this)) autobhop <- {
 }
 
 reporter("Autobhop", function() {
-	log("\tmethod: " + autobhop.__method + ", code_running: " + autobhop.__code_running
+	local method = (autobhop.__method == autobhop.PRECISE) ? "PRECISE" : "SMOOTH"
+	log("\tmethod: " + method + ", code_running: " + autobhop.__code_running
 		+ ", is_any_bhoppers: " + autobhop.__is_any_bhoppers())
 	log("\tsurvivors: " + autobhop.__survivors + ", infected: " + autobhop.__infected)
 	local players_str_lines = []
@@ -538,7 +577,7 @@ reporter("Autobhop", function() {
 	log("\tplayers: " + players_str)
 })
 
-if (!("bhop_instructor" in this)) bhop_instructor <- {
+if (!("bhop_callback" in this)) bhop_callback <- {
 
 	/* this values are used in logical expressions and shouldn't be changed */
 	ENABLED = 1
@@ -605,17 +644,17 @@ if (!("bhop_instructor" in this)) bhop_instructor <- {
 		local player_scope = scope(player)
 		local onGround = (NetProps.GetPropInt(player, "m_hGroundEntity") != -1)
 		local inJump = (NetProps.GetPropInt(player, "m_nButtons") & 2)
-		if (!("bhop_instructor" in player_scope)) {
-			player_scope.bhop_instructor <- {
+		if (!("bhop_callback" in player_scope)) {
+			player_scope.bhop_callback <- {
 				bhops_done = 0
 				max_speed = 0
 				inJump_history = array(history_size * 2 + 3, false)
 				onGround_history = array(history_size * 2 + 3, onGround)
 			}
 		}
-		local bhop_instructor = player_scope.bhop_instructor
-		local inJump_history = bhop_instructor.inJump_history
-		local onGround_history = bhop_instructor.onGround_history
+		local bhop_callback = player_scope.bhop_callback
+		local inJump_history = bhop_callback.inJump_history
+		local onGround_history = bhop_callback.onGround_history
 		inJump_history.pop()
 		inJump_history.insert(0, inJump)
 		onGround_history.pop()
@@ -629,41 +668,41 @@ if (!("bhop_instructor" in this)) bhop_instructor <- {
 			//landing history_delta ticks ago
 			if (wasJumpPressed(history_size + 1)) {
 				if (__check_jump_possibility(player)) {
-					bhop_instructor.bhops_done++
-					bhop_instructor.max_speed = max(bhop_instructor.max_speed, current_speed)
-					__onSuccess(player, bhop_instructor.bhops_done, bhop_instructor.max_speed)
+					bhop_callback.bhops_done++
+					bhop_callback.max_speed = max(bhop_callback.max_speed, current_speed)
+					__onSuccess(player, bhop_callback.bhops_done, bhop_callback.max_speed)
 				} else {
-					__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, NAN)
+					__onFail(player, bhop_callback.bhops_done, bhop_callback.max_speed, NAN)
 				}
 			} else {
-				if (bhop_instructor.bhops_done > 0)
-					bhop_instructor.max_speed = max(bhop_instructor.max_speed, current_speed)
+				if (bhop_callback.bhops_done > 0)
+					bhop_callback.max_speed = max(bhop_callback.max_speed, current_speed)
 				local i
 				for(i = 1; i <= history_size; i++) {
 					if (wasJumpPressed(history_size + 1 + i)) {
-						__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, -i)
+						__onFail(player, bhop_callback.bhops_done, bhop_callback.max_speed, -i)
 						break
 					} else if (wasJumpPressed(history_size + 1 - i)) {
-						__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, i)
+						__onFail(player, bhop_callback.bhops_done, bhop_callback.max_speed, i)
 						break
 					}
 				}
 				if (i > history_size)
-					__onFail(player, bhop_instructor.bhops_done, bhop_instructor.max_speed, NAN)
-				bhop_instructor.bhops_done = 0
-				bhop_instructor.max_speed = 0
+					__onFail(player, bhop_callback.bhops_done, bhop_callback.max_speed, NAN)
+				bhop_callback.bhops_done = 0
+				bhop_callback.max_speed = 0
 			}
 		}
 	}
 	
 	__onDisable = function(player) {
-		delete scope(player).bhop_instructor
+		delete scope(player).bhop_callback
 	}
 	
 	__is_any_bhoppers = function() {
 		if (__survivors || __infected) return true
 		foreach(player, state in __players)
-			if (state == bhop_instructor.ENABLED)
+			if (state == bhop_callback.ENABLED)
 				return true
 		return false
 	}
@@ -672,26 +711,26 @@ if (!("bhop_instructor" in this)) bhop_instructor <- {
 		if (typeof player_or_team == "integer") {
 			local team = player_or_team
 			local _state
-			if (state == bhop_instructor.DISABLED) _state = false
-			else if (state == bhop_instructor.ENABLED) _state = true
-			else throw "bhop_instructor.set(): state for team should be bhop_instructor.DISABLED or bhop_instructor.ENABLED"
+			if (state == bhop_callback.DISABLED) _state = false
+			else if (state == bhop_callback.ENABLED) _state = true
+			else throw "bhop_callback.set(): state for team should be bhop_callback.DISABLED or bhop_callback.ENABLED"
 			if (team & Teams.INFECTED) __infected = _state
 			if (team & Teams.SURVIVORS) __survivors = _state
 			__teams = (__infected ? Teams.INFECTED : 0) | (__survivors ? Teams.SURVIVORS : 0)
 			if (!_state)
 				foreach(player in players(team))
-					if (!(player in __players) || __players[player] != bhop_instructor.ENABLED)
+					if (!(player in __players) || __players[player] != bhop_callback.ENABLED)
 						__onDisable(player)
 		} else {
 			local player = player_or_team
-			if (state != bhop_instructor.UNDEFINED) {
+			if (state != bhop_callback.UNDEFINED) {
 				__players[player] <- state
 			} else {
 				if (player in __players) delete __players[player]
 			}
 			if (
-				state == bhop_instructor.DISABLED
-				|| (state == bhop_instructor.UNDEFINED && !(__teams & get_team(player)))
+				state == bhop_callback.DISABLED
+				|| (state == bhop_callback.UNDEFINED && !(__teams & get_team(player)))
 			) {
 				__onDisable(player)
 			}
@@ -700,23 +739,23 @@ if (!("bhop_instructor" in this)) bhop_instructor <- {
 			//checking if we should disable it
 			if (!__is_any_bhoppers()) {
 				__code_running = false
-				remove_ticker("__bhop_instructor")
+				remove_ticker("__bhop_callback")
 			}
 		} else {
 			//checking if we should enable it
 			if (__is_any_bhoppers()) {
 				__code_running = true
-				register_ticker("__bhop_instructor", function() {
+				register_ticker("__bhop_callback", function() {
 					if (!__survivors && !__infected) {
 						foreach(player, state in __players) {
-							if (state == bhop_instructor.ENABLED) __onTick(player)
+							if (state == bhop_callback.ENABLED) __onTick(player)
 						}
 					} else {
 						foreach(player in players()) {
 							local enabled = __teams & get_team(player)
 							if (player in __players) {
 								local state = __players[player]
-								if (state != bhop_instructor.UNDEFINED) enabled = state
+								if (state != bhop_callback.UNDEFINED) enabled = state
 							}
 							if (enabled) __onTick(player)
 						}
@@ -727,20 +766,27 @@ if (!("bhop_instructor" in this)) bhop_instructor <- {
 	}
 }
 
-reporter("Bhop instructor", function() {
-	log("\tcode_running: " + bhop_instructor.__code_running
-		+ ", is_any_bhoppers: " + bhop_instructor.__is_any_bhoppers())
-	log("\tsurvivors: " + bhop_instructor.__survivors + ", infected: " + bhop_instructor.__infected)
+reporter("Bhop callback", function() {
+	log("\tcode_running: " + bhop_callback.__code_running
+		+ ", is_any_bhoppers: " + bhop_callback.__is_any_bhoppers())
+	log("\tsurvivors: " + bhop_callback.__survivors + ", infected: " + bhop_callback.__infected)
 	local players_str_lines = []
-	foreach(player, state in bhop_instructor.__players) {
+	foreach(player, state in bhop_callback.__players) {
 		local state_str
-		if (state == bhop_instructor.UNDEFINED) state_str = "UNDEFINED"
-		else if (state == bhop_instructor.ENABLED) state_str = "ENABLED"
-		else if (state == bhop_instructor.DISABLED) state_str = "DISABLED"
+		if (state == bhop_callback.UNDEFINED) state_str = "UNDEFINED"
+		else if (state == bhop_callback.ENABLED) state_str = "ENABLED"
+		else if (state == bhop_callback.DISABLED) state_str = "DISABLED"
 		else state_str = (state == null) ? "null" : state.tostring()
 		players_str_lines.append(player_to_str(player) + ": " + state_str)
 	}
 	local players_str = (players_str_lines.len() > 0) ? concat(players_str_lines, ", ") : "empty"
 	log("\tplayers: " + players_str)
-	//TODO listeners, default listener
+	local listeners = []
+	if (bhop_callback.__onSuccessDefaultEnabled) listeners.append("[instructor]")
+	foreach(key, listener in bhop_callback.__onSuccessCustom) listeners.append("\"" + key + "\"")
+	log("\tonSuccess listeners: " + ((listeners.len() > 0) ? concat(listeners, ", ") : "empty"))
+	listeners = []
+	if (bhop_callback.__onFailDefaultEnabled) listeners.append("[instructor]")
+	foreach(key, listener in bhop_callback.__onFailCustom) listeners.append("\"" + key + "\"")
+	log("\tonFail listeners: " + ((listeners.len() > 0) ? concat(listeners, ", ") : "empty"))
 })

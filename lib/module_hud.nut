@@ -728,7 +728,7 @@ hud <- {
 		local lists = __hud_data.lists
 		if (!(key in lists)) throw "no such list: " + key
 		
-		__list_resize(lists[key].slots, 0)
+		__list_resize(lists[key], 0)
 		delete lists[key]
 	}
 }

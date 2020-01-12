@@ -2,12 +2,9 @@
  * Taken from:
  * Speedrunner Tools
  * https://steamcommunity.com/sharedfiles/filedetails/?id=510955402
- * Edited to work without scriptmode
 */
 
-local mapname = Convars.GetStr("host_map")
-if (mapname.slice(mapname.len() - 4, mapname.len()) == ".bsp")
-	mapname = mapname.slice(0, mapname.len() - 4)
+local mapname = mapname()
 
 if (mapname.find("m1_") != null)
 {

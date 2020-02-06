@@ -4,6 +4,7 @@
 FUNCTIONS FOR DEVELOPMENT
 Warning! All tasks and callbacks are removed on round change.
 ! requires lib/module_base !
+! requires lib/module_math !
 ! requires lib/module_strings !
 ! requires lib/module_tasks !
 ------------------------------------
@@ -29,6 +30,9 @@ draw_collision_box(ent, dur, color)
 ------------------------------------
 mark(vec, duration, color = Vector(255, 0, 255), radius = 4)
 	Marks point, drawing a box for specified duration.
+------------------------------------
+ent_visualise(player, code_radius, max_distance)
+	Marks and prints to console all entities found in a player viewcone. Entities found by their origin are shown green, found by collision box - yellow, found by traceline - pink.
  */
 
 //---------- CODE ----------
@@ -37,7 +41,7 @@ this = ::root
 
 log("[lib] including module_development")
 
-__watch_netprops_show <- function() {
+_def_func("__watch_netprops_show", function() {
 	//HUDSetLayout(::__watch_netprops)
 	local lines = []
 	for (local slot = 1;;slot++) {
@@ -46,9 +50,9 @@ __watch_netprops_show <- function() {
 		} else break
 	}
 	hud.show_list("watch_netprops", lines, 0.05, 0.55 - 0.06*::__watch_netprops.up_shift, 1, 0.1, -0.04)
-}
+})
 
-watch_netprops <- function(ent, ...) {
+_def_func("watch_netprops", function(ent, ...) {
 	if (!ent) {
 		hud.hide_list("watch_netprops")
 		remove_ticker("watch_netprops")
@@ -65,7 +69,6 @@ watch_netprops <- function(ent, ...) {
 	::__watch_netprops.up_shift <- (size > 4) ? size - 4 : 0
 	foreach(index, netprop in netprops) {
 		local slot = index + 1
-		//HUDPlace(slot, 0.05, 0.55 + 0.06*(index - ::__watch_netprops.up_shift), 1, 0.1)
 		local type = NetProps.GetPropType(
 			(::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent), netprop)
 		::__watch_netprops.Fields[slot] <- {
@@ -87,7 +90,7 @@ watch_netprops <- function(ent, ...) {
 						foreach (index, flag_name in bitmap)
 							if (val & (1 << index))
 								names_arr.push(flag_name)
-						str += connect_strings(names_arr, " | ")
+						str += concat(names_arr, " | ")
 						break;
 					}
 					local val = NetProps.GetPropEntity(ent, table.name)
@@ -120,9 +123,9 @@ watch_netprops <- function(ent, ...) {
 	SendToConsole("alias +save_mode \"script watch_netprops_save_binds()\"");
 	SendToConsole("alias -save_mode \"script watch_netprops_restore_binds()\"");
 	SendToConsole("bind alt +save_mode");
-}
+})
 
-watch_netprops_save <- function (slot) {
+_def_func("watch_netprops_save", function (slot) {
 	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent
 	local table = ::__watch_netprops.Fields[slot]
 	switch (table.type) {
@@ -132,13 +135,13 @@ watch_netprops_save <- function (slot) {
 		case "Vector": table.saved <- NetProps.GetPropVector(ent, table.name); break
 		case null: default: say_chat("can't save netprop of unsupported prop type"); return
 	}
-	logf("saved value %s of netprop %s", table.saved.tostring(), table.name)
+	logf("[lib] saved value %s of netprop %s", table.saved.tostring(), table.name)
 	table.dataval = "<save> " + table.dataval
 	__watch_netprops_show()
 	loop_add_to_timer("__watch_netprops", 0.1)
-}
+})
 
-watch_netprops_restore <- function (slot) {
+_def_func("watch_netprops_restore", function (slot) {
 	local ent = ::__watch_netprops.ent_func ? ::__watch_netprops.ent_func() : ::__watch_netprops.ent
 	local table = ::__watch_netprops.Fields[slot]
 	if (!("saved" in table)) {
@@ -152,18 +155,18 @@ watch_netprops_restore <- function (slot) {
 		case "float": NetProps.SetPropFloat(ent, table.name, saved); break
 		case "Vector": NetProps.SetPropVector(ent, table.name, saved); break
 	}
-	logf("restored value %s of netprop %s", saved.tostring(), table.name)
+	logf("[lib] restored value %s of netprop %s", saved.tostring(), table.name)
 	table.dataval = "<set> " + table.dataval
 	__watch_netprops_show()
 	loop_add_to_timer("__watch_netprops", 0.1)
-}
+})
 
-watch_netprops_save_binds <- @() SendToConsole(::__watch_netprops.binds_save)
-watch_netprops_restore_binds <- @() SendToConsole(::__watch_netprops.binds_restore)
+_def_func("watch_netprops_save_binds", @() SendToConsole(::__watch_netprops.binds_save))
+_def_func("watch_netprops_restore_binds", @() SendToConsole(::__watch_netprops.binds_restore))
 
 local buttons_bits = ["IN_ATTACK", "IN_JUMP", "IN_DUCK", "IN_FORWARD", "IN_BACK", "IN_USE", "IN_CANCEL", "IN_LEFT", "IN_RIGHT", "IN_MOVELEFT", "IN_MOVERIGHT", "IN_ATTACK2", "IN_RUN", "IN_RELOAD", "IN_ALT1", "IN_ALT2", "IN_SCORE", "IN_SPEED", "IN_WALK", "IN_ZOOM", "IN_WEAPON1", "IN_WEAPON2", "IN_BULLRUSH", "IN_GRENADE1", "IN_GRENADE2"]
 
-__netprops_bitmaps <- {
+_def_var("__netprops_bitmaps", {
 	m_fFlags = ["FL_ONGROUND", "FL_DUCKING", "FL_WATERJUMP", "FL_ONTRAIN", "FL_INRAIN", "FL_FROZEN", "FL_ATCONTROLS", "FL_CLIENT", "FL_FAKECLIENT", "FL_INWATER", "FL_FLY", "FL_SWIM", "FL_CONVEYOR", "FL_NPC", "FL_GODMODE", "FL_NOTARGET", "FL_AIMTARGET", "FL_PARTIALGROUND", "FL_STATICPROP", "FL_GRAPHED", "FL_GRENADE", "FL_STEPMOVEMENT", "FL_DONTTOUCH", "FL_BASEVELOCITY", "FL_WORLDBRUSH", "FL_OBJECT", "FL_KILLME", "FL_ONFIRE", "FL_DISSOLVING", "FL_TRANSRAGDOLL", "FL_UNBLOCKABLE_BY_PLAYER", "FL_FREEZING"]
 	m_nButtons = buttons_bits
 	m_nOldButtons = buttons_bits
@@ -172,13 +175,13 @@ __netprops_bitmaps <- {
 	m_afButtonReleased = buttons_bits
 	m_afButtonDisabled = buttons_bits
 	m_afButtonForced = buttons_bits
-}
+})
 
-if (!("__watch_netprops" in getroottable())) ::__watch_netprops <- {}
+if (!("__watch_netprops" in this)) _def_var("__watch_netprops", {})
 
 ////////////////////////////
 
-draw_collision_box <- function(ent, duration, color = Vector(255, 255, 0)) {
+_def_func("draw_collision_box", function(ent, duration, color = Vector(255, 255, 0)) {
 	local mins = ent.GetOrigin() + propvec(ent, "m_Collision.m_vecMins")
 	local maxs = ent.GetOrigin() + propvec(ent, "m_Collision.m_vecMaxs")
 	DebugDrawLine_vCol( Vector(mins.x, mins.y, mins.z), Vector(mins.x, maxs.y, mins.z), color, false, duration )
@@ -195,21 +198,72 @@ draw_collision_box <- function(ent, duration, color = Vector(255, 255, 0)) {
 	DebugDrawLine_vCol( Vector(mins.x, maxs.y, mins.z), Vector(mins.x, maxs.y, maxs.z), color, false, duration )
 	DebugDrawLine_vCol( Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, mins.y, maxs.z), color, false, duration )
 	DebugDrawLine_vCol( Vector(maxs.x, maxs.y, mins.z), Vector(maxs.x, maxs.y, maxs.z), color, false, duration )
-}
+})
 
-mark <- function(vec, duration, color = Vector(255, 0, 255), radius = 4) {
+_def_func("mark", function(vec, duration, color = Vector(255, 0, 255), radius = 4) {
 	DebugDrawBoxDirection(vec, Vector(-radius, -radius, -radius), Vector(radius, radius, radius), Vector(0, 0, 1), color, 255, duration)
-}
+})
 
-log_event <- function(event, enabled = true) {
+_def_func("log_event", function(event, enabled = true) {
 	if (enabled) register_callback("__log_event_table", event, log_table);
 	else remove_callback("__log_event_table", event);
-}
+})
 
-log_events <- function(enabled = true) {
+_def_func("log_events", function(enabled = true) {
 	cvar("net_showevents", enabled ? 2 : 0);
-}
+})
 
-__module_development_logstate <- function() {
-
-}
+_def_func("ent_visualise", function(cone_radius, max_distance, player = null) {
+	if (!player) player = Ent(1)
+	local view_origin = player.EyePosition()
+	local view_forward = player.EyeAngles().Forward()
+	local function is_in_cone(pos) {
+		local player_to_pos = (pos - view_origin)
+		if (player_to_pos.Length() > max_distance) return false
+		local angle = angle_between_vectors(view_forward, player_to_pos)
+		if (angle > cone_radius) return false
+		return true
+	}
+	local dev_set = !cvarf("developer")
+	local entities = {}
+	for(local ent = Entities.First(); ent != null; ent = Entities.Next(ent)) {
+		local pos = ent.GetOrigin()
+		local use_collision_center = false
+		if (!is_in_cone(pos)) {
+			if (pos.Length() > 0.1) continue //otherwise brush entity
+			pos = (propvec(ent, "m_Collision.m_vecMaxs") + propvec(ent, "m_Collision.m_vecMins")).Scale(0.5)
+			if (!is_in_cone(pos)) continue
+			use_collision_center = true
+		}
+		entities[ent] <- [pos, use_collision_center ? Vector(255, 255, 0) : Vector(0, 255, 0)]
+		if (!dev_set) {
+			cvar("developer", 1)
+			dev_set = true
+			SendToConsole("cancelselect") //close console
+		}
+	}
+	local trace_result = trace_line(view_origin, view_origin + view_forward.Scale(max_distance),
+		TRACE_MASK_ALL, player)
+	if (trace_result.hit) {
+		local ent = trace_result.enthit
+		if (!(ent in entities)) {
+			local pos = ent.GetOrigin()
+			local use_collision_center = false
+			if (pos.Length() < 0.1)
+				pos = (propvec(ent, "m_Collision.m_vecMaxs") + propvec(ent, "m_Collision.m_vecMins")).Scale(0.5)
+			entities[ent] <- [pos, Vector(255, 0, 255)]
+		}
+	}
+	run_next_tick( function() {
+		foreach(ent, data in entities) {
+			local id = ent.GetEntityIndex().tointeger()
+			local targetname = ent.GetName()
+			local name = format("%s #%d%s", ent.GetClassname(),
+				id, targetname != "" ? " | " + targetname : "")
+			logf("[lib] Found entity %s at %s", name, vecstr2(data[0]))
+				mark(data[0], 10, data[1], 4)
+				DebugDrawText(data[0], name, false, 10)
+				draw_collision_box(ent, 10, data[1])
+		}
+	})
+})

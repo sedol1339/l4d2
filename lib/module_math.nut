@@ -71,7 +71,7 @@ this = ::root
 
 log("[lib] including module_math")
 
-vector_to_angle <- function(vec) {
+_def_func("vector_to_angle", function(vec) {
 	if (vec.x == 0 && vec.y == 0 && vec.z == 0) throw "cannot convect zero vector to angle";
 	local dx = vec.x;
 	local dy = vec.y;
@@ -80,38 +80,59 @@ vector_to_angle <- function(vec) {
 	local pitch = -57.2957795131*atan2(dz, dxy);
 	local yaw = 57.2957795131*atan2(dy, dx);
 	return QAngle(pitch, yaw, 0);
-}
+})
 
-angle_between_vectors <- function(vec1, vec2) {
+_def_func("angle_between_vectors", function(vec1, vec2) {
 	local len1_sqr = vec1.LengthSqr()
 	local len2_sqr = vec2.LengthSqr()
 	if (len1_sqr == 0) throw "cannot find angle, vector 1 is zero";
 	if (len2_sqr == 0) throw "cannot find angle, vector 2 is zero";
 	local ang_cos = vec1.Dot(vec2) / sqrt(len1_sqr * len2_sqr);
 	return 57.2957795131*acos(ang_cos);
-}
+})
 
-trace_line <- function(start, end, mask = TRACE_MASK_VISIBLE_AND_NPCS, ignore = null) {
-	local table = { start = start, end = end, mask = mask, ignore = ignore };
-	TraceLine(table);
-	if ("startsolid" in table) {
-		if (table.startsolid) table.fraction = 0;
-	} else {
-		table.startsolid <- false
+_def_constvar("__trace", {
+	start = null
+	end = null
+	mask = 0
+	ignore = null
+	startsolid = false
+	fraction = 0
+	hit = false
+	hitpos = null
+})
+
+_def_func("trace_line", function(start, end, mask = TRACE_MASK_VISIBLE_AND_NPCS, ignore = null) {
+	__trace.start = start
+	__trace.end = end
+	__trace.mask = mask
+	__trace.ignore = ignore
+	__trace.startsolid = false
+	__trace.hit = false
+	__trace.hitpos = null
+	TraceLine(__trace)
+	if (__trace.startsolid) __trace.fraction = 0
+	if (__trace.hit) {
+		__trace.hitpos = Vector()
+		local a = __trace.start
+		local b = __trace.end
+		local h = __trace.hitpos
+		local f = __trace.fraction
+		h.x = a.x + (b.x - a.x) * f
+		h.y = a.y + (b.y - a.y) * f
+		h.z = a.z + (b.z - a.z) * f
 	}
-	if (table.hit)
-		table.hitpos <- table.start + (table.end - table.start).Scale(table.fraction);
-	//DebugDrawLine_vCol(start, end, table.hit ? Vector(255,0,0) : Vector(0,255,0), false, 1);
-	return table;
-}
+	//DebugDrawLine_vCol(start, end, __trace.hit ? Vector(255, 0, 0) : Vector(0, 255, 0), false, 1)
+	return __trace
+})
 
-normalize <- function(vec) {
+_def_func("normalize", function(vec) {
 	local len = vec.Length()
 	if (len == 0) throw "cannot normalize zero vector";
 	return vec.Scale(1/len);
-}
+})
 
-roundf <- function(a) {
+_def_func("roundf", function(a) {
 	local a_abs = fabs(a)
 	local a_abs_flr = floor(a_abs)
 	local a_abs_part = a_abs - a_abs_flr
@@ -119,13 +140,13 @@ roundf <- function(a) {
 	if (a_abs_part >= 0.5)
 		a_abs_round++
 	return (a > 0) ? a_abs_round : 0 - a_abs_round
-}
+})
 
-decompose_by_orthonormal_basis <- function(vec, basis_x, basis_y, basis_z) {
+_def_func("decompose_by_orthonormal_basis", function(vec, basis_x, basis_y, basis_z) {
 	return Vector(vec.Dot(basis_x), vec.Dot(basis_y), vec.Dot(basis_z))
-}
+})
 
-linear_interp <- function(x1, y1, x2, y2, clump_left = false, clump_right = false) {
+_def_func("linear_interp", function(x1, y1, x2, y2, clump_left = false, clump_right = false) {
 	x1 = x1.tofloat()
 	y1 = y1.tofloat()
 	x2 = x2.tofloat()
@@ -139,9 +160,9 @@ linear_interp <- function(x1, y1, x2, y2, clump_left = false, clump_right = fals
 		else if (clump_right && x > maxX) x = maxX
 		return a*x + b
 	}
-}
+})
 
-quadratic_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
+_def_func("quadratic_interp", function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
 	x1 = x1.tofloat()
 	y1 = y1.tofloat()
 	x2 = x2.tofloat()
@@ -165,9 +186,9 @@ quadratic_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_r
 		else if (clump_right && x > maxX) x = maxX
 		return a*x*x + b*x + c
 	}
-}
+})
 
-bilinear_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
+_def_func("bilinear_interp", function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_right = false) {
 	x1 = x1.tofloat()
 	y1 = y1.tofloat()
 	x2 = x2.tofloat()
@@ -185,11 +206,11 @@ bilinear_interp <- function(x1, y1, x2, y2, x3, y3, clump_left = false, clump_ri
 		if (clump_right && x > x3) return y3
 		return a2*x + b2
 	}
-}
+})
 
-sliding_random <- function(a_randomMin, a_randomMax, b_randomMin, b_randomMax, a_value, b_value, current_val) {
+_def_func("sliding_random", function(a_randomMin, a_randomMax, b_randomMin, b_randomMax, a_value, b_value, current_val) {
 	local fraction = (current_val - a_value) / (b_value - a_value)
 	local current_randomMin = a_randomMin + (b_randomMin - a_randomMin) * fraction
 	local current_randomMax = a_randomMax + (b_randomMax - a_randomMax) * fraction
 	return RandomFloat(current_randomMin, current_randomMax)
-}
+})

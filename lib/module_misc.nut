@@ -87,23 +87,23 @@ this = ::root
 
 log("[lib] including module_misc")
 
-read_console_output <- function(command, on_read) {
+_def_func("read_console_output", function(command, on_read, __delay = 0) {
 	on_read = on_read.bindenv(this)
 	if ("_console_called" in root && _console_called)
 		throw "console reading is in progress"
 	local filename = "console"
 	local con_file = format("ems/%s.csv", filename)
 	local old_logfile = Convars.GetStr("con_logfile")
-	if (old_logfile == con_file) old_logfile = null //probably some exception last time
+	if (old_logfile == con_file) old_logfile = "" //probably some exception last time
 	Convars.SetValue("con_logfile", con_file)
 	SendToServerConsole(format("vprof_record_start ems/%s; vprof_record_stop; vprof_to_csv ems/%s", filename, filename))
 	//StringToFile creates NUL-terminated file, con_logfile appends after NUL and
-	//FileToString cannot read after NUL; I use vprof just to create a small text file, that's all;
+	//FileToString cannot read after NUL; I use vprof just to create a small text file, that's all
 	//if I create file with con_logfile, it will grow next read_console_output() calls, until it becomes too large
 	//to read it with FileToString
-	printl("Sending command to console: " + command)
+	log("[lib] read_console_output(): called for command " + command)
 	SendToServerConsole(command)
-	EntFire("worldspawn", "CallScriptFunction", "_console_on_read")
+	EntFire("worldspawn", "CallScriptFunction", "_console_on_read", __delay)
 	::_console_on_read <- function() {
 		Convars.SetValue("con_logfile", old_logfile)
 		local file_contents = FileToString(format("%s.csv", filename))
@@ -111,9 +111,9 @@ read_console_output <- function(command, on_read) {
 		on_read(file_contents) //may throw exception
 	}
 	::_console_called <- true
-}
+})
 
-get_datetime <- function(on_get) {
+_def_func("get_datetime", function(on_get) {
 	on_get = on_get.bindenv(this)
 	Convars.SetValue("con_timestamp", 1)
 	read_console_output("echo", function(file_contents) {
@@ -138,15 +138,15 @@ get_datetime <- function(on_get) {
 				+ 86400*32*(table.month - 1)
 				+ 86400*32*12*(table.year - 2000)
 		} catch (exception) {
-			log("Exception while getting datetime: " + exception)
+			log("[lib] Exception while getting datetime: " + exception)
 			log("..file contents:")
 			log(file_contents)
 		}
 		on_get(table)
 	})
-}
+})
 
-class BidirectionalMap {
+_def_constvar("BidirectionalMap", class {
 	_dict1 = null //first -> second
 	_dict2 = null //second -> first
 	constructor(arr) { //should be array of pairs
@@ -186,9 +186,9 @@ class BidirectionalMap {
 			arr.push(key)
 		return arr
 	}
-}
+})
 
-class Constraint {
+_def_constvar("Constraint", class {
 	func = null
 	_description = null
 	constructor(func, _description = null) {
@@ -205,9 +205,9 @@ class Constraint {
 	function _call(scope, value) {
 		return func(value)
 	}
-}
+})
 
-class IntClosedInterval extends Constraint {
+_def_constvar("IntClosedInterval", class extends Constraint {
 	min = null
 	max = null
 	constructor(min, max) {
@@ -231,9 +231,9 @@ class IntClosedInterval extends Constraint {
 		if (max != null && value > max) return false
 		return true
 	}
-}
+})
 
-class FloatClosedInterval extends Constraint {
+_def_constvar("FloatClosedInterval", class extends Constraint {
 	min = null
 	max = null
 	constructor(min, max) {
@@ -257,16 +257,16 @@ class FloatClosedInterval extends Constraint {
 		if (max != null && value > max) return false
 		return true
 	}
-}
+})
 
-class BelongsToSet extends Constraint {
+_def_constvar("BelongsToSet", class extends Constraint {
 	arr = null
 	set = null
 	constructor(arr, _description = null) {
 		set = {}
 		this.arr = clone arr
 		foreach (value in arr) {
-			if (value in set) log("warning! BelongsToSet: duplicate value " + value)
+			if (value in set) log("[lib] BelongsToSet: WARNING! BelongsToSet: duplicate value " + value)
 			set[value] <- true
 		}
 		this._description = _description
@@ -301,4 +301,33 @@ class BelongsToSet extends Constraint {
 	function _call(scope, value) {
 		return (value in set)
 	}
-}
+})
+
+_def_constvar("buttons_console_cmds", BidirectionalMap([
+	["none", 0],
+	
+	["+forward", IN_FORWARD],
+	["+back", IN_BACK],
+	["+moveleft", IN_MOVELEFT],
+	["+moveright", IN_MOVERIGHT],
+	
+	["+jump", IN_JUMP],
+	["+duck", IN_DUCK],
+	["+speed", IN_SPEED],
+	
+	["+attack", IN_ATTACK],
+	["+attack2", IN_ATTACK2],
+	["+reload", IN_RELOAD],
+	["+zoom", IN_ZOOM],
+	
+	["+use", IN_USE],
+	
+	["+alt1", IN_ALT1],
+	["+alt2", IN_ALT2],
+	["+score", IN_SCORE]
+]))
+
+_def_constvar("buttons_console_cmds_constraint", BelongsToSet(
+	buttons_console_cmds.arrayOfStraightKeys(),
+	"valid values: " + concat(buttons_console_cmds.arrayOfStraightKeys(), ", ")
+))

@@ -83,110 +83,117 @@ Example of using functions from this module to control hunter bot (map c8m3_sewe
 
 //---------- CODE ----------
 
+this = ::root
+
 log("[lib] including module_botcontrol")
 
-if (!("custom_airstrafe" in this)) custom_airstrafe <- {
-	
-	sv_airaccelerate = cvarf("sv_airaccelerate")
-	speed_max = 450.0
-	AirSpeedCap = 30.0
-	accel_multiplier = 7.3
-	
-	press_key = function(player, key) {
-		scope(player).fake_buttons = scope(player).fake_buttons | key
-	}
-	
-	release_key = function(player, key) {
-		scope(player).fake_buttons = scope(player).fake_buttons & ~key
-	}
-	
-	set_keys = function(player, keys) {
-		scope(player).fake_buttons = keys
-	}
-	
-	get_keys = function(player) {
-		return scope(player).fake_buttons
-	}
-	
-	override_params = function(player, params) {
-		scope(player).airstrafe_params = params
-	}
-	
-	start = function(player) {
-		local player_scope = scope(player)
-		player_scope.fake_buttons <- 0
-		player_scope.airstrafe_params <- null
-		register_ticker(entstr(player) + "_airstrafe", player, function() {
-			custom_airstrafe.__do_airmove(player_scope)
-		})
-	}
-	
-	//stops airstrafes code, removes data from player scope
-	stop = function(player) {
-		local player_scope = scope(player)
-		if ("fake_buttons" in player_scope) delete player_scope.fake_buttons
-		if ("airstrafe_params" in player_scope) delete player_scope.airstrafe_params
-		remove_ticker(entstr(player) + "_airstrafe")
-	}
-	
-	__do_airmove = function(player_scope) {
-		local override = player_scope.airstrafe_params
-		local sv_airaccelerate = override ? override.sv_airaccelerate : custom_airstrafe.sv_airaccelerate
-		local speed_max = override ? override.speed_max : custom_airstrafe.speed_max
-		local AirSpeedCap = override ? override.AirSpeedCap : custom_airstrafe.AirSpeedCap
-		local accel_multiplier = override ? override.accel_multiplier : custom_airstrafe.accel_multiplier
-		local strafe_ent = player_scope.self
-		//logf("doing airmove for %s, pos = %s, fake_buttons = %d", 
-		//	var_to_str(strafe_ent), var_to_str(strafe_ent.GetOrigin()), player_scope.fake_buttons)
-		if (propent(strafe_ent, "m_hGroundEntity")) return
-		local buttons = player_scope.fake_buttons
-		local w = buttons & IN_FORWARD
-		local s = buttons & IN_BACK
-		local a = buttons & IN_MOVELEFT
-		local d = buttons & IN_MOVERIGHT
-		local fmove = 0.0
-		local smove = 0.0
-		if (w && !s) fmove = speed_max
-		if (s && !w) fmove = -speed_max
-		if (d && !a) smove = -speed_max
-		if (a && !d) smove = speed_max
-		if (fmove == 0.0 && smove == 0.0) return
-		
-		//local viewangles = strafe_ent.EyeAngles()
-		//local viewangles = ::_viewangle
-		local viewangles = ("future_viewangles" in player_scope) ? player_scope.future_viewangles : strafe_ent.EyeAngles()
-		local velocity = strafe_ent.GetVelocity()
-		local forward = viewangles.Forward()
-		local right = viewangles.Left().Scale(-1)
-		forward.z = 0; forward = normalize(forward)
-		right.z = 0; right = normalize(right)
-		
-		local wishvel = Vector(forward.x * fmove + right.x * smove, forward.y * fmove + right.y * smove, 0)
-		local wishspeed = wishvel.Length()
-		local wishdir = wishvel.Scale(1/wishspeed)
-		wishspeed = min(wishspeed, AirSpeedCap)
-		local currentspeed = velocity.Dot(wishdir)
-		local addspeed = wishspeed - currentspeed
-		
-		if (addspeed <= 0) return
-		local dt = clock.tick_time
-		//local velocity_to_analyze = ("old_velocity" in player_scope) ? player_scope.old_velocity : velocity
-		local velocity_to_analyze = velocity
-		local accelspeed
-		if (velocity_to_analyze.z > -12 && velocity_to_analyze.z < 128) {
-			accelspeed = min(addspeed, sv_airaccelerate * wishspeed * dt * accel_multiplier / 4)
-			//log("dividing by 4, result is " + accelspeed)
-		} else {
-			accelspeed = min(addspeed, sv_airaccelerate * wishspeed * dt * accel_multiplier)
-		}
-		local push_vel = wishdir.Scale(accelspeed)
-		velocity_impulse(strafe_ent, push_vel)
-		player_scope.old_velocity <- velocity
-	}
-	
-}
+//Какой чудесный день,
+//Какой чудесный код,
+//Какой чудесный я
+//и песенка моя
 
-mousemove <- function(player, angle_delta, duration){
+if (!("custom_airstrafe" in this)) {
+	_def_var("custom_airstrafe", {})
+	
+	_def_var("custom_airstrafe.sv_airaccelerate", cvarf("sv_airaccelerate"))
+	_def_var("custom_airstrafe.speed_max", 450.0)
+	_def_var("custom_airstrafe.AirSpeedCap", 30.0)
+	_def_var("custom_airstrafe.accel_multiplier", 7.3)
+}
+	
+_def_func("custom_airstrafe.press_key", function(player, key) {
+	scope(player).fake_buttons = scope(player).fake_buttons | key
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.release_key", function(player, key) {
+	scope(player).fake_buttons = scope(player).fake_buttons & ~key
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.set_keys", function(player, keys) {
+	scope(player).fake_buttons = keys
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.get_keys", function(player) {
+	return scope(player).fake_buttons
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.override_params", function(player, params) {
+	scope(player).airstrafe_params = params
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.start", function(player) {
+	local player_scope = scope(player)
+	player_scope.fake_buttons <- 0
+	player_scope.airstrafe_params <- null
+	register_ticker(entstr(player) + "_airstrafe", player, function() {
+		custom_airstrafe.__do_airmove(player_scope)
+	})
+}.bindenv(custom_airstrafe))
+
+//stops airstrafes code, removes data from player scope
+_def_func("custom_airstrafe.stop", function(player) {
+	local player_scope = scope(player)
+	if ("fake_buttons" in player_scope) delete player_scope.fake_buttons
+	if ("airstrafe_params" in player_scope) delete player_scope.airstrafe_params
+	remove_ticker(entstr(player) + "_airstrafe")
+}.bindenv(custom_airstrafe))
+
+_def_func("custom_airstrafe.__do_airmove", function(player_scope) {
+	local override = player_scope.airstrafe_params
+	local sv_airaccelerate = override ? override.sv_airaccelerate : custom_airstrafe.sv_airaccelerate
+	local speed_max = override ? override.speed_max : custom_airstrafe.speed_max
+	local AirSpeedCap = override ? override.AirSpeedCap : custom_airstrafe.AirSpeedCap
+	local accel_multiplier = override ? override.accel_multiplier : custom_airstrafe.accel_multiplier
+	local strafe_ent = player_scope.self
+	//logf("[lib] doing airmove for %s, pos = %s, fake_buttons = %d", 
+	//	var_to_str(strafe_ent), var_to_str(strafe_ent.GetOrigin()), player_scope.fake_buttons)
+	if (propent(strafe_ent, "m_hGroundEntity")) return
+	local buttons = player_scope.fake_buttons
+	local w = buttons & IN_FORWARD
+	local s = buttons & IN_BACK
+	local a = buttons & IN_MOVELEFT
+	local d = buttons & IN_MOVERIGHT
+	local fmove = 0.0
+	local smove = 0.0
+	if (w && !s) fmove = speed_max
+	if (s && !w) fmove = -speed_max
+	if (d && !a) smove = -speed_max
+	if (a && !d) smove = speed_max
+	if (fmove == 0.0 && smove == 0.0) return
+	
+	//local viewangles = strafe_ent.EyeAngles()
+	//local viewangles = ::_viewangle
+	local viewangles = ("future_viewangles" in player_scope) ? player_scope.future_viewangles : strafe_ent.EyeAngles()
+	local velocity = strafe_ent.GetVelocity()
+	local forward = viewangles.Forward()
+	local right = viewangles.Left().Scale(-1)
+	forward.z = 0; forward = normalize(forward)
+	right.z = 0; right = normalize(right)
+	
+	local wishvel = Vector(forward.x * fmove + right.x * smove, forward.y * fmove + right.y * smove, 0)
+	local wishspeed = wishvel.Length()
+	local wishdir = wishvel.Scale(1/wishspeed)
+	wishspeed = min(wishspeed, AirSpeedCap)
+	local currentspeed = velocity.Dot(wishdir)
+	local addspeed = wishspeed - currentspeed
+	
+	if (addspeed <= 0) return
+	local dt = clock.tick_time
+	//local velocity_to_analyze = ("old_velocity" in player_scope) ? player_scope.old_velocity : velocity
+	local velocity_to_analyze = velocity
+	local accelspeed
+	if (velocity_to_analyze.z > -12 && velocity_to_analyze.z < 128) {
+		accelspeed = min(addspeed, sv_airaccelerate * wishspeed * dt * accel_multiplier / 4)
+		//log("[lib] dividing by 4, result is " + accelspeed)
+	} else {
+		accelspeed = min(addspeed, sv_airaccelerate * wishspeed * dt * accel_multiplier)
+	}
+	local push_vel = wishdir.Scale(accelspeed)
+	velocity_impulse(strafe_ent, push_vel)
+	player_scope.old_velocity <- velocity
+}.bindenv(custom_airstrafe))
+
+_def_func("mousemove", function(player, angle_delta, duration){
 	local start_time = Time()
 	local total_ticks = duration.tofloat() / clock.tick_time
 	local angle_delta_per_tick = QAngle(
@@ -205,108 +212,107 @@ mousemove <- function(player, angle_delta, duration){
 		)
 		teleport_entity(player, null, new_angles)
 	})
+})
+
+if (!("motion_capture" in this)) {
+	_def_var("motion_capture", {})
+	_def_var("motion_capture.__current_recordings", {})
 }
 
-if (!("motion_capture" in this)) motion_capture <- {
+_def_func("motion_capture.start_recording", function(player) {
+	if (player in motion_capture.__current_recordings) throw "recording for this player is already active"
+	local start_time = Time()
+	local recording_table = {
+		recorded_data = {
+			start_origin = player.GetOrigin()
+			start_velocity = player.GetVelocity()
+			frames = []
+		}
+	}
+	local frames = recording_table.recorded_data.frames
+	motion_capture.__current_recordings[player] <- recording_table
+	register_ticker(entstr(player) + "_motion_capture", function() {
+		frames.append([
+			Time() - start_time
+			propint(player, "m_nButtons")
+			player.EyeAngles().Forward()
+			player.GetVelocity()
+		])
+	})
+}.bindenv(motion_capture))
 
-	__current_recordings = {}
+_def_func("motion_capture.stop_recording", function(player) {
+	if (!(player in motion_capture.__current_recordings)) throw "recording for this player is not active"
+	local result = motion_capture.__current_recordings[player].recorded_data
+	delete motion_capture.__current_recordings[player]
+	remove_ticker(entstr(player) + "_motion_capture")
+	return result
+}.bindenv(motion_capture))
 
-	start_recording = function(player) {
-		if (player in motion_capture.__current_recordings) throw "recording for this player is already active"
-		local start_time = Time()
-		local recording_table = {
-			recorded_data = {
-				start_origin = player.GetOrigin()
-				start_velocity = player.GetVelocity()
-				frames = []
+_def_func("motion_capture.save", function(filename) {
+	
+}.bindenv(motion_capture))
+
+_def_func("motion_capture.load", function(filename) {
+	
+}.bindenv(motion_capture))
+
+//warning: z_lunge_up, z_player_lunge_up
+_def_func("motion_capture.play", function(player, captured_motion, start_from_recorded_origin = false) {
+	if (start_from_recorded_origin) player.SetOrigin(captured_motion.start_origin)
+	player.SetVelocity(captured_motion.start_velocity)
+	local saved_flags = player.GetSenseFlags()
+	player.SetSenseFlags(-1)
+	local frames = captured_motion.frames
+	local total_frames = frames.len()
+	local index = 0
+	local time_tolerance = 0.001
+	local start_time = Time()
+	local buttons_to_process = [IN_ATTACK, IN_ATTACK2, IN_DUCK, IN_SPEED, IN_JUMP]
+	custom_airstrafe.start(player)
+	register_ticker(entstr(player) + "_motion_play", player, function() {
+		local cancel = function() {
+			custom_airstrafe.stop(player)
+			log("[lib] motion play finished for " + ent_to_str(player))
+			player.SetSenseFlags(saved_flags)
+			propint(player, "m_afButtonDisabled", 0)
+			propint(player, "m_afButtonForced", 0)
+		}
+		if (player.IsDying()) { cancel(); return false }
+		local time = Time() - start_time
+		local new_index
+		for(new_index = index; ; new_index++) {
+			if (new_index >= total_frames) { cancel(); return false }
+			if (frames[new_index][0] > time + time_tolerance) break
+		}
+		index = new_index
+		if (new_index == 0) return
+		local frame_to_apply = frames[new_index - 1]
+		local next_frame = (new_index > 1) ? frames[new_index] : frames[new_index - 1]
+		if (new_index + 1 < total_frames) next_frame = frames[new_index + 1]
+		local buttons = next_frame[1]
+		local prev_buttons = custom_airstrafe.get_keys(player)
+		custom_airstrafe.set_keys(player, buttons)
+		foreach(button in buttons_to_process) {
+			local pressed_prev = prev_buttons & button
+			local pressed = buttons & button
+			if (pressed_prev && !pressed) {
+				//release
+				propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") | button)
+				propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ button)
+			} else if (!pressed_prev && pressed) {
+				//press
+				propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ button)
+				propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | button)
 			}
 		}
-		local frames = recording_table.recorded_data.frames
-		motion_capture.__current_recordings[player] <- recording_table
-		register_ticker(entstr(player) + "_motion_capture", function() {
-			frames.append([
-				Time() - start_time
-				propint(player, "m_nButtons")
-				player.EyeAngles().Forward()
-				player.GetVelocity()
-			])
-		})
-	}
-	
-	stop_recording = function(player) {
-		if (!(player in motion_capture.__current_recordings)) throw "recording for this player is not active"
-		local result = motion_capture.__current_recordings[player].recorded_data
-		delete motion_capture.__current_recordings[player]
-		remove_ticker(entstr(player) + "_motion_capture")
-		return result
-	}
-	
-	save = function(filename) {
-		
-	}
-	
-	load = function(filename) {
-		
-	}
-	
-	//warning: z_lunge_up, z_player_lunge_up
-	play = function(player, captured_motion, start_from_recorded_origin = false) {
-		if (start_from_recorded_origin) player.SetOrigin(captured_motion.start_origin)
-		player.SetVelocity(captured_motion.start_velocity)
-		local saved_flags = player.GetSenseFlags()
-		player.SetSenseFlags(-1)
-		local frames = captured_motion.frames
-		local total_frames = frames.len()
-		local index = 0
-		local time_tolerance = 0.001
-		local start_time = Time()
-		local buttons_to_process = [IN_ATTACK, IN_ATTACK2, IN_DUCK, IN_SPEED, IN_JUMP]
-		custom_airstrafe.start(player)
-		register_ticker(entstr(player) + "_motion_play", player, function() {
-			local cancel = function() {
-				custom_airstrafe.stop(player)
-				log("motion play finished for " + ent_to_str(player))
-				player.SetSenseFlags(saved_flags)
-				propint(player, "m_afButtonDisabled", 0)
-				propint(player, "m_afButtonForced", 0)
-			}
-			if (player.IsDying()) { cancel(); return false }
-			local time = Time() - start_time
-			local new_index
-			for(new_index = index; ; new_index++) {
-				if (new_index >= total_frames) { cancel(); return false }
-				if (frames[new_index][0] > time + time_tolerance) break
-			}
-			index = new_index
-			if (new_index == 0) return
-			local frame_to_apply = frames[new_index - 1]
-			local next_frame = (new_index > 1) ? frames[new_index] : frames[new_index - 1]
-			if (new_index + 1 < total_frames) next_frame = frames[new_index + 1]
-			local buttons = next_frame[1]
-			local prev_buttons = custom_airstrafe.get_keys(player)
-			custom_airstrafe.set_keys(player, buttons)
-			foreach(button in buttons_to_process) {
-				local pressed_prev = prev_buttons & button
-				local pressed = buttons & button
-				if (pressed_prev && !pressed) {
-					//release
-					propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") | button)
-					propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ button)
-				} else if (!pressed_prev && pressed) {
-					//press
-					propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ button)
-					propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") | button)
-				}
-			}
-			player.SetForwardVector(frame_to_apply[2])
-			scope(player).future_viewangles <- vector_to_angle(next_frame[2])
-			//log(player.GetOrigin() + " forward: " + player.EyeAngles().Forward() + " buttons: " + buttons)
-		})
-	}
-	
-}
+		player.SetForwardVector(frame_to_apply[2])
+		scope(player).future_viewangles <- vector_to_angle(next_frame[2])
+		//log("[lib] " + player.GetOrigin() + " forward: " + player.EyeAngles().Forward() + " buttons: " + buttons)
+	})
+}.bindenv(motion_capture))
 
-autofire_start <- function(player) {
+_def_func("autofire_start", function(player) {
 	register_ticker(entstr(player) + "_autofire", player, function() {
 		if (propint(player, "m_afButtonDisabled") & IN_ATTACK) {
 			propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
@@ -316,10 +322,10 @@ autofire_start <- function(player) {
 			propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
 		}
 	})
-}
+})
 
-autofire_stop <- function(player) {
+_def_func("autofire_stop", function(player) {
 	remove_ticker(entstr(player) + "_autofire")
 	propint(player, "m_afButtonDisabled", propint(player, "m_afButtonDisabled") &~ IN_ATTACK)
 	propint(player, "m_afButtonForced", propint(player, "m_afButtonForced") &~ IN_ATTACK)
-}
+})

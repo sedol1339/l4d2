@@ -48,7 +48,7 @@ run_next_tick(...)
 	run_next_tick(group_key, entity, func)
 ------------------------------------
 clock.sec()
-	Returns engine time in seconds. Same as Time(). This time stops if game is paused and is affected by host_timescale.
+	Returns engine time in seconds. Same as Time(). Time stops if game is paused and is affected by host_timescale.
 clock.msec()
 	Returns engine time * 1000.
 clock.frames()
@@ -80,6 +80,7 @@ register_ticker(...)
 	Execution scope: when register_loop() or register_ticker() is being called, it binds function to "this" scope (this action saves weakref to "this").
 	Round transition behaviour: all tickers and loops calls are performed by logic_timer entity, which is created while first loop or ticker is registered. If this entity gets removed, all registered tickers and loops are removed (list of them is stored inside logic_timer's scope, this table is erased from memory). So all tickers and loops are removed between rounds.
 	Exception handling: if ticker or loop throws an exception, stack trace will appear in console, but this will not prevent other tickers and loops from running.
+	Warning: do not use IncludeScript in tickers and loops, this may crash the game
 	Table ::loop_info contains some information about the current loop (use it only from loop or ticker function!):
 	loop_info.start_time: time when current loop was registered
 	loop_info.delta_time: delay between this and previous calls; this key is NAN at first call. See also: clock.tick_time.
@@ -102,6 +103,12 @@ loop_get_delay(key)
 	Returns delay of a loop.
 loop_set_delay(key, delay)
 	Sets delay for a loop. Loop will be called next time when "delay" seconds passed from last call (before first call last call time is -INF).
+loop_exists(key)
+	Returns true if loop exists.
+loop_pause(key)
+	Pauses a loop.
+loop_resume(key)
+	Resumes a loop from the same time.
 ------------------------------------
 register_callback(...)
 	Registering a function that will be called on specified game event. Usage:
@@ -117,9 +124,12 @@ register_callback(...)
 	If function returns false (exactly false, not null), callback will be removed.
 	Function does not fully check argument types for performance reasons, so be careful.
 	Execution scope: when register_callback() is being called, it binds function to "this" scope, like tickers and loops do.
-	Exception handling: if callback throws an exception, this will not prevent other callbacks from running, but stack trace will not appear in console, only exception title will be printed.
+	Exception handling: if callback throws an exception, stack trace will appear in console, but this will not prevent other callbacks for same event from running.
+	Warning: do not use IncludeScript in callbacks, this may crash the game
 remove_callback(key, event)
 	Removes a callback.
+callback_exists(key, event)
+	Returns true if callback exists.
 ------------------------------------
 clock.evaluate_tickrate.start()
 	Starts counting ticks.
@@ -135,6 +145,34 @@ add_task_on_shutdown(key, func, after_all = false)
 	Execution scope: when add_task_on_shutdown() is being called, it binds function to "this" scope.
 remove_task_on_shutdown(key)
 	Removes task on shutdown.
+------------------------------------
+on_player_team(team, is_bot, func)
+	Register a callback for player_team event that will fire for specified team and params.is_bot condition. This is not chained! Pass null to cancel. Parameter "team" should be one of (Teams.UNASSIGNED, Teams.SPECTATORS, Teams.SURVIVORS, Teams.INFECTED). Parameter "is_bot" should be one of (ClientType.ANY, ClientType.HUMAN, ClientType.BOT).
+remove_on_player_team()
+	Removes all functions registered with on_player_team().
+------------------------------------
+on_key_action(key, player|team, keyboard_key, delay, on_pressed, on_released = null, on_hold = null)
+	Register listener(s) for key press/hold/release events. Function "on_pressed" is called when player presses specified keyboard_key and gets player as parameter. Function "on_released" is called when player releases specified keyboard_key and gets player as parameter. Function "on_hold" is called together with "on_pressed" and later until players releases specified key, this function also gets player as parameter. Delay is a delay in seconds between checks (0 = every tick). Key is not a keyboard key but an identifier that can be used for on_key_action_remove() later. Second param may be player entity or the whole team (Teams.UNASSIGNED, Teams.SPECTATORS, Teams.SURVIVORS, Teams.INFECTED).
+	Example: on_key_action("my", Teams.SURVIVORS, IN_ATTACK, 0.1, @(player)player.ApplyAbsVelocityImpulse(Vector(0,0,300)), null)
+	Result: any survivor will be pushed upwards when press primary attack key. Check is performed every 0.1 second.
+	Example: on_key_action("my", player(), IN_ALT1, 0, @(p)propint(p,"movetype",8), @(p)propint(p,"movetype",2))
+	Result: player (see lib/base for player() function) will enter noclip mode when press alt button and will return to normal walk when releases alt button.
+on_key_action_remove(key)
+	Remove key action registered with on_key_action.
+------------------------------------
+register_chat_command(name, func, min = null, max = null, msg = null)
+	Registers a chat command (under the hood makes a callback for event player_say). Name can be string or array of strings (this means same handler for different commands). For example, name "testcmd" means that player types !testcmd or /testcmd in chat (both will work). Func should have 4 parameters:
+		player - player who issued command
+		command - what command was called (without ! or /)
+		args_text - all arguments as string
+		args - all arguments as array (arguments are either enclosed in quotes or divided by spaces)
+	Example used input: !testcmd a b " c d"
+	Corresponding function call: func(player, "testcmd", "a b \" c d\"", ["a", "b", " c d"])
+	User input cannot have nested quotes (\"). Commands may include unicode and are case-insensitive (only for english and russian letters). You can pass up to three optional params to register_chat_command: min - minimum number of arguments allowed (or null), max - maximum number of arguments allowed (or null), msg - message to print when arglen < min or arglen > max.
+remove_chat_command(names)
+	Remove chat command registered with register_chat_command given name or array of names.
+print_all_chat_commands()
+	Prints all chat commands registered with register_chat_command to console.
  */
 
 //---------- CODE ----------
@@ -143,18 +181,20 @@ this = ::root
 
 log("[lib] including module_tasks")
 
-__dc_check <- function() {
+_def_func("__dc_check", function() {
 	local time = Time()
+	if (!("DirectorScript" in root) || !("__delayed_calls" in DirectorScript)) return
 	foreach (key, table in DirectorScript.__delayed_calls) {
 		if (table.time <= time) {
 			delete DirectorScript.__delayed_calls[key]
 			if (table.ent != null && invalid(table.ent)) return
-			table.func() //function is binded to some scope
+			table.func.call(table.scope)
 		}
 	}
-}
+})
 
-delayed_call <- function(...) {
+_def_func("delayed_call", function(...) {
+	if (!("DirectorScript" in root)) return
 	if (!("__delayed_calls" in DirectorScript)) DirectorScript.__delayed_calls <- {}
 	//we need to put delayed calls table in some scope that is getting cleared between rounds, because delayed calls should be removed between rounds
 	local func, delay, ent = null, group_key = null
@@ -178,15 +218,16 @@ delayed_call <- function(...) {
 	}
 	local key = UniqueString()
 	DirectorScript.__delayed_calls[key] <- {
-		func = func.bindenv(this)
+		func = func
+		scope = this.weakref()
 		group_key = group_key
 		ent = ent
 		time = Time() + delay
 	}
 	ent_fire(worldspawn, "CallScriptFunction", "__dc_check", delay)
-}
+})
 
-run_this_tick <- function(...) {
+_def_func("run_this_tick", function(...) {
 	local func, ent = null, group_key = null
 	switch (vargv.len()) {
 		case 1:
@@ -204,9 +245,9 @@ run_this_tick <- function(...) {
 			break
 	}
 	delayed_call(group_key, ent, 0, func)
-}
+})
 
-run_next_tick <- function(...) {
+_def_func("run_next_tick", function(...) {
 	local func, ent = null, group_key = null
 	switch (vargv.len()) {
 		case 1:
@@ -226,17 +267,17 @@ run_next_tick <- function(...) {
 	delayed_call(group_key, ent, 0.001, function() {
 		delayed_call(group_key, ent, 0.001, func)
 	})
-}
+})
 
-remove_delayed_call <- function (key) {
-	if (!("__delayed_calls" in DirectorScript)) return
+_def_func("remove_delayed_call", function (key) {
+	if (!("DirectorScript" in root) || !("__delayed_calls" in DirectorScript)) return
 	if (key in DirectorScript.__delayed_calls)
 		delete DirectorScript.__delayed_calls[key]
-}
+})
 
-remove_delayed_call_group <- function (group_key) {
+_def_func("remove_delayed_call_group", function (group_key) {
 	if (group_key == null) throw "group key is null"
-	if (!("__delayed_calls" in DirectorScript)) return
+	if (!("DirectorScript" in root) || !("__delayed_calls" in DirectorScript)) return
 	local keys_to_delete = []
 	foreach (key, table in DirectorScript.__delayed_calls) {
 		if (table.group_key == group_key)
@@ -244,17 +285,17 @@ remove_delayed_call_group <- function (group_key) {
 	}
 	foreach (key in keys_to_delete)
 		delete DirectorScript.__delayed_calls[key]
-}
+})
 
 //----------------------------------
 
 if (!("__clock_ent" in this)) {
-	__clock_ent <- null
-	__loops <- null
+	_def_var_nullable("__clock_ent", null, "instance")
+	_def_var_nullable("__loops", null, "table")
 }
 
 //performs logic_timer initializing if not initialized yet
-__clock_init <- function() {
+_def_func("__clock_init", function() {
 	if (__clock_ent) return
 	if (clock.__ticks == -1) clock.__ticks = 0
 	clock.__last_tick_time = NAN
@@ -278,15 +319,31 @@ __clock_init <- function() {
 				loop_table.last_delta = delta
 				loop_table.total_calls++
 				if (next_call_override) loop_table.next_call_time_override = null
-				__call_this_tick(loop_table.func, key)
+				if (loop_table.ent != null && invalid(loop_table.ent)) {
+					delete loops[key]
+					continue
+				}
+				loop_info.start_time = loop_table.start_time
+				if (loop_table.last_delta != INF) {
+					loop_info.delta_time = loop_table.last_delta
+				} else {
+					loop_info.delta_time = NAN
+				}
+				loop_info.total_calls = loop_table.total_calls
+				loop_info.first_call = (loop_table.total_calls == 1)
+				try {
+					//we need to see callstack of possible exception
+					//but this should not prevent execution of other loops
+					loop_table.thread.call()
+				} catch (e) {}
 			}
 		}
 	}
 	__clock_ent = __clock.weakref()
 	__loops = scope(__clock).loops.weakref()
-}
+})
 
-register_ticker <- function(...) {
+_def_func("register_ticker", function(...) {
 	local func, key, ent = null
 	switch (vargv.len()) {
 		case 1:
@@ -304,9 +361,9 @@ register_ticker <- function(...) {
 			break
 	}
 	__register_loop_internal(key, ent, 0, func)
-}
+})
 
-register_loop <- function(...) {
+_def_func("register_loop", function(...) {
 	local func, delay, key, ent = null
 	switch (vargv.len()) {
 		case 2:
@@ -327,14 +384,17 @@ register_loop <- function(...) {
 			break
 	}
 	__register_loop_internal(key, ent, delay, func)
-}
+})
 
 //fixed arguments
-__register_loop_internal <- function(key, ent, delay, func) {
+_def_func("__register_loop_internal", function(key, ent, delay, func) {
 	if (!key) key = UniqueString()
 	__clock_init()
+	local scope = this.weakref()
 	__loops[key] <- {
-		func = func.bindenv(this)
+		thread = newthread( function() {
+			if (func.call(scope) == false) delete __loops[key]
+		})
 		ent = ent
 		delay = delay
 		last_call = -INF
@@ -343,79 +403,27 @@ __register_loop_internal <- function(key, ent, delay, func) {
 		last_delta = 0
 		next_call_time_override = null
 	}
-}
+})
 
-remove_ticker <- function(key) {
+_def_var("loop_info", {})
+_def_var_nullable("loop_info.start_time", null, "float") //time when current loop started
+_def_var_nullable("loop_info.delta_time", null, "float")	//time elapsed since last function call
+_def_var_nullable("loop_info.total_calls", null, "integer")	//total calls (1 for first call)
+_def_var_nullable("loop_info.first_call", null, "bool")	//equivalent to "loop_info.ticks == 0"
+
+_def_func("remove_ticker", function(key) {
 	if(key in __loops)
 		delete __loops[key]
-}
+})
 
-remove_loop <- remove_ticker
+_def_func("remove_loop", remove_ticker)
 
-/**
- * this function will execute func(...) with passed args
- * later in this tick; if func throws an exception,
- * callstack will be shown in console, but __call_this_tick
- * will never throw an exception
- * 
- * purpose:
- * we use __call_this_tick(func, key) instead of func() in tasks,
- * because we don't want this statement to throw an exception,
- * and also we want to see callstack if func throws exception
- *
- * key should be valid or function will not do anything
- */
-
-__call_this_tick <- function(func, key) {
-	__queue_func.push(func)
-	__queue_keys.push(key)
-	//DoEntFire("!self", "FireUser3", "", 0, null, worldspawn)
-	ent_fire(worldspawn, "FireUser3")
-}
-
-__queue_func <- []
-__queue_keys <- []
-
-loop_info <- {
-	start_time = null, //time when current loop started
-	delta_time = null,	//time elapsed since last function call
-	total_calls = null,	//total calls (1 for first call)
-	first_call = null,	//equivalent to "loop_info.ticks == 0"
-}
-
-scope(worldspawn).InputFireUser3 <- function() {
-	//takes and runs one function from queue
-	if (__queue_func.len() > 0) {
-		//add "__" because these variables should not override vars from function's "this"
-		local func = __queue_func.remove(0)
-		local key = __queue_keys.remove(0)
-		if (!(key in __loops)) return //loop was removed
-		local table = __loops[key]
-		if (table.ent != null && invalid(table.ent)) {
-			delete __loops[key]
-			return
-		}
-		if (table.next_call_time_override != null) return
-		loop_info.start_time = table.start_time
-		if (table.last_delta != INF) {
-			loop_info.delta_time = table.last_delta
-		} else {
-			loop_info.delta_time = NAN
-		}
-		loop_info.total_calls = table.total_calls
-		loop_info.first_call = (table.total_calls == 1)
-		local result = func()
-		if (result == false) delete __loops[key]
-	}
-	return false
-}
-
-loop_run_after <- function(key, delay) {
+_def_func("loop_run_after", function(key, delay) {
 	if(!(key in __loops)) throw "no loop for given key"
 	__loops[key].next_call_time_override = Time() + delay
-}
+})
 
-loop_get_next_call_time <- function(key) {
+_def_func("loop_get_next_call_time", function(key) {
 	if(!(key in __loops)) throw "no loop for given key"
 	local loop_table = __loops[key]
 	local next_call = loop_table.last_call + loop_table.delay
@@ -423,22 +431,44 @@ loop_get_next_call_time <- function(key) {
 	if (next_call_override)
 		return next_call_override
 	return next_call
-}
+})
 
-loop_get_delay <- function(key) {
+_def_func("loop_get_delay", function(key) {
 	if(!(key in __loops)) throw "no loop for given key"
 	return __loops[key].delay
-}
+})
 
-loop_set_delay <- function(key, delay) {
+_def_func("loop_set_delay", function(key, delay) {
 	if(!(key in __loops)) throw "no loop for given key"
 	__loops[key].delay = delay
-}
+})
+
+_def_func("loop_exists", function(key) {
+	if (!__loops) return false
+	return (key in __loops)
+})
+
+_def_func("loop_pause", function(key) {
+	if(!(key in __loops)) throw "no loop for given key"
+	local loop_table = __loops[key]
+	loop_table.next_call_time_override = INF
+	loop_table.saved_delay <- loop_get_next_call_time(key)
+})
+
+_def_func("loop_resume", function(key) {
+	if(!(key in __loops)) throw "no loop for given key"
+	local loop_table = __loops[key]
+	if (!("saved_delay" in loop_table)) throw "loop was not paused, cannot resume"
+	loop_table.next_call_time_override = Time() + loop_table.saved_delay
+	delete loop_table.saved_delay
+})
 
 //----------------------------------
 
-register_callback <- function(...) {
+_def_func("register_callback", function(...) {
+	if (!("DirectorScript" in root)) throw "No DirectorScript! Cannot run register_callback()"
 	if (!("__callbacks" in DirectorScript)) DirectorScript.__callbacks <- {}
+	if (!("__callbackFuncs" in DirectorScript)) DirectorScript.__callbackFuncs <- {}
 	//we need to put callbacks table in some scope that is getting cleared between rounds, because callbacks should be removed between rounds
 	local func, event, ent = null, key = null
 	switch (vargv.len()) {
@@ -460,101 +490,112 @@ register_callback <- function(...) {
 			break
 	}
 	if (key == null) key = UniqueString()
-	//don't touch something that is working
 	if (!(event in DirectorScript.__callbacks)) {
 		DirectorScript.__callbacks[event] <- {}
-		local scope = { event_name = event }
-		scope["OnGameEvent_" + event] <- function (params) {
+		DirectorScript.__callbackFuncs["OnGameEvent_" + event] <- function(params) {
+			local callback_tables = DirectorScript.__callbacks[event]
+			if (callback_tables.len() == 0) return
 			if ("userid" in params)
 				params.player <- GetPlayerFromUserID(params.userid)
 			if ("victim" in params)
 				params.player_victim <- GetPlayerFromUserID(params.victim)
 			if ("attacker" in params)
 				params.player_attacker <- GetPlayerFromUserID(params.attacker)
-			foreach(key, callback_table in DirectorScript.__callbacks[scope.event_name]) {
-				try {
-					if (callback_table.ent != null && invalid(callback_table.ent)) {
-						logf("Removing callback %s.%s because entity is not valid", scope.event_name, key.tostring())
-						delete DirectorScript.__callbacks[scope.event_name][key]
-						continue
-					}
-					local result = callback_table.func(clone params)
-					if (result == false) delete DirectorScript.__callbacks[scope.event_name][key]
-				} catch (exception) {
-					logf("ERROR! Exception in callback %s.%s: %s", scope.event_name, key.tostring(), exception)
+			foreach(key, callback_table in callback_tables) {
+				if (callback_table.ent != null && invalid(callback_table.ent)) {
+					logf("[lib] removing callback %s.%s because entity is not valid", event, key.tostring())
+					delete DirectorScript.__callbacks[event][key]
+					continue
 				}
+				try {
+					callback_table.thread.call(clone params)
+				} catch (e) {}
 			}
 		}
-		__CollectEventCallbacks(scope, "OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener)
+		//see: https://github.com/sedol1339/l4d2/blob/master/squirrel/defaults.nut
+		__CollectEventCallbacks(DirectorScript.__callbackFuncs,
+			"OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener)
 	}
+	local scope = this.weakref()
 	DirectorScript.__callbacks[event][key] <- {
 		ent = ent
-		func = func.bindenv(this)
+		thread = newthread( function(params) {
+			if (func.call(scope, params) == false) delete DirectorScript.__callbacks[event][key]
+		})
 	}
-}
+})
 
-remove_callback <- function(key, event) {
+_def_func("remove_callback", function(key, event) {
+	if (!("DirectorScript" in root)) return
 	if (!("__callbacks" in DirectorScript)) return
 	if (!(event in DirectorScript.__callbacks)) return
 	local event_table = DirectorScript.__callbacks[event]
 	if (!(key in event_table)) return
 	delete event_table[key]
-}
+})
+
+_def_func("callback_exists", function(key, event) {
+	if (!("DirectorScript" in root)) return false
+	if (!("__callbacks" in DirectorScript)) return false
+	if (!(event in DirectorScript.__callbacks)) return false
+	local event_table = DirectorScript.__callbacks[event]
+	return (key in event_table)
+})
 
 //----------------------------------
 
-if (!("clock" in this)) clock <- {
+if (!("clock" in this)) _def_constvar("clock", {})
 	
-	sec = Time
-	
-	msec = @() Time() * 1000
-	
-	frames = GetFrameCount
-	
-	__ticks = -1
-	
-	__last_tick_time = NAN
-	
-	tick_time = 1.0 / 30
-	
-	ticks = function() {
-		if (__ticks == -1) throw "use clock.tick_counter_init() first"
-		return __ticks
-	}
-	
-	tick_counter_init = function() {
-		__clock_init()
-	}
-	
-	evaluate_tickrate = {
-		start = function() {
-			clock.evaluate_tickrate.start_sec <- clock.sec();
-			clock.evaluate_tickrate.start_ticks <- clock.ticks();
-		},
-		finish = function() { 
-			if (!("start_sec" in clock.evaluate_tickrate)) throw "clock.evaluate_tickrate: finish without start";
-			if (clock.sec() == clock.evaluate_tickrate.start_sec) throw "zero time elapsed (game was paused?)";
-			return (clock.ticks() - clock.evaluate_tickrate.start_ticks) / (clock.sec() - clock.evaluate_tickrate.start_sec);
-		},
-	}
-	
-	evaluate_framerate = {
-		start = function() {
-			clock.evaluate_framerate.start_sec <- clock.sec();
-			clock.evaluate_framerate.start_frames <- clock.frames();
-		},
-		finish = function() { 
-			if (!("start_sec" in clock.evaluate_framerate)) throw "clock.evaluate_framerate: finish without start";
-			if (clock.sec() == clock.evaluate_framerate.start_sec) throw "zero time elapsed (game was paused?)";
-			return (clock.frames() - clock.evaluate_framerate.start_frames) / (clock.sec() - clock.evaluate_framerate.start_sec);
-		},
-	}
-	
-}
+_def_func("clock.sec", Time)
+
+_def_func("clock.msec", @() Time() * 1000)
+
+_def_func("clock.frames", GetFrameCount)
+
+_def_var("clock.__ticks", -1)
+
+_def_var("clock.__last_tick_time", NAN)
+
+_def_var("clock.tick_time", 1.0 / 30)
+
+_def_func("clock.ticks", function() {
+	if (__ticks == -1) throw "use clock.tick_counter_init() first"
+	return __ticks
+})
+
+_def_func("clock.tick_counter_init", function() {
+	__clock_init()
+})
+
+_def_var("clock.evaluate_tickrate", {})
+
+_def_func("clock.evaluate_tickrate.start", function() {
+	clock.evaluate_tickrate.start_sec <- clock.sec();
+	clock.evaluate_tickrate.start_ticks <- clock.ticks();
+})
+
+_def_func("clock.evaluate_tickrate.finish", function() { 
+	if (!("start_sec" in clock.evaluate_tickrate)) throw "clock.evaluate_tickrate: finish without start";
+	if (clock.sec() == clock.evaluate_tickrate.start_sec) throw "zero time elapsed (game was paused?)";
+	return (clock.ticks() - clock.evaluate_tickrate.start_ticks) / (clock.sec() - clock.evaluate_tickrate.start_sec);
+})
+
+_def_var("clock.evaluate_framerate", {})
+
+_def_func("clock.evaluate_framerate.start", function() {
+	clock.evaluate_framerate.start_sec <- clock.sec();
+	clock.evaluate_framerate.start_frames <- clock.frames();
+})
+
+_def_func("clock.evaluate_framerate.finish", function() { 
+	if (!("start_sec" in clock.evaluate_framerate)) throw "clock.evaluate_framerate: finish without start";
+	if (clock.sec() == clock.evaluate_framerate.start_sec) throw "zero time elapsed (game was paused?)";
+	return (clock.frames() - clock.evaluate_framerate.start_frames) / (clock.sec() - clock.evaluate_framerate.start_sec);
+})
 
 //----------------------------------
 
-add_task_on_shutdown <- function(key, func, after_all = false) {
+_def_func("add_task_on_shutdown", function(key, func, after_all = false) {
 	local scope = this
 	this = root
 	if (!key) key = UniqueString()
@@ -572,7 +613,7 @@ add_task_on_shutdown <- function(key, func, after_all = false) {
 				Convars.SetValue("developer", 0)
 				Convars.SetValue("contimes", 8)
 			}
-			printl("running tasks on shutdown...")
+			log("[lib] running tasks on shutdown...")
 			local arr = []
 			foreach(key, func in __on_shutdown) arr.append([key, func])
 			foreach(key, func in __on_shutdown_after_all) arr.append([key, func])
@@ -580,7 +621,7 @@ add_task_on_shutdown <- function(key, func, after_all = false) {
 				try {
 					key_and_func[1]()
 				} catch (exception) {
-					logf("ERROR! Exception in task on shutdown %s: %s", key_and_func[0].tostring(), exception)
+					logf("[lib] ERROR! Exception in task on shutdown %s: %s", key_and_func[0].tostring(), exception)
 				}
 			}
 		}.bindenv(this)
@@ -591,7 +632,7 @@ add_task_on_shutdown <- function(key, func, after_all = false) {
 			Convars.SetValue("developer", 1)
 			Convars.SetValue("contimes", 0)
 		}
-		log("new task on shutdown registered");
+		log("[lib] add_task_on_shutdown(): new task on shutdown registered");
 	}
 	
 	if (!after_all) {
@@ -601,13 +642,13 @@ add_task_on_shutdown <- function(key, func, after_all = false) {
 		__on_shutdown_after_all[key] <- func.bindenv(scope)
 		if (key in __on_shutdown) delete __on_shutdown[key]
 	}
-}
+})
 
-remove_task_on_shutdown <- function(key) {
+_def_func("remove_task_on_shutdown", function(key) {
 	if (!("__on_shutdown" in root)) return
 	if (key in __on_shutdown) delete __on_shutdown[key]
 	if (key in __on_shutdown_after_all) delete __on_shutdown_after_all[key]
-}
+})
 
 reporter("Tasks", function() {
 	log("\tClock initialized: " + (__clock_ent ? "true" : "false"))
@@ -653,4 +694,258 @@ reporter("Tasks", function() {
 		foreach(key, task in __on_shutdown_after_all)
 			logf("\t\t%s: %s", key.tostring(), var_to_str(task))
 	}
+})
+
+//uses Teams and ClientType tables from lib/base
+
+_def_func("on_player_team", function(teams, isbot, func) {
+	if (!__on_player_team) {
+		DirectorScript.__on_player_team <- [
+			[null, null], //Teams.UNASSIGNED
+			[null, null], //Teams.SPECTATORS
+			[null, null], //Teams.SURVIVORS
+			[null, null], //Teams.INFECTED
+		]
+		__on_player_team = DirectorScript.__on_player_team.weakref()
+	}
+	//it's ok to be registered multiple times
+	register_callback("__on_player_team", "player_team", function(params) {
+		local func = __on_player_team[params.team][params.isbot ? 1 : 0];
+		if (func) func(params)
+	});
+	if (teams == Teams.ANY && isbot == ClientType.ANY) throw "specify team ot playertype for on_player_connect";
+	for(local i = 0; i <= 3; i++)
+		if (teams & (1 << i)) {
+			if (isbot == ClientType.ANY || !isbot)
+				__on_player_team[i][0] = func
+			if (isbot == ClientType.ANY || isbot)
+				__on_player_team[i][1] = func
+		}
+})
+
+_def_func("remove_on_player_team", function() {
+	remove_callback("__on_player_team", "player_team");
+	for (local team = 0; team <= 3; team++)
+		for (local isbot = 0; isbot <= 1; isbot++)
+			__on_player_team[team][isbot] = null;
+})
+
+if (!("__on_player_team" in this)) {
+	_def_var_nullable("__on_player_team", null, "array")
+}
+
+reporter("on_player_team listeners", function() {
+	if (!__on_player_team) {
+		logf("\tNone")
+		return
+	}
+	local t = __on_player_team
+	if (t[0][0] || t[0][1])
+		logf("\tTeams.UNASSIGNED & HUMAN: %s, \n\tTeams.UNASSIGNED & BOT: %s", var_to_str(t[0][0]), var_to_str(t[0][1]))
+	if (t[1][0] || t[1][1])
+		logf("\tTeams.SPECTATORS & HUMAN: %s, \n\tTeams.SPECTATORS & BOT: %s", var_to_str(t[1][0]), var_to_str(t[1][1]))
+	if (t[2][0] || t[2][1])
+		logf("\tTeams.SURVIVORS & HUMAN: %s, \n\tTeams.SURVIVORS & BOT: %s", var_to_str(t[2][0]), var_to_str(t[2][1]))
+	if (t[3][0] || t[3][1])
+		logf("\tTeams.SURVIVORS & HUMAN: %s, \n\tTeams.SURVIVORS & BOT: %s", var_to_str(t[3][0]), var_to_str(t[3][1]))
+})
+
+_def_func("on_key_action", function(
+	key,
+	player_or_team,
+	keyboard_key,
+	delay,
+	on_pressed,
+	on_released = null,
+	on_hold = null
+) {
+	if (!key) key = UniqueString()
+	if (!on_pressed) on_pressed = __dummy
+	if (!on_released) on_released = __dummy
+	if (!on_hold) on_hold = __dummy
+	local player = null
+	local team = null
+	if (type(player_or_team) == "integer") {
+		team = player_or_team
+	} else {
+		player = player_or_team
+	}
+	register_loop("__key_action_" + key, delay, function() {
+		local function do_key_check(player) {
+			local player_scope = scope(player)
+			local name_in_scope = "__last_buttons_" + key
+			local key_pressed = (propint(player, "m_nButtons") & keyboard_key) ? true : false
+			if (name_in_scope in player_scope) {
+				local last_key_state = player_scope[name_in_scope]
+				if (last_key_state && !key_pressed)
+					on_released(player)
+				else if (!last_key_state && key_pressed)
+					on_pressed(player)
+				if (key_pressed)
+					on_hold(player)
+			}
+			player_scope[name_in_scope] <- key_pressed
+		}
+		if (player) {
+			do_key_check(player)
+		} else {
+			for_each_player( function(player) {
+				if (get_team(player) & team)
+					do_key_check(player)
+			})
+		}
+	})
+})
+
+_def_func("on_key_action_remove", function(key) {
+	remove_loop("__key_action_" + key)
+	for_each_player( function(player) {
+		player.ValidateScriptScope()
+		local player_scope = player.GetScriptScope()
+		local name_in_scope = "__last_buttons_" + key
+		if (name_in_scope in player_scope)
+			delete player_scope[name_in_scope]
+	})
+})
+
+if (!("__chat_cmds" in this)) _def_var_nullable("__chat_cmds", null, "table")
+
+_def_func("register_chat_command", function(names, func, argmin = null, argmax = null, errmsg = null) {
+	if (!__chat_cmds) {
+		DirectorScript.__chat_cmds <- {}
+		__chat_cmds = DirectorScript.__chat_cmds.weakref()
+	}
+	if (type(names) == "string") {
+		names = [names]
+	} else if (type(names) != "array") {
+		throw "name should be string or array of strings"
+	}
+	foreach (name in names) {
+		if (names.find(" ") != null) throw "chat command name cannot contain spaces"
+		name = tolower(name)
+		local cmd = "cmd_" + name
+		if (cmd in __chat_cmds)
+			logf("[lib] WARNING! chat command %s was already registered, overriding...", name)
+		__chat_cmds[cmd] <- {
+			func = func.bindenv(this),
+			argmin = argmin,
+			argmax = argmax,
+			errmsg = errmsg
+		}
+	}
+	register_callback("__chat_cmds", "player_say", function(params) {
+		local cmd_markers = ["!", "/"]
+		local text = lstrip(params.text)
+		local is_command = false
+		foreach(marker in cmd_markers)
+			if (text.len() >= marker.len() && text.slice(0, marker.len()) == marker) {
+				text = text.slice(marker.len())
+				is_command = true
+				break
+			}
+		if (!is_command) return
+		local space_pos = text.find(" ")
+		local command = tolower(space_pos ? text.slice(0, space_pos) : text)
+		if (!("cmd_" + command in __chat_cmds)) return
+		logf("[lib] parsing args for chat command %s from player %s", command, player_to_str(params.player))
+		local initial_args_text = ""
+		local args = []
+		if (space_pos) {
+			initial_args_text = text.slice(space_pos + 1)
+			local args_text = initial_args_text
+			//now we start parsing arguments
+			while(true) {
+				args_text = lstrip(args_text)
+				if (args_text.len() == 0) break
+				if (args_text[0].tochar() == "\"") {
+					//quotes are started
+					local end_quote_pos = -1
+					local next_quote_pos = 0
+					while(true) {
+						next_quote_pos = args_text.find("\"", next_quote_pos + 1)
+						if (next_quote_pos == null) break
+						if (next_quote_pos == args_text.len() - 1 || args_text[next_quote_pos + 1].tochar() == " ") {
+							end_quote_pos = next_quote_pos
+							break
+						}
+					}
+					if (end_quote_pos == -1) {
+						//quotes are not closed
+						local next_space = args_text.find(" ", 1)
+						if (next_space == null) next_space = args_text.len()
+						local arg = args_text.slice(0, next_space)
+						args.push(arg)
+						args_text = args_text.slice(next_space)
+					} else {
+						//quotes are closed
+						local arg = args_text.slice(0, end_quote_pos + 1)
+						//removing quotes
+						arg = arg.slice(1, arg.len() - 1)
+						args.push(arg)
+						args_text = args_text.slice(end_quote_pos + 1)
+					}
+				} else {
+					//no quotes
+					local next_space = args_text.find(" ", 1)
+						if (next_space == null) next_space = args_text.len()
+					local arg = args_text.slice(0, next_space)
+					args.push(arg)
+					args_text = args_text.slice(next_space)
+				}
+			}
+		}
+		local cmd_table = __chat_cmds["cmd_" + command]
+		local argmin = cmd_table.argmin
+		local argmax = cmd_table.argmax
+		local errmsg = cmd_table.errmsg
+		if (argmin != null && argmin != 0 && argmin == argmax && args.len() != argmin) {
+			say_chat(errmsg ? errmsg : format("This command requires %s arguments", argmin))
+		} else if (argmin != null && args.len() < argmin) {
+			say_chat(errmsg ? errmsg : format("This command requires at least %s %s", argmin, argmin > 1 ? "arguments" : "argument"))
+		} else if (argmax != null && args.len() > argmax) {
+			if (argmax != 0) {
+				say_chat(errmsg ? errmsg : format("This command accepts no more than %s %s", argmax, argmax > 1 ? "arguments" : "argument"))
+			} else {
+				say_chat(errmsg ? errmsg : "This command does not accept arguments")
+			}
+		} else {
+			cmd_table.func(params.player, command, initial_args_text, args)
+		}
+	})
+})
+
+_def_func("remove_chat_command", function(names) {
+	if (type(names) == "string") {
+		names = [names]
+	} else if (type(names) != "array") {
+		throw "name should be string or array of strings"
+	}
+	foreach (name in names) {
+		name = "cmd_" + tolower(name)
+		if (!(name in __chat_cmds))
+			logf("[lib] WARNING! chat command %s was not registered", name)
+		else
+			delete __chat_cmds[name]
+	}
+})
+
+_def_func("print_all_chat_commands", function() {
+	log("[lib] all chat commands registered with register_chat_command")
+	if (__chat_cmds) {
+		logt(__chat_cmds)
+	} else {
+		log("\tNone")
+	}
+})
+
+reporter("Chat commands", function() {
+	local cmds = []
+	if (!__chat_cmds || __chat_cmds.len() == 0) {
+		log("\tNone")
+		return
+	}
+	foreach(cmd, table in __chat_cmds) {
+		cmds.append(cmd.slice(4, cmd.len()))
+	}
+	log("\t" + concat(cmds, ", "))
 })

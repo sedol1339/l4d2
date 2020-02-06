@@ -3,7 +3,6 @@ This is a VScript library for L4D2. Some information:
 - Library is divided into parts that are named kapkan/lib/module_*.nut
 - Most of library parts require kapkan/lib/module_base.nut
 - All library parts contain documentation with examples
-- Library uses kapkan/lib folder to prevent name collisions
 - Library always includes itself in root table, no matter which scope you specify
 - Library can be included several times, supposedly nothing will break
 - This library does not create any entities, running tasks or affecting HUD by default
@@ -13,28 +12,61 @@ Repository (may be outdated): https://github.com/sedol1339/l4d2/lib
 
 This library can be used together with VSLib, ImprovedScripting, Speedrunner Tools, Sw1ft's lib_utils, but compatibility was not fully tested.
 
-There are some conventions that I used when writing code for this library.
-- Most functions are placed in root table.
-- All constants are copied to root table.
-- Library does not create or affect entities, HUD by default.
-- Library does not create any callbacks by default.
-- Understandability: functions and variables are named in most clear way. I use snake_case, don't use hungarian notation.
-- Encapsulation: internal variables or functions, that are not meant to be used from outside, are eigher made local or prefixed with "__".
-- Grouping: all lines of code that refer to the same action are placed in one module and one place if possible.
-- Simplicity: classes should only be used where they are really needed.
-- I finally unlearned to put a semicolon at the end of line.
-
 -------------------------------
 ---------- Changelog ----------
 -------------------------------
 
-TODO: force_cvar, PZ bots melee after shove fix, skill_detect(flags), thirdperson, norecoil, nospread, something from upgrades and aimtr, sequences
+Lib v3.0.0 (31.01.2020)
+- CHANGE: removed module_convars, functions cvar(), cvarf(), cvarstr() moved to module_base
+- CHANGE: removed module_strings, functions moved to module_base
+- CHANGE: removed module_advanced, functions moved to module_tasks and module_gamelogic
+- CHANGE: removed module_entities, functions moved to module_gamelogic
+- CHANGE: removed function for_each_player(), use foreach(player in players()) instead
+- CHANGE: removed function switch_to_infected(), use set_playable_team() instead
+- CHANGE: removed module_files, functions moved to module_base
+- CHANGE: removed connect_strings() alias for function concat()
+- CHANGE: removed parameter "restore_cvars" for function restart_game()
+- CHANGE: function server_host() moved from module_entities to module_base
+- CHANGE: function cvar_create() moved from module_convars to module_serversettings
+- CHANGE: removed function disallow_dying_infected_bots() use server_settings.no_bot_deathcams instead
+- CHANGE: removed functions stop_director() and stop_director_forced(), use use server_settings.no_director instead
+- CHANGE: removed make_playground() function, use functions from module_gamelogic and module_serversettings instead
+- NEW: modules module_serversettings, module_addonframework with new functions
+- NEW: report() function now detects name collisions and variable type mismatches
+- NEW: function broadcast_client_command() in module_gamelogic
+- NEW: functions loop_exists(), callback_exists(), loop_pause(), loop_resume() in module_tasks
+- NEW: when including file "lib_auto" instead of "lib", constants will not be added to root table
+- NEW: functions debug(), debugf(), debug_on(), debug_off() in module_base
+- NEW: new function ent_visualise() in module_development
+- NEW: buttons_console_cmds, buttons_console_cmds_constraint in module_misc (TODO move somewhere else)
+- NEW: function cheats() in module_base
+- NEW: functions infected(), humans(), bots(), restart_game_now() in module_gamelogic
+- NEW: functions clear_effects(), finish_anim(), remove_items(), resurrect() in module_gamelogic
+- NEW: parameter group_key for spawn_infected()
+- NEW: constants STATE_DISABLED and STATE_ENABLED
+- NEW: new autojump method SP_SMOOTH (see player_settings.autojump in module_serversettings)
+- IMPROVE: it's now possible to use functions, binded to some scopes, as task functions (loops, callbacks, delayed calls)
+- IMPROVE: if exception occurs in a callback, this will not prevent other callbacks from running
+- IMPROVE: all library functions are redefined when library is included again (affects non-root scopes like "hud")
+- IMPROVE: optimized function trace_line() in module_math
+- IMPROVE: function say_chat() not is able to wait when listenserver host joins the game (see documentation)
+- IMPROVE: function spawn_infected() now returns a human player if they take control of spawned zombie
+- FIX: All HUD data are clearly removed between rounds
+- FIX: on_player_team data and chat commands data are clearly removed between rounds
+- FIX: fixed circular references warning after registering callbacks
+- FIX: fixed log() and players() descriptions
+- FIX: callback functions and delayed calls now check that DirectorScript exists
+- tickers, loops and callbacks now use newthread() squirrel built-in function and use func.call(scope) instead of bindenv
+- warning! do not use IncludeScript in tickers, loops an callbacks, this may crash the game
+- most of library console debug output is now prefixed with "[lib]"
+- new files debug.nut, collision_checker.nut, entry.nut for internal usage
+- removed useless file kapkan/lib/extras.nut
 
 Lib v2.7.0 (11.01.2020)
 - CHANGE: bhop_instructor renamed to bhop_callback
 - CHANGE: custom_airstrafe.fsmove_max renamed to custom_airstrafe.speed_max
 - NEW: function custom_airstrafe.override_params()
-- NEW: position can be null in function spawn_infected(), this means spawn somewhere in the world
+- NEW: position can be null in function spawn_infected(), this means spawn like director spawns
 - FIX: fixed custom_airstrafe.press_key() and custom_airstrafe.release_key() functions
 - FIX: autobhop smooth method now correctly sets FL_ONGROUND flag and play correct animation
 - FIX: fixed hud.hide_list() function

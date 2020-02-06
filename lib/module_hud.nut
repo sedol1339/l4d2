@@ -1,13 +1,11 @@
 //---------- DOCUMENTATION ----------
 
-//TODO test HUD timer callbacks, show_message and overall HUD behaviour on round change.
-
 /**
 FRAMEWORK FOR CONTROLLING HUD
 Warning! All tasks and callbacks are removed on round change.
 ! requires lib/module_base !
 ! requires lib/module_tasks !
-See: L4D2_EMS/Appendix:_HUD. Timers can be used independently of HUD. See an example at the end of the documentation.
+See: L4D2_EMS/Appendix:_HUD. Timers can be used independently of HUD. See an example at the end of the documentation. All HUD data (slots, timers, callbacks, lists, messages) are removed between rounds.
 ------------------------------------
 hud.show_message(text, duration, background, float_up, x, y, w, h)
 	Shows message without possessing a slot. It's a simple usage of the HUD library.
@@ -99,22 +97,23 @@ this = ::root
 
 log("[lib] including module_hud")
 
-__hud_data_init <- function() { //if we include library first time
-	::__hud_data <- {
-		possessors = {},
-		internal_slots = {},
-		layout = { //realtime!
-			Fields = {}
-		},
-		layout_dummy = {
-			Fields = {}
-		},
-		initialized = false,
-		disabled = false,
-		timers = {},
-		timer_callbacks = {},
-		lists = {}
-	}
+_def_func("__hud_data_init", function() { //if we include library first time
+	DirectorScript.__hud_data <- {}
+	_def_var("__hud_data", DirectorScript.__hud_data.weakref(), 0, "table")
+	_def_var("__hud_data.possessors", {})
+	_def_var("__hud_data.internal_slots", {})
+	_def_var("__hud_data.layout", { //realtime!
+		Fields = {}
+	})
+	_def_var("__hud_data.layout_dummy", {
+		Fields = {}
+	})
+	_def_var("__hud_data.initialized", false)
+	_def_var("__hud_data.disabled", false)
+	_def_var("__hud_data.timers", {})
+	_def_var("__hud_data.timer_callbacks", {})
+	_def_var("__hud_data.lists", {})
+	
 	for (local i = 1; i <= 14; i++) {
 		//14 slots (1-14)
 		__hud_data.internal_slots[i] <- {
@@ -130,612 +129,620 @@ __hud_data_init <- function() { //if we include library first time
 			state = TIMER_DISABLE,
 		}
 	}
-}
+})
 
-if (!("__hud_data" in root))
+_def_constvar("hud", {})
+
+
+_def_func("hud.__check_init", function() {
+	if (!("__hud_data" in root) || !__hud_data || !__hud_data.initialized)
+		hud.init()
+}.bindenv(hud))
+
+_def_func("hud.__refresh", function() {
+	HUDSetLayout(__hud_data.disabled ? __hud_data.layout_dummy : __hud_data.layout)
+}.bindenv(hud))
+
+_def_func("hud.__find_free_slot", function() { //returns slot internal index or -1 if no free slots
+	foreach(index, slot in __hud_data.internal_slots)
+		if (!slot.possessor)
+			return index
+	return -1
+}.bindenv(hud))
+
+_def_func("hud.__get_internal_index", function(possessor, name) { //throws exception if not found
+	
+	checktype(possessor, STRING)
+	checktype(name, ["string", "integer"])
+	
+	if (!(possessor in __hud_data.possessors))
+		throw format("Possessor %s not found", possessor.tostring())
+	local possessor_table = __hud_data.possessors[possessor]
+	if (!(name in possessor_table))
+		throw format("Name %s not found for possessor %s", name.tostring(), possessor)
+	return possessor_table[name]
+}.bindenv(hud))
+
+_def_func("hud.__set_flags", function(slot_table, flag, value) {
+	if (value)
+		slot_table.flags = slot_table.flags & ~flag
+	else
+		slot_table.flags = slot_table.flags | flag
+}.bindenv(hud))
+
+_def_func("hud.__find_free_timer", function()  { //returns timer index (0-3) or -1 if no free timers
+	foreach (id, timer in __hud_data.timers)
+		if (!timer.possessor)
+			return id
+	return -1
+}.bindenv(hud))
+
+_def_func("hud.__get_timer_id", function(possessor, name, dont_throw = false) { //throws exception if not found
+	
+	checktype(possessor, STRING)
+	checktype(name, STRING)
+	
+	foreach (id, timer in __hud_data.timers)
+		if (timer.possessor == possessor && timer.name == name)
+			return id
+	if (dont_throw) return -1
+	throw format("cannot find timer named %s for possessor %s", name.tostring(), possessor)
+}.bindenv(hud))
+
+_def_func("hud.init", function() {
+	if (("__hud_data" in root) && __hud_data && __hud_data.initialized)
+		return
 	__hud_data_init()
+	__hud_data.initialized = true
+	log("[lib] HUD was initialized")
+	
+	hud.__refresh()
+}.bindenv(hud))
 
-hud <- {
-	__check_init = function() {
-		if (!__hud_data.initialized)
-			//throw "HUD is not initialized"
-			hud.init()
-	},
+_def_func("hud.possess_slot", function(possessor, name) {
+	__check_init()
 	
-	__refresh = function() {
-		HUDSetLayout(__hud_data.disabled ? __hud_data.layout_dummy : __hud_data.layout)
-	},
+	checktype(possessor, STRING)
+	checktype(name, ["string", "integer"])
 	
-	__find_free_slot = function() { //returns slot internal index or -1 if no free slots
-		foreach(index, slot in __hud_data.internal_slots)
-			if (!slot.possessor)
-				return index
-		return -1
-	},
+	local slot_to_possess = hud.__find_free_slot()
+	if (slot_to_possess == -1) {
+		log("[lib] possess_slot(): cannot find free HUD slots")
+		return false
+	}
+	if (!(possessor in __hud_data.possessors))
+		__hud_data.possessors[possessor] <- {}
+	local possessor_table = __hud_data.possessors[possessor]
+	if (name in possessor_table)
+		throw format("name %s is already registered for possessor %s", name.tostring(), possessor)
 	
-	__get_internal_index = function(possessor, name) { //throws exception if not found
-		
-		checktype(possessor, STRING)
-		checktype(name, ["string", "integer"])
-		
-		if (!(possessor in __hud_data.possessors))
-			throw format("Possessor %s not found", possessor.tostring())
-		local possessor_table = __hud_data.possessors[possessor]
-		if (!(name in possessor_table))
-			throw format("Name %s not found for possessor %s", name.tostring(), possessor)
-		return possessor_table[name]
-	},
+	//first action: add slot to possessors table
+	possessor_table[name] <- slot_to_possess
 	
-	__set_flags = function(slot_table, flag, value) {
-		if (value)
-			slot_table.flags = slot_table.flags & ~flag
-		else
-			slot_table.flags = slot_table.flags | flag
-	},
+	//second action: edit possessor in internal_slots
+	__hud_data.internal_slots[slot_to_possess].possessor = possessor
+	__hud_data.internal_slots[slot_to_possess].name = name
 	
-	__find_free_timer = function()  { //returns timer index (0-3) or -1 if no free timers
-		foreach (id, timer in __hud_data.timers)
-			if (!timer.possessor)
-				return id
-		return -1
-	},
+	//third action: add slot to layout
+	__hud_data.layout.Fields[slot_to_possess] <- {
+		slot = slot_to_possess,
+		dataval = "",
+		flags = 0
+	}
+	HUDPlace(slot_to_possess, 0.1, 0.1, 0.3, 0.05)
 	
-	__get_timer_id = function(possessor, name, dont_throw = false) { //throws exception if not found
-		
-		checktype(possessor, STRING)
-		checktype(name, STRING)
-		
-		foreach (id, timer in __hud_data.timers)
-			if (timer.possessor == possessor && timer.name == name)
-				return id
-		if (dont_throw) return -1
-		throw format("cannot find timer named %s for possessor %s", name.tostring(), possessor)
-	},
+	hud.__refresh()
+	return true
+}.bindenv(hud))
+
+_def_func("hud.release_slot", function(possessor, name) {
+	__check_init()
 	
-	init = function() {
-		if (__hud_data.initialized)
-			return
-		__hud_data.initialized = true
-		log("HUD was initialized")
-		
-		hud.__refresh()
-	},
+	checktype(possessor, STRING)
+	checktype(name, ["string", "integer"])
 	
-	possess_slot = function(possessor, name) {
-		__check_init()
-		
-		checktype(possessor, STRING)
-		checktype(name, ["string", "integer"])
-		
-		local slot_to_possess = hud.__find_free_slot()
-		if (slot_to_possess == -1) {
-			log("cannot find free HUD slots")
+	//first action: remove slot from possessors table
+	if (!(possessor in __hud_data.possessors)) {
+		log("[lib] hud.release_slot(): no possessor with name " + possessor)
+		return
+	}
+	local possessor_table = __hud_data.possessors[possessor]
+	if (!(name in possessor_table)) {
+		log("[lib] hud.release_slot(): no slot with name " + possessor + ":" + name.tostring())
+		return
+	}
+	local slot_to_delete = __get_internal_index(possessor, name)
+	delete possessor_table[name]
+	
+	//second action: edit possessor in internal_slots
+	__hud_data.internal_slots[slot_to_delete].possessor = null
+	
+	//third action: remove slot from layout
+	delete __hud_data.layout.Fields[slot_to_delete]
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.get_all_slots", function(possessor) {
+	__check_init()
+	
+	if (!(possessor in __hud_data.possessors)) return []
+	local possessor_table = __hud_data.possessors[possessor]
+	local arr = []
+	foreach(name in possessor_table) arr.append(name)
+	return arr
+}.bindenv(hud))
+
+_def_func("hud.release_all_slots", function(possessor) {
+	__check_init()
+	
+	local possessed = __hud_data.get_all_slots(possessor)
+	foreach(name in possessed)
+		__hud_data.release_slot(possessor, _name)
+}.bindenv(hud))
+
+_def_func("hud.possess_multiple_slots", function(possessor, names) {
+	__check_init()
+	
+	checktype(names, "array")
+	
+	local possessed = []
+	foreach(name in names) {
+		local success
+		try {
+			success = __hud_data.possess_slot(possessor, name)
+		} catch (exception) {
+			success = false
+		}
+		if (!success) {
+			foreach(_name in possessed)
+				__hud_data.release_slot(possessor, _name)
 			return false
-		}
-		if (!(possessor in __hud_data.possessors))
-			__hud_data.possessors[possessor] <- {}
-		local possessor_table = __hud_data.possessors[possessor]
-		if (name in possessor_table)
-			throw format("name %s is already registered for possessor %s", name.tostring(), possessor)
-		
-		//first action: add slot to possessors table
-		possessor_table[name] <- slot_to_possess
-		
-		//second action: edit possessor in internal_slots
-		__hud_data.internal_slots[slot_to_possess].possessor = possessor
-		__hud_data.internal_slots[slot_to_possess].name = name
-		
-		//third action: add slot to layout
-		__hud_data.layout.Fields[slot_to_possess] <- {
-			slot = slot_to_possess,
-			dataval = "",
-			flags = 0
-		}
-		HUDPlace(slot_to_possess, 0.1, 0.1, 0.3, 0.05)
-		
-		hud.__refresh()
-		return true
-	},
-	
-	release_slot = function(possessor, name) {
-		__check_init()
-		
-		checktype(possessor, STRING)
-		checktype(name, ["string", "integer"])
-		
-		//first action: remove slot from possessors table
-		if (!(possessor in __hud_data.possessors)) {
-			log("hud.release_slot(): no possessor with name " + possessor)
-			return
-		}
-		local possessor_table = __hud_data.possessors[possessor]
-		if (!(name in possessor_table)) {
-			log("hud.release_slot(): no slot with name " + possessor + ":" + name.tostring())
-			return
-		}
-		local slot_to_delete = __get_internal_index(possessor, name)
-		delete possessor_table[name]
-		
-		//second action: edit possessor in internal_slots
-		__hud_data.internal_slots[slot_to_delete].possessor = null
-		
-		//third action: remove slot from layout
-		delete __hud_data.layout.Fields[slot_to_delete]
-		
-		hud.__refresh()
-	},
-	
-	get_all_slots = function(possessor) {
-		__check_init()
-		
-		if (!(possessor in __hud_data.possessors)) return []
-		local possessor_table = __hud_data.possessors[possessor]
-		local arr = []
-		foreach(name in possessor_table) arr.append(name)
-		return arr
-	},
-	
-	release_all_slots = function(possessor) {
-		__check_init()
-		
-		local possessed = __hud_data.get_all_slots(possessor)
-		foreach(name in possessed)
-			__hud_data.release_slot(possessor, _name)
-	},
-	
-	possess_multiple_slots = function(possessor, names) {
-		__check_init()
-		
-		checktype(names, "array")
-		
-		local possessed = []
-		foreach(name in names) {
-			local success
-			try {
-				success = __hud_data.possess_slot(possessor, name)
-			} catch (exception) {
-				success = false
-			}
-			if (!success) {
-				foreach(_name in possessed)
-					__hud_data.release_slot(possessor, _name)
-				return false
-			} else {
-				possessed.append(name)
-			}
-		}
-		return true
-	},
-	
-	set_position = function(possessor, name, x, y, w, h) {
-		__check_init()
-		
-		checktype(x, NUMBER)
-		checktype(y, NUMBER)
-		checktype(w, NUMBER)
-		checktype(h, NUMBER)
-			
-		local slot = __get_internal_index(possessor, name)
-		HUDPlace(slot, x, y, w, h)
-		
-		hud.__refresh()
-	},
-	
-	set_visible = function(possessor, name, is_visible) {
-		__check_init()
-		
-		checktype(visible, BOOL)
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		__set_flags(slot_table, HUD_FLAG_NOTVISIBLE, is_visible)
-		
-		hud.__refresh()
-	},
-	
-	set_text = function(possessor, name, text) {
-		__check_init()
-		
-		checktype(text, ["string", "integer", "float"])
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		if ("datafunc" in slot_table) delete slot_table.datafunc
-		if ("special" in slot_table) delete slot_table.special
-		if ("staticstring" in slot_table) delete slot_table.staticstring
-		slot_table.dataval <- text
-		
-		hud.__refresh()
-	},
-	
-	set_datafunc = function(possessor, name, func) {
-		__check_init()
-		
-		checktype(func, FUNC)
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		if ("dataval" in slot_table) delete slot_table.dataval
-		if ("special" in slot_table) delete slot_table.special
-		if ("staticstring" in slot_table) delete slot_table.staticstring
-		slot_table.datafunc <- func
-		
-		hud.__refresh()
-	},
-	
-	PREFIX = true,
-	POSTFIX = false,
-	
-	set_special = function(possessor, name, value, is_prefix = null, text = null) {
-		__check_init()
-		
-		checktype(value, ["integer", "string"])
-		if (is_prefix != null) checktype(is_prefix, BOOL)
-		if (text != null) checktype(text, STRING)
-		
-		if (is_prefix != null && text == null || is_prefix != null && text == null)
-			throw "is_prefix (4th argument) and text (5th argument) are used together, one of them is null"
-		if (value == HUD_SPECIAL_TIMER0 || value == HUD_SPECIAL_TIMER1 || value == HUD_SPECIAL_TIMER2 || value == HUD_SPECIAL_TIMER3)
-			throw "value (3rd argument) cannot be HUD_SPECIAL_TIMER*, use timer name instead"
-		if (type(value) == "string")
-			value = __get_timer_id(possessor, value) //now it's integer
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		if ("dataval" in slot_table) delete slot_table.dataval
-		if ("datafunc" in slot_table) delete slot_table.datafunc
-		slot_table.special <- value
-		if (is_prefix != null) {
-			slot_table.staticstring <- text
-			__set_flags(slot_table, HUD_FLAG_POSTSTR, is_prefix)
-			__set_flags(slot_table, HUD_FLAG_PRESTR, !is_prefix)
 		} else {
-			slot_table.staticstring <- null
+			possessed.append(name)
 		}
-		
-		hud.__refresh()
-	},
+	}
+	return true
+}.bindenv(hud))
+
+_def_func("hud.set_position", function(possessor, name, x, y, w, h) {
+	__check_init()
 	
-	flags_set = function(possessor, name, flags) {
-		__check_init()
+	checktype(x, NUMBER)
+	checktype(y, NUMBER)
+	checktype(w, NUMBER)
+	checktype(h, NUMBER)
 		
-		checktype(flags, "integer")
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		slot_table.flags = flags
-		
-		hud.__refresh()
-	},
+	local slot = __get_internal_index(possessor, name)
+	HUDPlace(slot, x, y, w, h)
 	
-	flags_add = function(possessor, name, flags) {
-		__check_init()
-		
-		checktype(flags, "integer")
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		__set_flags(slot_table, flags, true)
-		
-		hud.__refresh()
-	},
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.set_visible", function(possessor, name, is_visible) {
+	__check_init()
 	
-	flags_remove = function(possessor, name, flags) {
-		__check_init()
-		
-		checktype(flags, "integer")
-		
-		local slot = __get_internal_index(possessor, name)
-		local slot_table = __hud_data.layout.Fields[slot]
-		__set_flags(slot_table, flags, false)
-		
-		hud.__refresh()
-	},
+	checktype(visible, BOOL)
 	
-	possess_timer = function(possessor, timer_name) {
-		__check_init()
-		
-		checktype(possessor, STRING)
-		checktype(timer_name, STRING)
-		
-		local timer_to_possess = hud.__find_free_timer()
-		if (timer_to_possess == -1) {
-			log("cannot find free timer")
-			return false
-		}
-		if (__get_timer_id(possessor, timer_name, true) != -1)
-			throw format("timer name %s is already registered for possessor %s", timer_name.tostring(), possessor)
-		
-		__hud_data.timers[timer_to_possess].possessor = possessor
-		__hud_data.timers[timer_to_possess].name = timer_name
-		
-		return true
-	},
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	__set_flags(slot_table, HUD_FLAG_NOTVISIBLE, is_visible)
 	
-	release_timer = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_to_release = __get_timer_id(possessor, timer_name)
-		__hud_data.timers[timer_to_release].possessor = null
-		__hud_data.timers[timer_to_release].name = null
-		HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
-		__hud_data.timers[timer_index].state == TIMER_DISABLE
-	},
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.set_text", function(possessor, name, text) {
+	__check_init()
 	
-	disable_timer = function(possessor, timer_name) {
-		__check_init()
-		
-		checktype(possessor, STRING)
-		checktype(timer_name, STRING)
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
-		__hud_data.timers[timer_index].state == TIMER_DISABLE
-	},
+	checktype(text, ["string", "integer", "float"])
 	
-	set_timer = function(possessor, timer_name, value) {
-		__check_init()
-		
-		checktype(value, NUMBER)
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		HUDManageTimers(timer_index, TIMER_STOP, 0)
-		local old_state = __hud_data.timers[timer_index].state
-		HUDManageTimers(timer_index, TIMER_SET, value)
-		if (old_state == TIMER_COUNTDOWN) {
-			HUDManageTimers(timer_index, TIMER_COUNTDOWN, value)
-		} else if (old_state == TIMER_COUNTUP) {
-			HUDManageTimers(timer_index, TIMER_COUNTUP, value)
-		} else {
-			__hud_data.timers[timer_index].state = TIMER_STOP
-		}
-	},
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	if ("datafunc" in slot_table) delete slot_table.datafunc
+	if ("special" in slot_table) delete slot_table.special
+	if ("staticstring" in slot_table) delete slot_table.staticstring
+	slot_table.dataval <- text
 	
-	start_timer_countup = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		local old_state = __hud_data.timers[timer_index].state
-		local value = HUDReadTimer(timer_index) //even for disabled
-		HUDManageTimers(timer_index, TIMER_COUNTUP, value)
-		__hud_data.timers[timer_index].state = TIMER_COUNTUP
-	},
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.set_datafunc", function(possessor, name, func) {
+	__check_init()
 	
-	start_timer_countdown = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		local old_state = __hud_data.timers[timer_index].state
-		local value = HUDReadTimer(timer_index) //even for disabled
+	checktype(func, FUNC)
+	
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	if ("dataval" in slot_table) delete slot_table.dataval
+	if ("special" in slot_table) delete slot_table.special
+	if ("staticstring" in slot_table) delete slot_table.staticstring
+	slot_table.datafunc <- func
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_constvar("hud.PREFIX", true)
+_def_constvar("hud.POSTFIX", false)
+
+_def_func("hud.set_special", function(possessor, name, value, is_prefix = null, text = null) {
+	__check_init()
+	
+	checktype(value, ["integer", "string"])
+	if (is_prefix != null) checktype(is_prefix, BOOL)
+	if (text != null) checktype(text, STRING)
+	
+	if (is_prefix != null && text == null || is_prefix != null && text == null)
+		throw "is_prefix (4th argument) and text (5th argument) are used together, one of them is null"
+	if (value == HUD_SPECIAL_TIMER0 || value == HUD_SPECIAL_TIMER1 || value == HUD_SPECIAL_TIMER2 || value == HUD_SPECIAL_TIMER3)
+		throw "value (3rd argument) cannot be HUD_SPECIAL_TIMER*, use timer name instead"
+	if (type(value) == "string")
+		value = __get_timer_id(possessor, value) //now it's integer
+	
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	if ("dataval" in slot_table) delete slot_table.dataval
+	if ("datafunc" in slot_table) delete slot_table.datafunc
+	slot_table.special <- value
+	if (is_prefix != null) {
+		slot_table.staticstring <- text
+		__set_flags(slot_table, HUD_FLAG_POSTSTR, is_prefix)
+		__set_flags(slot_table, HUD_FLAG_PRESTR, !is_prefix)
+	} else {
+		slot_table.staticstring <- null
+	}
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.flags_set", function(possessor, name, flags) {
+	__check_init()
+	
+	checktype(flags, "integer")
+	
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	slot_table.flags = flags
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.flags_add", function(possessor, name, flags) {
+	__check_init()
+	
+	checktype(flags, "integer")
+	
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	__set_flags(slot_table, flags, true)
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.flags_remove", function(possessor, name, flags) {
+	__check_init()
+	
+	checktype(flags, "integer")
+	
+	local slot = __get_internal_index(possessor, name)
+	local slot_table = __hud_data.layout.Fields[slot]
+	__set_flags(slot_table, flags, false)
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.possess_timer", function(possessor, timer_name) {
+	__check_init()
+	
+	checktype(possessor, STRING)
+	checktype(timer_name, STRING)
+	
+	local timer_to_possess = hud.__find_free_timer()
+	if (timer_to_possess == -1) {
+		log("[lib] possess_timer(): cannot find free timer")
+		return false
+	}
+	if (__get_timer_id(possessor, timer_name, true) != -1)
+		throw format("timer name %s is already registered for possessor %s", timer_name.tostring(), possessor)
+	
+	__hud_data.timers[timer_to_possess].possessor = possessor
+	__hud_data.timers[timer_to_possess].name = timer_name
+	
+	return true
+}.bindenv(hud))
+
+_def_func("hud.release_timer", function(possessor, timer_name) {
+	__check_init()
+	
+	local timer_to_release = __get_timer_id(possessor, timer_name)
+	__hud_data.timers[timer_to_release].possessor = null
+	__hud_data.timers[timer_to_release].name = null
+	HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
+	__hud_data.timers[timer_index].state == TIMER_DISABLE
+}.bindenv(hud))
+
+_def_func("hud.disable_timer", function(possessor, timer_name) {
+	__check_init()
+	
+	checktype(possessor, STRING)
+	checktype(timer_name, STRING)
+	
+	local timer_index = __get_timer_id(possessor, timer_name)
+	HUDManageTimers(timer_to_possess, TIMER_DISABLE, 0)
+	__hud_data.timers[timer_index].state == TIMER_DISABLE
+}.bindenv(hud))
+
+_def_func("hud.set_timer", function(possessor, timer_name, value) {
+	__check_init()
+	
+	checktype(value, NUMBER)
+	
+	local timer_index = __get_timer_id(possessor, timer_name)
+	HUDManageTimers(timer_index, TIMER_STOP, 0)
+	local old_state = __hud_data.timers[timer_index].state
+	HUDManageTimers(timer_index, TIMER_SET, value)
+	if (old_state == TIMER_COUNTDOWN) {
 		HUDManageTimers(timer_index, TIMER_COUNTDOWN, value)
-		__hud_data.timers[timer_index].state = TIMER_COUNTDOWN
-	},
-	
-	pause_timer = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		local value = HUDReadTimer(timer_index) //even for disabled
-		HUDManageTimers(timer_index, TIMER_STOP, 0)
-		HUDManageTimers(timer_index, TIMER_SET, value)
+	} else if (old_state == TIMER_COUNTUP) {
+		HUDManageTimers(timer_index, TIMER_COUNTUP, value)
+	} else {
 		__hud_data.timers[timer_index].state = TIMER_STOP
-	},
+	}
+}.bindenv(hud))
+
+_def_func("hud.start_timer_countup", function(possessor, timer_name) {
+	__check_init()
 	
-	get_timer = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		return HUDReadTimer(timer_index)
-	},
+	local timer_index = __get_timer_id(possessor, timer_name)
+	local old_state = __hud_data.timers[timer_index].state
+	local value = HUDReadTimer(timer_index) //even for disabled
+	HUDManageTimers(timer_index, TIMER_COUNTUP, value)
+	__hud_data.timers[timer_index].state = TIMER_COUNTUP
+}.bindenv(hud))
+
+_def_func("hud.start_timer_countdown", function(possessor, timer_name) {
+	__check_init()
 	
-	set_timer_callback = function(possessor, timer_name, value, func, stop_timer = false) {
-		__check_init()
-		
-		checktype(value, NUMBER)
-		if (func != null) checktype(func, FUNC)
-		checktype(stop_timer, BOOL)
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		if(__hud_data.timer_callbacks.len() == 0) {
-			register_ticker("__hud_callbacks", function() {
-				foreach(key, callback in __hud_data.timer_callbacks) {
-					local timer_index = callback.timer_index
-					local state = __hud_data.timers[timer_index].state
-					if (state == TIMER_DISABLE) {
-						delete __hud_data.timer_callbacks[key]
-						continue
-					}
-					local current_value = HUDReadTimer(timer_index)
-					if (
-						state == TIMER_COUNTUP && current_value >= callback.value
-						|| state == TIMER_COUNTDOWN && current_value <= callback.value
-					) {
-						if (callback.stop_timer) {
-							hud.pause_timer(callback.possessor, callback.name)
-							hud.set_timer(callback.possessor, callback.name, value)
-							//HUDManageTimers(timer_index, TIMER_STOP, 0)
-							//HUDManageTimers(timer_index, TIMER_SET, value)
-							//__hud_data.timers[timer_index].state = TIMER_STOP
-						}
-						delete __hud_data.timer_callbacks[key]
-						if (callback.func)
-							callback.func()
-					}
+	local timer_index = __get_timer_id(possessor, timer_name)
+	local old_state = __hud_data.timers[timer_index].state
+	local value = HUDReadTimer(timer_index) //even for disabled
+	HUDManageTimers(timer_index, TIMER_COUNTDOWN, value)
+	__hud_data.timers[timer_index].state = TIMER_COUNTDOWN
+}.bindenv(hud))
+
+_def_func("hud.pause_timer", function(possessor, timer_name) {
+	__check_init()
+	
+	local timer_index = __get_timer_id(possessor, timer_name)
+	local value = HUDReadTimer(timer_index) //even for disabled
+	HUDManageTimers(timer_index, TIMER_STOP, 0)
+	HUDManageTimers(timer_index, TIMER_SET, value)
+	__hud_data.timers[timer_index].state = TIMER_STOP
+}.bindenv(hud))
+
+_def_func("hud.get_timer", function(possessor, timer_name) {
+	__check_init()
+	
+	local timer_index = __get_timer_id(possessor, timer_name)
+	return HUDReadTimer(timer_index)
+}.bindenv(hud))
+
+_def_func("hud.set_timer_callback", function(possessor, timer_name, value, func, stop_timer = false) {
+	__check_init()
+	
+	checktype(value, NUMBER)
+	if (func != null) checktype(func, FUNC)
+	checktype(stop_timer, BOOL)
+	
+	local timer_index = __get_timer_id(possessor, timer_name)
+	if(__hud_data.timer_callbacks.len() == 0) {
+		register_ticker("__hud_callbacks", function() {
+			foreach(key, callback in __hud_data.timer_callbacks) {
+				local timer_index = callback.timer_index
+				local state = __hud_data.timers[timer_index].state
+				if (state == TIMER_DISABLE) {
+					delete __hud_data.timer_callbacks[key]
+					continue
 				}
-				if (__hud_data.timer_callbacks.len() == 0)
-					remove_ticker("__hud_callbacks")
-			})
-		}
-		__hud_data.timer_callbacks[UniqueString()] <- {
-			possessor = possessor,
-			name = timer_name,
-			value = value,
-			func = func,
-			stop_timer = stop_timer,
-			timer_index = timer_index
-		}
-	},
-	
-	remove_timer_callbacks = function(possessor, timer_name) {
-		__check_init()
-		
-		local timer_index = __get_timer_id(possessor, timer_name)
-		foreach(key, callback in __hud_data.timer_callbacks)
-			if (callback.possessor == possessor && callback.name = timer_name)
-				delete __hud_data.timer_callbacks[key]
-		if (__hud_data.timer_callbacks.len() == 0)
-			remove_ticker("__hud_callbacks")
-	},
-	
-	global_off = function() {
-		__check_init()
-		__hud_data.disabled = true
-		hud.__refresh()
-	},
-	
-	global_on = function() {
-		__check_init()
-		__hud_data.disabled = false
-		hud.__refresh()
-	},
-	
-	global_clear = function() {
-		__check_init()
-		__hud_data_init()
-		hud.__refresh()
-	},
-	
-	show_message = function(text, duration = 5, background = true, float_up = false, x = 0.35, y = 0.75, w = 0.3, h = 0.05) {
-		__check_init()
-		
-		checktype(text, STRING)
-		checktype(duration, NUMBER)
-		checktype(background, BOOL)
-		checktype(float_up, BOOL)
-		checktype(x, NUMBER)
-		checktype(y, NUMBER)
-		checktype(w, NUMBER)
-		checktype(h, NUMBER)
-		
-		local slot_name = UniqueString()
-		if (!hud.possess_slot("__show_message", slot_name)) {
-			log("warning! no free slots for message: " + text)
-			return
-		}
-		
-		hud.set_position("__show_message", slot_name, x, y, w, h)
-		hud.flags_set("__show_message", slot_name, HUD_FLAG_ALIGN_CENTER | (background ? 0 : HUD_FLAG_NOBG))
-		hud.set_text("__show_message", slot_name, text)
-		local start_time = clock.sec()
-		
-		if (float_up)
-			register_ticker("__show_message" + slot_name, function() {
-				local function dY(dT) {
-					return 0.15*(1 - 1/(dT + 1))
+				local current_value = HUDReadTimer(timer_index)
+				if (
+					state == TIMER_COUNTUP && current_value >= callback.value
+					|| state == TIMER_COUNTDOWN && current_value <= callback.value
+				) {
+					if (callback.stop_timer) {
+						hud.pause_timer(callback.possessor, callback.name)
+						hud.set_timer(callback.possessor, callback.name, value)
+						//HUDManageTimers(timer_index, TIMER_STOP, 0)
+						//HUDManageTimers(timer_index, TIMER_SET, value)
+						//__hud_data.timers[timer_index].state = TIMER_STOP
+					}
+					delete __hud_data.timer_callbacks[key]
+					if (callback.func)
+						callback.func()
 				}
-				hud.set_position("__show_message", slot_name, x, y - dY(clock.sec() - start_time), w, h)
-				hud.__refresh()
-			})
-		delayed_call(duration, function() {
-			hud.release_slot("__show_message", slot_name)
-			if (float_up)
-				remove_ticker("__show_message" + slot_name)
+			}
+			if (__hud_data.timer_callbacks.len() == 0)
+				remove_ticker("__hud_callbacks")
 		})
-		
-		hud.__refresh()
-	},
+	}
+	__hud_data.timer_callbacks[UniqueString()] <- {
+		possessor = possessor,
+		name = timer_name,
+		value = value,
+		func = func,
+		stop_timer = stop_timer,
+		timer_index = timer_index
+	}
+}.bindenv(hud))
+
+_def_func("hud.remove_timer_callbacks", function(possessor, timer_name) {
+	__check_init()
 	
-	show_list = function(key, lines, x0 = 0.1, y0 = 0.25, w = 0.3, h = 0.05, dh = 0, background = false) {
-		__check_init()
-		
-		checktype(key, STRING)
-		checktype(lines, "array")
-		checktype(x0, NUMBER)
-		checktype(y0, NUMBER)
-		checktype(w, NUMBER)
-		checktype(h, NUMBER)
-		checktype(dh, NUMBER)
-		checktype(background, BOOL)
-		
-		local lists = __hud_data.lists
-		if (!(key in lists)) {
-			lists[key] <- {
-				slots = []
-			}
-		}
-		local list = lists[key]
-		list.x0 <- x0
-		list.y0 <- y0
-		list.w <- w
-		list.h <- h
-		list.dh <- dh
-		list.background <- background
-		list.desired_size <- lines.len()
-		
-		if (!__list_resize(list, lines.len())) {
-			log("warning! no free slots for list: " + key)
-		}
-		local len = list.slots.len()
-		if (len == 0) {
-			log("warning! empty list: " + key)
-		}
-		for(local i = 0; i < len; i++) {
-			local key = list.slots[i].key
-			hud.set_text("__lists", key, lines[i])
-		}
-	},
+	local timer_index = __get_timer_id(possessor, timer_name)
+	foreach(key, callback in __hud_data.timer_callbacks)
+		if (callback.possessor == possessor && callback.name = timer_name)
+			delete __hud_data.timer_callbacks[key]
+	if (__hud_data.timer_callbacks.len() == 0)
+		remove_ticker("__hud_callbacks")
+}.bindenv(hud))
+
+_def_func("hud.global_off", function() {
+	__check_init()
+	__hud_data.disabled = true
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.global_on", function() {
+	__check_init()
+	__hud_data.disabled = false
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.global_clear", function() {
+	__check_init()
+	__hud_data_init()
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.show_message", function(
+	text,
+	duration = 5,
+	background = true,
+	float_up = false,
+	x = 0.35,
+	y = 0.75,
+	w = 0.3,
+	h = 0.05
+) {
+	__check_init()
 	
-	//may not add enough slots if there are no free slots, then returns false
-	__list_resize = function(list, new_size) {
-		local slots = list.slots
-		local current_len = slots.len()
-		local not_enough_slots = false
-		if (new_size > current_len) {
-			for (local i = current_len; i < new_size; i++) {
-				local new_key = UniqueString()
-				if (!hud.possess_slot("__lists", new_key)) {
-					not_enough_slots = true
-					break
-				}
-				slots.append({
-					key = new_key
-				})
-				hud.flags_set("__lists", new_key, HUD_FLAG_ALIGN_LEFT | (list.background ? 0 : HUD_FLAG_NOBG))
-			}
-		} else if (new_size < current_len) {
-			for (local i = new_size; i < current_len; i++) {
-				hud.release_slot("__lists", slots[i].key)
-			}
-			for (local i = new_size; i < current_len; i++) {
-				slots.pop()
-			}
-		}
-		local x1 = list.x0
-		local w = list.w
-		local h = list.h
-		for(local i = 0; i < slots.len(); i++) {
-			local y1 = list.y0 + (list.h + list.dh) * i
-			hud.set_position("__lists", slots[i].key, x1, y1, w, h)
-		}
-		return !not_enough_slots
+	checktype(text, STRING)
+	checktype(duration, NUMBER)
+	checktype(background, BOOL)
+	checktype(float_up, BOOL)
+	checktype(x, NUMBER)
+	checktype(y, NUMBER)
+	checktype(w, NUMBER)
+	checktype(h, NUMBER)
+	
+	local slot_name = UniqueString()
+	if (!hud.possess_slot("__show_message", slot_name)) {
+		log("[lib] show_message(): WARNING! no free slots for message: " + text)
+		return
 	}
 	
-	hide_list = function(key) {
-		__check_init()
-		
-		checktype(key, STRING)
-		
-		local lists = __hud_data.lists
-		if (!(key in lists)) throw "no such list: " + key
-		
-		__list_resize(lists[key], 0)
-		delete lists[key]
+	hud.set_position("__show_message", slot_name, x, y, w, h)
+	hud.flags_set("__show_message", slot_name, HUD_FLAG_ALIGN_CENTER | (background ? 0 : HUD_FLAG_NOBG))
+	hud.set_text("__show_message", slot_name, text)
+	local start_time = clock.sec()
+	
+	if (float_up)
+		register_ticker("__show_message" + slot_name, function() {
+			local function dY(dT) {
+				return 0.15*(1 - 1/(dT + 1))
+			}
+			hud.set_position("__show_message", slot_name, x, y - dY(clock.sec() - start_time), w, h)
+			hud.__refresh()
+		})
+	delayed_call(duration, function() {
+		hud.release_slot("__show_message", slot_name)
+		if (float_up)
+			remove_ticker("__show_message" + slot_name)
+	})
+	
+	hud.__refresh()
+}.bindenv(hud))
+
+_def_func("hud.show_list", function(key, lines, x0 = 0.1, y0 = 0.25, w = 0.3, h = 0.05, dh = 0, background = false) {
+	__check_init()
+	
+	checktype(key, STRING)
+	checktype(lines, "array")
+	checktype(x0, NUMBER)
+	checktype(y0, NUMBER)
+	checktype(w, NUMBER)
+	checktype(h, NUMBER)
+	checktype(dh, NUMBER)
+	checktype(background, BOOL)
+	
+	local lists = __hud_data.lists
+	if (!(key in lists)) {
+		lists[key] <- {
+			slots = []
+		}
 	}
-}
+	local list = lists[key]
+	list.x0 <- x0
+	list.y0 <- y0
+	list.w <- w
+	list.h <- h
+	list.dh <- dh
+	list.background <- background
+	list.desired_size <- lines.len()
+	
+	if (!__list_resize(list, lines.len())) {
+		log("[lib] show_list(): WARNING! no free slots for list: " + key)
+	}
+	local len = list.slots.len()
+	if (len == 0) {
+		log("[lib] show_list(): WARNING! empty list: " + key)
+	}
+	for(local i = 0; i < len; i++) {
+		local key = list.slots[i].key
+		hud.set_text("__lists", key, lines[i])
+	}
+}.bindenv(hud))
+
+//may not add enough slots if there are no free slots, then returns false
+_def_func("hud.__list_resize", function(list, new_size) {
+	local slots = list.slots
+	local current_len = slots.len()
+	local not_enough_slots = false
+	if (new_size > current_len) {
+		for (local i = current_len; i < new_size; i++) {
+			local new_key = UniqueString()
+			if (!hud.possess_slot("__lists", new_key)) {
+				not_enough_slots = true
+				break
+			}
+			slots.append({
+				key = new_key
+			})
+			hud.flags_set("__lists", new_key, HUD_FLAG_ALIGN_LEFT | (list.background ? 0 : HUD_FLAG_NOBG))
+		}
+	} else if (new_size < current_len) {
+		for (local i = new_size; i < current_len; i++) {
+			hud.release_slot("__lists", slots[i].key)
+		}
+		for (local i = new_size; i < current_len; i++) {
+			slots.pop()
+		}
+	}
+	local x1 = list.x0
+	local w = list.w
+	local h = list.h
+	for(local i = 0; i < slots.len(); i++) {
+		local y1 = list.y0 + (list.h + list.dh) * i
+		hud.set_position("__lists", slots[i].key, x1, y1, w, h)
+	}
+	return !not_enough_slots
+}.bindenv(hud))
+
+_def_func("hud.hide_list", function(key) {
+	__check_init()
+	
+	checktype(key, STRING)
+	
+	local lists = __hud_data.lists
+	if (!(key in lists)) throw "no such list: " + key
+	
+	__list_resize(lists[key], 0)
+	delete lists[key]
+}.bindenv(hud))
 
 reporter("HUD system", function() {
-	log("\tInitialized: " + (__hud_data.initialized ? "true" : "false"))
-	if (!__hud_data.initialized) return
+	local initialized = ("__hud_data" in root) && __hud_data.initialized
+	log("\tInitialized: " + (initialized ? "true" : "false"))
+	if (!initialized) return
 	log("\tTurned on: " + (!__hud_data.disabled ? "true" : "false"))
 	log("\tPossessed slots (internal):")
 	foreach(index, slot in __hud_data.internal_slots) {

@@ -3,8 +3,7 @@
 /**
 FUNCTIONS FOR CONTROLLING BOTS
 ! requires lib/module_base !
-! requires lib/module_convars !
-! requires lib/module_entities !
+! requires lib/module_gamelogic !
 ! requires lib/module_tasks !
 ------------------------------------
 custom_airstrafe

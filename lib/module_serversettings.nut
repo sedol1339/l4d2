@@ -70,6 +70,23 @@ LIST OF PLAYER SETTINGS
 		Has two states: STATE_DISABLED and STATE_ENABLED. If enabled, forces thirdperson view for survivor player. Works in coop and versus.
 	player_settings.external_view_pvc
 		Has two states: STATE_DISABLED and STATE_ENABLED. If enabled, forces thirdperson view for survivor or infected player using point_viewcontrol. Is not lagcompenstated and not interpolated, so not recommended to use. This is still the only way to enable thirdperson for infected player without forcing it globally (z_view_distance) or changing gamemode to coop and running "thirdperson" from client. Also this thirdperson method disables screen effects like vomit.
+	player_settings.jockey_health_modifier
+	player_settings.smoker_health_modifier
+	player_settings.tank_health_modifier
+	player_settings.boomer_health_modifier
+	player_settings.charger_health_modifier
+	player_settings.hunter_health_modifier
+	player_settings.spitter_health_modifier
+	player_settings.survivor_health_modifier
+	player_settings.survivor_incap_health_modifier
+	player_settings.survivor_hanging_health_modifier
+		These settings control max health of player classes. Values 0 and 1 mean default max health, Values > 0 mean health multiplier, Values < 0 mean static health (negated). Examples: 0 - default health, 1 - default health, 2 - twice health, 0.5 - half health, -100 - 100 health.
+LIST OF PERKS
+	This is a special subset of player settings that modify game mechanics.
+	player_settings.charger_steering
+		Has two states: STATE_DISABLED and STATE_ENABLED. Allows chargers to rotate with mouse while charging. Can be changed while charging.
+	player_settings.charger_jump
+		Has two states: STATE_DISABLED and STATE_ENABLED. Allows chargers to jump while charging. Will not work if steering is not allowed. Can be changed while charging. Jump force can be chaged by changing field player_settings.charger_jump.jump_force (default 1.0 = survivor's jump height).  Individuela jump force can be set by setting field charger_jump_modifier in player's script scope.
 ------------------------------------
 server_settings
 	A table that contains different server settings. Each setting is a field in table, for example server_settings.no_director. Each setting is a scope containing the following functions:
@@ -312,7 +329,7 @@ if (!("player_settings" in root)) _def_constvar("player_settings", {})
 _def_func("new_player_setting", function(name, scope) {
 	local old_scope
 	if (name in player_settings) {
-		log("[lib] new_player_setting(): overriding " + name)
+		//log("[lib] new_player_setting(): overriding " + name)
 		old_scope = player_settings[name]
 	}
 	player_settings[name] <- scope
@@ -326,6 +343,7 @@ _def_func("new_player_setting", function(name, scope) {
 	scope.__marked_players <- {}
 	scope.__state <- null
 	scope.__forced <- null
+	scope.__team_hook_created <- false
 	//move all fields from old scope that are not a functions
 	if (old_scope) {
 		foreach(key, value in old_scope) {
@@ -335,13 +353,21 @@ _def_func("new_player_setting", function(name, scope) {
 		}
 	}
 	// -- INTERNAL FUNCTIONS --
+	scope.__team_hook_create <- function() {
+		register_callback("player_settings." + name, "player_team", function(params) {
+			__handle_change({
+				[params.player] = resolve_player_state(params.player, params.oldteam)
+			})
+		}.bindenv(scope))
+		log("[lib] registered player_team listener for player setting " + name)
+	}.bindenv(scope)
 	scope.__should_run_ticker <- function() {
 		if (__global_forced != null) {
 			return should_run_ticker(__global_forced)
 		}
 		if (
-			should_run_ticker(__infected)
-			|| should_run_ticker(__survivors)
+			(__infected != null && should_run_ticker(__infected))
+			|| (__survivors != null && should_run_ticker(__survivors))
 			|| should_run_ticker(default_state)
 		) {
 			return true
@@ -389,6 +415,11 @@ _def_func("new_player_setting", function(name, scope) {
 			} else if (on_startup) {
 				on_change(player, null, player_state)
 			}
+			if (!__team_hook_created && player_state != default_state) {
+				//first changes in this setting, registering hook for player_team event
+				__team_hook_create()
+				__team_hook_created = true
+			}
 		}
 	}.bindenv(scope)
 	scope.__erase_invalid_player <- function(player) {
@@ -408,7 +439,7 @@ _def_func("new_player_setting", function(name, scope) {
 				__marked_players[player] <- true
 				on_change(player, null, player_state)
 			}
-			on_tick(player, player_state)
+			if (should_run_ticker(player_state)) on_tick(player, player_state)
 		}
 	}
 	scope.__get_prev_player_states <- function() {
@@ -419,11 +450,11 @@ _def_func("new_player_setting", function(name, scope) {
 		return prev_player_states
 	}
 	// -- PUBLIC FUNCTIONS --
-	scope.resolve_player_state <- function(player) {
+	scope.resolve_player_state <- function(player, force_team = null) {
 		if (__global_forced != null) return __global_forced
 		if (player in __players_forced) return __players_forced[player]
 		if (player in __players) return __players[player]
-		local team = NetProps.GetPropInt(player, "m_iTeamNum")
+		local team = force_team ? force_team : NetProps.GetPropInt(player, "m_iTeamNum")
 		if (team == 2 && __survivors != null) return __survivors
 		if (team == 3 && __infected != null) return __infected
 		return default_state
@@ -440,11 +471,9 @@ _def_func("new_player_setting", function(name, scope) {
 			local team = team_or_player
 			if (team & Teams.SURVIVORS) {
 				__survivors = state_or_null
-			} else if (team & Teams.INFECTED) {
+			}
+			if (team & Teams.INFECTED) {
 				__infected = state_or_null
-			} else {
-				throw "[lib] " + name + ".set(): pass Teams.SURVIVORS and/or Teams.INFECTED"
-					+ " or player instance as first argument"
 			}
 		} else {
 			local player = team_or_player
@@ -497,7 +526,7 @@ if (!("server_settings" in root)) _def_constvar("server_settings", {})
 _def_func("new_server_setting", function(name, scope) {
 	local old_scope
 	if (name in server_settings) {
-		log("[lib] new_server_setting(): overriding " + name)
+		//log("[lib] new_server_setting(): overriding " + name)
 		old_scope = server_settings[name]
 	}
 	server_settings[name] <- scope
@@ -566,7 +595,7 @@ if (!("custom_callbacks" in root)) _def_constvar("custom_callbacks", {})
 
 _def_func("new_custom_callback", function(name, scope) {
 	local override_scope = ((name in custom_callbacks) ? custom_callbacks[name] : null)
-	if (override_scope) log("[lib] new_custom_callback(): overriding " + name)
+	//if (override_scope) log("[lib] new_custom_callback(): overriding " + name)
 	custom_callbacks[name] <- scope
 	// -- INTERNAL FIELDS --
 	scope.__listeners <- {}
@@ -825,6 +854,162 @@ new_player_setting("external_view_pvc", {
 		}
 	}
 })
+
+local player_classes = {
+	[Z_SURVIVOR] = "survivor",
+	[Z_SMOKER] = "smoker",
+	[Z_BOOMER] = "boomer",
+	[Z_HUNTER] = "hunter",
+	[Z_SPITTER] = "spitter",
+	[Z_JOCKEY] = "jockey",
+	[Z_CHARGER] = "charger",
+	[Z_TANK] = "tank"
+}
+
+_def_func("__apply_health_modifier", function(player, modifier) {
+	local current_team = propint(player, "m_iTeamNum")
+	if (player.IsDying() || player.IsDead() || player.IsGhost() || current_team < 2) return
+	local zombie_class = player.GetZombieType()
+	local incapped = player.IsIncapacitated() //true if player is hanging from ledge
+	if (zombie_class != Z_SURVIVOR && incapped) return
+	logf("[lib] applying health modifier %g to player %s of class %d", modifier, player_to_str(player), zombie_class)
+	local player_scope = scope(player)
+	local current_max_health = propint(player, "m_iMaxHealth")
+	local current_health = propint(player, "m_iHealth")
+	local default_max_health //for current class and incap state
+	local health_percent = min(1.0, current_health.tofloat() / current_max_health)
+	if (zombie_class != Z_SURVIVOR) {
+		if (!("default_max_health" in player_scope) || player_scope.default_max_health_class != zombie_class) {
+			player_scope.default_max_health <- current_max_health
+			player_scope.default_max_health_class <- zombie_class
+			logf("[lib] considering player's default max health is %d", current_max_health)
+		} else {
+			logf("[lib] was considered that player's default max health is %d", player_scope.default_max_health)
+		}
+		default_max_health = player_scope.default_max_health
+	} else { //survivor
+		if ("just_revived" in scope(player)) {
+			delete scope(player).just_revived
+			default_max_health = 100
+			log("[lib] survivor was just revived, default max health = " + default_max_health)
+		} else if (player.IsHangingFromLedge()) {
+			default_max_health = cvarf("survivor_ledge_grab_health").tointeger()
+			log("[lib] survivor is handing from ledge, default max health = " + default_max_health)
+		} else if (incapped) {
+			default_max_health = cvarf("survivor_incap_health").tointeger()
+			log("[lib] survivor is incapped, default max health = " + default_max_health)
+		} else {
+			default_max_health = 100
+			log("[lib] survivor is standing, default max health = " + default_max_health)
+		}
+	}
+	if (modifier == 0 || modifier == 1) {
+		//default health (maybe should reset it from modified health)
+		if (current_max_health != default_max_health) {
+			propint(player, "m_iMaxHealth", default_max_health)
+			propint(player, "m_iHealth", ceil(default_max_health * health_percent))
+		}
+	} else if (modifier > 0) {
+		//multiplier
+		propint(player, "m_iMaxHealth", default_max_health * modifier)
+		propint(player, "m_iHealth", ceil(default_max_health * health_percent * modifier))
+	} else {
+		//static health (negated)
+		modifier = (-modifier).tointeger()
+		propint(player, "m_iMaxHealth", modifier)
+		propint(player, "m_iHealth", ceil(modifier * health_percent))
+	}
+	local model_index = propint(player, "m_nModelIndex")
+	run_next_tick(player, function() {
+		if (current_team != propint(player, "m_iTeamNum")) return
+		if (player.IsDying() || player.IsDead() || player.IsGhost()) return
+		if (model_index != propint(player, "m_nModelIndex")) return
+		current_max_health = propint(player, "m_iMaxHealth")
+		current_health = propint(player, "m_iHealth")
+		local health_buffer = propfloat(player, "m_healthBuffer")
+		local max_health_buffer = max(0, current_max_health - current_health)
+		if (health_buffer > max_health_buffer) {
+			logf("[lib] clumping health buffer from %g to %g", health_buffer, max_health_buffer)
+			propfloat(player, "m_healthBuffer", max_health_buffer)
+		}
+	})
+})
+
+_def_func("__player_spawn_health_modifiers", function(params) {
+	local player = params.player
+	local zombie_class = player.GetZombieType()
+	if (!(zombie_class in player_classes)) return
+	local class_name = player_classes[zombie_class]
+	local setting_scope = player_settings[class_name + "_health_modifier"]
+	local modifier = setting_scope.resolve_player_state(player)
+	__apply_health_modifier(player, modifier)
+})
+
+_def_func("__health_modifiers_handle_incap", function(params) {
+	local modifier = player_settings.survivor_incap_health_modifier.resolve_player_state(params.player)
+	__apply_health_modifier(params.player, modifier)
+})
+
+_def_func("__health_modifiers_handle_hanging", function(params) {
+	local modifier = player_settings.survivor_hanging_health_modifier.resolve_player_state(params.player)
+	__apply_health_modifier(params.player, modifier)
+})
+
+_def_func("__health_modifiers_handle_revive", function(params) {
+	local player = GetPlayerFromUserID(params.subject)
+	local modifier = player_settings.survivor_health_modifier.resolve_player_state(player)
+	scope(player).just_revived <- null
+	__apply_health_modifier(player, modifier)
+})
+
+_def_func("__health_modifiers_reg_callbacks", function() {
+	register_callback("health_modifiers.handle_incap", "player_incapacitated", __health_modifiers_handle_incap)
+	register_callback("health_modifiers.handle_hanging", "player_ledge_grab", __health_modifiers_handle_hanging)
+	register_callback("health_modifiers.handle_revive", "revive_success", __health_modifiers_handle_revive)
+})
+
+foreach(_class_index, class_name in player_classes) {
+	local class_index = _class_index
+	new_player_setting(class_name + "_health_modifier", {
+		default_state = 0
+		should_run_ticker = @(state) false
+		on_change = function(player, old_state, new_state) {
+			//shared callback for all health modifiers
+			register_callback("health_modifiers", "player_spawn", __player_spawn_health_modifiers)
+			local zombie_class = player.GetZombieType()
+			if (class_index == zombie_class) {
+				if (class_index != Z_SURVIVOR || !player.IsIncapacitated()) {
+					__apply_health_modifier(player, new_state)
+				}
+			}
+			if (class_index == Z_SURVIVOR && new_state != default_state) __health_modifiers_reg_callbacks()
+		}
+	})
+}
+
+new_player_setting("survivor_incap_health_modifier", {
+	default_state = 0
+	should_run_ticker = @(state) false
+	on_change = function(player, old_state, new_state) {
+		if (player.GetZombieType() == Z_SURVIVOR && player.IsIncapacitated() && !player.IsHangingFromLedge()) {
+			__apply_health_modifier(player, new_state)
+		}
+		if (new_state != default_state) __health_modifiers_reg_callbacks()
+	}
+})
+
+new_player_setting("survivor_hanging_health_modifier", {
+	default_state = 0
+	should_run_ticker = @(state) false
+	on_change = function(player, old_state, new_state) {
+		if (player.GetZombieType() == Z_SURVIVOR && player.IsHangingFromLedge()) {
+			__apply_health_modifier(player, new_state)
+		}
+		if (new_state != default_state) __health_modifiers_reg_callbacks()
+	}
+})
+
+IncludeScript("kapkan/lib/perks")
 
 ///////////////////////////////
 // SERVER SETTINGS

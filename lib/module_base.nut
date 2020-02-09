@@ -201,7 +201,7 @@ IncludeScript("kapkan/lib/collision_checker")
 this = getroottable()
 _def_var("root", this.weakref())
 
-_def_var("lib_version", "3.0.0")
+_def_var("lib_version", "3.1.0")
 
 IncludeScript("kapkan/lib/debug")
 

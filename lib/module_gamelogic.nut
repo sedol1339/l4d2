@@ -89,6 +89,9 @@ remove_dying_infected()
 spawn_infected(type, position = null, angle = null, precise_origin = false, group_key = null)
 	Spawn special infected and returns it, returns null if can't spawn. Also validates script scope of spawned entity. This function uses ZSpawn() internally, that tries to spawn zombie on ground. So position can be slightly corrected. If you want precise position, use optional parameter precise_origin = true. Function spawn_infected sets entity angle correctly, use enable_fast_rotation() to to make zombie's body instantly turn in the right direction.
 	Group_key is unnecessary parameter. It is only usable in spawn watcher (see module_watchers).
+------------------------------------	
+unlag(player, keep_frozen, on_unlag)
+	Freeze and hide player. Unfreeze after 0.25 seconds, unhide after 0.3 seconds. Use this function if you need to launch just spawned player. We need delay more than ~0.25 sec + cl_interp, otherwise entity interpolation will disrupt visible movement of target. If keep_frozen == false, after 0.25 seconds FL_FROZEN flag will be removed.
 ------------------------------------
 teleport_entity(ent, pos, ang)
 	Teleports entity. pos == null means don't change pos, ang == null means don't change ang.
@@ -395,6 +398,26 @@ _def_func("spawn_infected", function(
 		log("[lib] spawn_infected(): spawning " + names[param_type] + ": " + player_to_str(player));
 	on_spawn(player)
 	return player
+})
+
+_def_func("unlag", function(player, keep_frozen, on_unlag) {
+	local unlag_time = 0.25
+	local visible_time = 0.3
+	propint(player, "movetype", MOVETYPE_NONE)
+	propint(player, "m_nRenderMode", RENDER_NONE)
+	propint(player, "m_hGroundEntity", -1)
+	set_entity_flag(player, FL_FROZEN, true)
+	set_entity_flag(player, FL_ONGROUND, false)
+	delayed_call(player, unlag_time, function() {
+		if (!keep_frozen) set_entity_flag(player, FL_FROZEN, false)
+		if (!player.IsDying() && !player.IsDead()) {
+			propint(player, "movetype", MOVETYPE_WALK)
+			on_unlag()
+		}
+	})
+	delayed_call(player, visible_time, function() {
+		propint(player, "m_nRenderMode", RENDER_NORMAL)
+	})
 })
 
 _def_func("create_target_bot", function(pos) {

@@ -188,7 +188,7 @@ _def_func("__dc_check", function() {
 		if (table.time <= time) {
 			delete DirectorScript.__delayed_calls[key]
 			if (table.ent != null && invalid(table.ent)) return
-			table.func.call(table.scope)
+			table.func.call(table.scope ? table.scope : null)
 		}
 	}
 })
@@ -206,6 +206,7 @@ _def_func("delayed_call", function(...) {
 		case 3:
 			if (typeof vargv[0] == "string") group_key = vargv[0]
 			else if (typeof vargv[0] == "instance") ent = vargv[0]
+			else if (vargv[0] == null) ent = null
 			delay = vargv[1]
 			func = vargv[2]
 			break
@@ -218,10 +219,10 @@ _def_func("delayed_call", function(...) {
 	}
 	local key = UniqueString()
 	DirectorScript.__delayed_calls[key] <- {
-		func = func
-		scope = this.weakref()
-		group_key = group_key
-		ent = ent
+		func = func,
+		scope = ((this != null) ? this.weakref() : null),
+		group_key = group_key,
+		ent = ent,
 		time = Time() + delay
 	}
 	ent_fire(worldspawn, "CallScriptFunction", "__dc_check", delay)
@@ -236,6 +237,7 @@ _def_func("run_this_tick", function(...) {
 		case 2:
 			if (typeof vargv[0] == "string") group_key = vargv[0]
 			else if (typeof vargv[0] == "instance") ent = vargv[0]
+			else if (vargv[0] == null) ent = null
 			func = vargv[1]
 			break
 		case 3:
@@ -256,6 +258,7 @@ _def_func("run_next_tick", function(...) {
 		case 2:
 			if (typeof vargv[0] == "string") group_key = vargv[0]
 			else if (typeof vargv[0] == "instance") ent = vargv[0]
+			else if (vargv[0] == null) ent = null
 			func = vargv[1]
 			break
 		case 3:
@@ -390,10 +393,10 @@ _def_func("register_loop", function(...) {
 _def_func("__register_loop_internal", function(key, ent, delay, func) {
 	if (!key) key = UniqueString()
 	__clock_init()
-	local scope = this.weakref()
+	local scope = ((this != null) ? this.weakref() : null)
 	__loops[key] <- {
 		thread = newthread( function() {
-			if (func.call(scope) == false) delete __loops[key]
+			if (func.call(scope ? scope.ref() : null) == false) delete __loops[key]
 		})
 		ent = ent
 		delay = delay
@@ -516,11 +519,11 @@ _def_func("register_callback", function(...) {
 		__CollectEventCallbacks(DirectorScript.__callbackFuncs,
 			"OnGameEvent_", "GameEventCallbacks", RegisterScriptGameEventListener)
 	}
-	local scope = this.weakref()
+	local scope = ((this != null) ? this.weakref() : null)
 	DirectorScript.__callbacks[event][key] <- {
 		ent = ent
 		thread = newthread( function(params) {
-			if (func.call(scope, params) == false) delete DirectorScript.__callbacks[event][key]
+			if (func.call(scope ? scope.ref() : null, params) == false) delete DirectorScript.__callbacks[event][key]
 		})
 	}
 })

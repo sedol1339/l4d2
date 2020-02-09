@@ -16,7 +16,16 @@ This library can be used together with VSLib, ImprovedScripting, Speedrunner Too
 ---------- Changelog ----------
 -------------------------------
 
-Lib v3.0.0 (31.01.2020)
+Lib v3.1.0 (09.02.2020)
+- NEW: health modifiers, charger_steering and charger_jump in player_settings
+- NEW: module_behaviour with new functions
+- NEW: function unlag() in module_gamelogic
+- FIX: fixed team change handling in player_settings
+- FIX: fixed set() method in player_settings not working properly for infected team
+- FIX: fixed function run_next_tick() with entity param
+- FIX: fixed some errors in tasks
+
+Lib v3.0.0 (06.02.2020)
 - CHANGE: removed module_convars, functions cvar(), cvarf(), cvarstr() moved to module_base
 - CHANGE: removed module_strings, functions moved to module_base
 - CHANGE: removed module_advanced, functions moved to module_tasks and module_gamelogic

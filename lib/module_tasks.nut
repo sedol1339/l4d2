@@ -2,7 +2,7 @@
 
 /**
 FUNCTIONS FOR TASK MANAGMENT:
-Delayer calls, tickers (OnGameFrame functions), loops, callbacks for events, tasks on shutdown and others.
+Delayer calls, tickers (OnServerTick functions), loops, callbacks for events, tasks on shutdown and others.
 ! requires lib/module_base !
 ------------------------------------
 delayed_call(...)
